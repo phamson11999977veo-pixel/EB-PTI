@@ -1,0 +1,8 @@
+{
+  "name": "iPTI Care Employee Benefit Portal",
+  "description": "Cổng số hóa cấp đơn bảo hiểm sức khỏe nhóm hàng loạt (Listing) trục PTICare dành cho CA, ICA, CR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
