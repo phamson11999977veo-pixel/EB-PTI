@@ -9,6 +9,52 @@ interface UnderwritingPanelProps {
   clientType: 'new' | 'renew' | 'non_continuous';
 }
 
+// Calculate risk details
+export const getEmpRiskDetails = (emp: Partial<InsuredEmployee>) => {
+  const reasons: string[] = [];
+  let coefficient = 1.0;
+  
+  // Calculate age
+  let age = 30;
+  if (emp.dob) {
+    let birthYear = 1995;
+    if (emp.dob.includes('-')) {
+      birthYear = new Date(emp.dob).getFullYear();
+    } else if (emp.dob.includes('/')) {
+      const parts = emp.dob.split('/');
+      birthYear = parseInt(parts[2]);
+    }
+    age = new Date().getFullYear() - birthYear;
+  }
+  
+  if (age > 60) {
+    reasons.push(`Tuổi ngoài chuẩn (${age} tuổi, hạn mức tối đa 60 tuổi)`);
+    coefficient += 0.20; // +20% surcharge
+  }
+  
+  const highRiskOccupations = ['Xây dựng', 'Công trường', 'Lái xe', 'Vận tải', 'Cơ khí', 'Chế tạo', 'Hầm mỏ', 'Dầu khí', 'Lao động tay chân', 'Bảo vệ'];
+  if (emp.occupation && highRiskOccupations.some(occ => emp.occupation?.toLowerCase().includes(occ.toLowerCase()))) {
+    reasons.push(`Nghề nghiệp rủi ro cao (${emp.occupation})`);
+    coefficient += 0.30; // +30% surcharge
+  }
+  
+  if (emp.claimHistory === 'bad') {
+    reasons.push('Lịch sử bồi thường rủi ro cao (Nhiều lần / giá trị bồi thường lớn)');
+    coefficient += 0.15; // +15% surcharge
+  }
+  
+  if (emp.hasPreExisting || emp.hasHospitalized12m || emp.hasOngoingTreatment) {
+    reasons.push('Kê khai có bệnh lý mãn tính / nằm viện / điều trị trong 12 tháng qua');
+    coefficient += 0.10; // +10% surcharge
+  }
+  
+  return {
+    hasRisk: reasons.length > 0,
+    reasons,
+    coefficient: parseFloat(coefficient.toFixed(2))
+  };
+};
+
 export default function UnderwritingPanel({
   employees,
   onChangeEmployees,
@@ -26,20 +72,23 @@ export default function UnderwritingPanel({
     hasPreExisting: false,
     hasHospitalized12m: false,
     hasOngoingTreatment: false,
-    treatmentDetails: ''
+    treatmentDetails: '',
+    occupation: 'Văn phòng',
+    claimHistory: 'good' as 'good' | 'normal' | 'bad',
+    hasSupplementaryFile: false
   });
 
   // Calculate stats
   const totalInsured = employees.length;
-  const exceptionCount = employees.filter(e => e.hasPreExisting || e.hasHospitalized12m || e.hasOngoingTreatment).length;
+  const exceptionCount = employees.filter(e => getEmpRiskDetails(e).hasRisk).length;
   const resolvedCount = employees.filter(e => 
-    (e.hasPreExisting || e.hasHospitalized12m || e.hasOngoingTreatment) && e.underwritingAction !== 'none'
+    getEmpRiskDetails(e).hasRisk && e.underwritingAction !== 'none'
   ).length;
-  const approvedCount = employees.filter(e => e.underwritingAction === 'approve' || (!e.hasPreExisting && !e.hasHospitalized12m && !e.hasOngoingTreatment)).length;
+  const approvedCount = employees.filter(e => e.underwritingAction === 'approve' || !getEmpRiskDetails(e).hasRisk).length;
   
   const progressPercent = totalInsured > 0 ? Math.round(((totalInsured - exceptionCount + resolvedCount) / totalInsured) * 100) : 0;
 
-  // Prepopulate with elegant mock data
+  // Prepopulate with elegant mock data reflecting genuine insurance risk criteria (adverse selection)
   const handleLoadDemoEmployees = () => {
     const demo: InsuredEmployee[] = [
       {
@@ -55,7 +104,10 @@ export default function UnderwritingPanel({
         hasHospitalized12m: false,
         hasOngoingTreatment: false,
         treatmentDetails: '',
-        underwritingAction: 'none'
+        underwritingAction: 'none',
+        occupation: 'Giám đốc - Văn phòng',
+        claimHistory: 'good',
+        supplementaryFiles: []
       },
       {
         id: 'emp-2',
@@ -70,7 +122,10 @@ export default function UnderwritingPanel({
         hasHospitalized12m: false,
         hasOngoingTreatment: false,
         treatmentDetails: 'Cao huyết áp nhẹ, uống thuốc kiểm soát hàng ngày',
-        underwritingAction: 'none'
+        underwritingAction: 'none',
+        occupation: 'Trưởng phòng - Nhân sự',
+        claimHistory: 'normal',
+        supplementaryFiles: ['Don_Thuoc_Huyet_Ap.pdf']
       },
       {
         id: 'emp-3',
@@ -80,12 +135,15 @@ export default function UnderwritingPanel({
         gender: 'Nam',
         email: 'duc.pm@abc.com',
         tierId: 'tier-3', // staff
-        healthStatus: 'Sạch',
+        healthStatus: 'Có rủi ro',
         hasPreExisting: false,
         hasHospitalized12m: false,
         hasOngoingTreatment: false,
         treatmentDetails: '',
-        underwritingAction: 'none'
+        underwritingAction: 'none',
+        occupation: 'Kỹ sư - Giám sát Công trường Xây dựng', // high risk occupation
+        claimHistory: 'normal',
+        supplementaryFiles: ['Chung_Chi_An_Toan_Lao_Dong.pdf']
       },
       {
         id: 'emp-4',
@@ -100,7 +158,10 @@ export default function UnderwritingPanel({
         hasHospitalized12m: true,
         hasOngoingTreatment: true,
         treatmentDetails: 'Nằm viện phẫu thuật ruột thừa tháng 4/2026, hiện đã hồi phục ổn định',
-        underwritingAction: 'none'
+        underwritingAction: 'none',
+        occupation: 'Nhân viên hành chính - Văn phòng',
+        claimHistory: 'bad', // adverse claim history
+        supplementaryFiles: ['Giay_Ra_Vien.pdf', 'Tom_Tat_Benh_An.pdf']
       },
       {
         id: 'emp-5',
@@ -115,7 +176,28 @@ export default function UnderwritingPanel({
         hasHospitalized12m: false,
         hasOngoingTreatment: false,
         treatmentDetails: '',
-        underwritingAction: 'none'
+        underwritingAction: 'none',
+        occupation: 'Lập trình viên - Văn phòng',
+        claimHistory: 'good',
+        supplementaryFiles: []
+      },
+      {
+        id: 'emp-6',
+        name: 'Bùi Văn Vững',
+        dob: '15/06/1961', // 65 years old (Overage!)
+        cccd: '017061002233',
+        gender: 'Nam',
+        email: 'vung.bv@abc.com',
+        tierId: 'tier-3', // staff
+        healthStatus: 'Có rủi ro',
+        hasPreExisting: false,
+        hasHospitalized12m: false,
+        hasOngoingTreatment: false,
+        treatmentDetails: '',
+        underwritingAction: 'none',
+        occupation: 'Nhân viên Bảo vệ Cơ sở',
+        claimHistory: 'normal',
+        supplementaryFiles: ['Giay_Kham_Suc_Khoe_Dinh_Ky.pdf']
       }
     ];
     onChangeEmployees(demo);
@@ -133,7 +215,7 @@ export default function UnderwritingPanel({
       return;
     }
 
-    const hasRisk = newEmp.hasPreExisting || newEmp.hasHospitalized12m || newEmp.hasOngoingTreatment;
+    const { hasRisk } = getEmpRiskDetails(newEmp);
     const added: InsuredEmployee = {
       id: 'emp-' + Date.now(),
       name: newEmp.name,
@@ -147,7 +229,10 @@ export default function UnderwritingPanel({
       hasHospitalized12m: newEmp.hasHospitalized12m,
       hasOngoingTreatment: newEmp.hasOngoingTreatment,
       treatmentDetails: newEmp.treatmentDetails,
-      underwritingAction: 'none'
+      underwritingAction: 'none',
+      occupation: newEmp.occupation,
+      claimHistory: newEmp.claimHistory,
+      supplementaryFiles: newEmp.hasSupplementaryFile ? ['File_Y_Khoa_Kem_Theo.pdf'] : []
     };
 
     onChangeEmployees([...employees, added]);
@@ -163,7 +248,10 @@ export default function UnderwritingPanel({
       hasPreExisting: false,
       hasHospitalized12m: false,
       hasOngoingTreatment: false,
-      treatmentDetails: ''
+      treatmentDetails: '',
+      occupation: 'Văn phòng',
+      claimHistory: 'good',
+      hasSupplementaryFile: false
     });
   };
 
@@ -300,30 +388,36 @@ export default function UnderwritingPanel({
                 <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Thẩm định nghiệp vụ</span>
               </div>
               <p className="text-xs text-slate-500 mb-4">
-                Phát hiện các thành viên có bệnh lý đặc biệt hoặc điều trị y tế trong 12 tháng qua. Hãy đưa ra quyết định xử lý thẩm định cho từng trường hợp dưới đây.
+                Hệ thống tự động phân loại rủi ro (Adverse Selection) dựa trên Tuổi ngoài chuẩn, Nghề nghiệp rủi ro cao, Lịch sử bồi thường và Kê khai bệnh lý. Hãy đưa ra quyết định thẩm định phù hợp.
               </p>
 
               <div className="space-y-4">
-                {employees.filter(e => e.hasPreExisting || e.hasHospitalized12m || e.hasOngoingTreatment).map(emp => {
+                {employees.filter(e => getEmpRiskDetails(e).hasRisk).map(emp => {
                   const empTier = tiers.find(t => t.id === emp.tierId);
+                  const riskDetails = getEmpRiskDetails(emp);
                   return (
-                    <div key={emp.id} className="p-4 rounded-xl border border-amber-100 bg-white shadow-xs space-y-3">
+                    <div key={emp.id} className="p-4 rounded-xl border border-amber-200 bg-white shadow-xs space-y-3 text-left">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span className="font-bold text-slate-800 text-sm">{emp.name}</span>
                             <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">
                               {empTier?.name || 'Nhân viên'}
                             </span>
-                            <span className="text-[10px] bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded border border-rose-100 flex items-center gap-0.5">
-                              ⚠️ Kê khai có bệnh
+                            <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200 flex items-center gap-0.5">
+                              ⚠️ Phát hiện Rủi ro ({riskDetails.reasons.length})
+                            </span>
+                            <span className="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded border border-rose-200">
+                              Hệ số phụ phí: {riskDetails.coefficient}x (+{Math.round((riskDetails.coefficient - 1) * 100)}%)
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Ngày sinh: {emp.dob} · CCCD: {emp.cccd} · Email: {emp.email || 'N/A'}</p>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Ngày sinh: {emp.dob} · CCCD: {emp.cccd} · Nghề nghiệp: <strong className="text-slate-600">{emp.occupation || 'Chưa cập nhật'}</strong> · Lịch sử bồi thường: <strong className="text-slate-600">{emp.claimHistory === 'good' ? 'Tốt (Chưa có bồi thường)' : emp.claimHistory === 'normal' ? 'Bình thường' : 'Xấu (Nhiều lần/Giá trị lớn)'}</strong>
+                          </p>
                         </div>
                         
                         {/* Selected Underwriting State */}
-                        <div className="text-xs font-semibold">
+                        <div className="text-xs font-semibold self-start sm:self-center">
                           {emp.underwritingAction === 'none' && (
                             <span className="text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">Đang chờ xử lý</span>
                           )}
@@ -331,45 +425,109 @@ export default function UnderwritingPanel({
                             <span className="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">Đã duyệt bảo hiểm gốc</span>
                           )}
                           {emp.underwritingAction === 'exclude' && (
-                            <span className="text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Loại trừ bệnh có sẵn</span>
+                            <span className="text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Loại trừ bệnh gốc</span>
                           )}
                           {emp.underwritingAction === 'request_files' && (
-                            <span className="text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">Yêu cầu & Đã upload Bệnh án</span>
+                            <span className="text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">Yêu cầu &amp; Đã upload Bệnh án</span>
                           )}
                           {emp.underwritingAction === 'decline' && (
-                            <span className="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Từ chối bảo hiểm cá nhân</span>
+                            <span className="text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">Từ chối bảo hiểm</span>
                           )}
                         </div>
                       </div>
 
-                      {/* Health declarations details */}
-                      <div className="bg-rose-50/40 p-3 rounded-lg border border-rose-100/50 text-xs text-slate-700">
-                        <div className="font-bold text-rose-800 mb-1">Chi tiết khai báo bệnh lý:</div>
-                        <p>{emp.treatmentDetails || 'Chưa cung cấp chi tiết chẩn đoán.'}</p>
-                        <div className="flex gap-4 mt-2 text-[10px] font-semibold text-rose-900/70">
-                          {emp.hasPreExisting && <span>• Có bệnh có sẵn/mãn tính</span>}
-                          {emp.hasHospitalized12m && <span>• Có nằm viện trong 12 tháng</span>}
-                          {emp.hasOngoingTreatment && <span>• Đang điều trị đặc biệt</span>}
+                      {/* Risk analysis & health declarations details */}
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-700 space-y-2">
+                        <div>
+                          <div className="font-bold text-slate-800 mb-1">Các yếu tố rủi ro phân tích tự động:</div>
+                          <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-slate-600">
+                            {riskDetails.reasons.map((r, i) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {emp.treatmentDetails && (
+                          <div className="border-t border-slate-200 pt-1.5">
+                            <div className="font-bold text-rose-800 mb-0.5">Kê khai sức khỏe tự nguyện:</div>
+                            <p className="text-[11px] italic text-slate-600">{emp.treatmentDetails}</p>
+                          </div>
+                        )}
+
+                        {/* Supplementary files */}
+                        <div className="border-t border-slate-200 pt-1.5 flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-slate-800 text-[11px]">Giấy tờ, hồ sơ y khoa bổ sung:</span>
+                          {emp.supplementaryFiles && emp.supplementaryFiles.length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5">
+                              {emp.supplementaryFiles.map((file, idx) => (
+                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-[10px] font-bold">
+                                  📄 {file}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 italic">Chưa đính kèm tài liệu bổ sung</span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const fileName = prompt('Nhập tên file tài liệu đính kèm (VD: Tom_Tat_Benh_An.pdf):', 'Ho_So_Suc_Khoe_Bo_Sung.pdf');
+                              if (fileName) {
+                                onChangeEmployees(employees.map(x => x.id === emp.id ? {
+                                  ...x,
+                                  supplementaryFiles: [...(x.supplementaryFiles || []), fileName]
+                                } : x));
+                              }
+                            }}
+                            className="text-[10px] text-[#03377B] hover:underline font-bold ml-auto flex items-center gap-0.5"
+                          >
+                            <UploadCloud size={10} />
+                            <span>Tải bổ sung giấy tờ</span>
+                          </button>
                         </div>
                       </div>
+
+                      {/* Custom exclusion clause input for 'exclude' action */}
+                      {emp.underwritingAction === 'exclude' && (
+                        <div className="mt-2 text-xs space-y-1 bg-blue-50/40 p-2.5 rounded-lg border border-blue-100/50">
+                          <label className="font-bold text-blue-800 block">Điều khoản loại trừ cụ thể (In trên Giấy chứng nhận):</label>
+                          <input
+                            type="text"
+                            value={emp.customExclusionClause || ''}
+                            onChange={(e) => {
+                              onChangeEmployees(employees.map(x => x.id === emp.id ? { ...x, customExclusionClause: e.target.value } : x));
+                            }}
+                            placeholder="VD: Loại trừ toàn bộ các biến chứng y khoa liên quan đến bệnh Cao huyết áp mãn tính"
+                            className="w-full bg-white border border-blue-200 focus:border-blue-500 rounded px-2.5 py-1.5 outline-none font-medium text-xs"
+                          />
+                        </div>
+                      )}
 
                       {/* Underwriting decision buttons */}
                       <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-                        <span className="text-[11px] text-slate-400 font-bold uppercase mr-1 self-center">Quyết định:</span>
+                        <span className="text-[11px] text-slate-400 font-bold uppercase mr-1 self-center">Quyết định thẩm định:</span>
                         <button
                           type="button"
                           onClick={() => handleResolveException(emp.id, 'approve')}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${emp.underwritingAction === 'approve' ? 'bg-emerald-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
                         >
                           <UserCheck size={12} />
-                          <span>Duyệt Toàn bộ</span>
+                          <span>Duyệt toàn bộ</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleResolveException(emp.id, 'exclude')}
+                          onClick={() => {
+                            handleResolveException(emp.id, 'exclude');
+                            // Set default exclusion clause if empty
+                            if (!emp.customExclusionClause) {
+                              const clause = emp.treatmentDetails ? `Loại trừ bệnh có sẵn: ${emp.treatmentDetails}` : 'Loại trừ các rủi ro phát hiện trong hồ sơ bệnh án cũ';
+                              onChangeEmployees(employees.map(x => x.id === emp.id ? { ...x, underwritingAction: 'exclude', customExclusionClause: clause } : x));
+                            }
+                          }}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${emp.underwritingAction === 'exclude' ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
                         >
-                          <span>Loại trừ bệnh gốc</span>
+                          <span>Áp dụng Loại trừ</span>
                         </button>
                         <button
                           type="button"
@@ -377,7 +535,7 @@ export default function UnderwritingPanel({
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${emp.underwritingAction === 'request_files' ? 'bg-purple-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
                         >
                           <UploadCloud size={12} />
-                          <span>Upload Bệnh án</span>
+                          <span>Yêu cầu Bệnh án</span>
                         </button>
                         <button
                           type="button"
@@ -385,7 +543,7 @@ export default function UnderwritingPanel({
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${emp.underwritingAction === 'decline' ? 'bg-rose-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
                         >
                           <UserMinus size={12} />
-                          <span>Từ chối</span>
+                          <span>Từ chối BH</span>
                         </button>
                       </div>
                     </div>
@@ -489,6 +647,43 @@ export default function UnderwritingPanel({
                       className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none"
                     />
                   </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Nghề nghiệp / Lĩnh vực</label>
+                    <select
+                      value={newEmp.occupation}
+                      onChange={(e) => setNewEmp({ ...newEmp, occupation: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs outline-none"
+                    >
+                      <option value="Văn phòng">Văn phòng (Rủi ro thấp)</option>
+                      <option value="Xây dựng">Xây dựng/Công trường (Rủi ro cao)</option>
+                      <option value="Lái xe">Lái xe/Vận tải (Rủi ro cao)</option>
+                      <option value="Cơ khí">Cơ khí/Chế tạo (Rủi ro cao)</option>
+                      <option value="Bảo vệ">Bảo vệ/Giám sát (Rủi ro cao)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Lịch sử bồi thường</label>
+                    <select
+                      value={newEmp.claimHistory}
+                      onChange={(e) => setNewEmp({ ...newEmp, claimHistory: e.target.value as any })}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs outline-none"
+                    >
+                      <option value="good">Tốt (Chưa bồi thường)</option>
+                      <option value="normal">Bình thường</option>
+                      <option value="bad">Xấu (Nhiều lần/Giá trị lớn)</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center pt-5 col-span-1">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-700">
+                      <input 
+                        type="checkbox" 
+                        checked={newEmp.hasSupplementaryFile}
+                        onChange={(e) => setNewEmp({ ...newEmp, hasSupplementaryFile: e.target.checked })}
+                        className="rounded text-[#03377B] focus:ring-[#03377B]"
+                      />
+                      <span className="font-bold text-[#03377B]">Đính kèm Hồ sơ y khoa lẻ</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="pt-2 border-t border-slate-200/60">
@@ -573,13 +768,18 @@ export default function UnderwritingPanel({
                 <tbody className="divide-y divide-slate-100">
                   {employees.map((emp) => {
                     const empTier = tiers.find(t => t.id === emp.tierId);
-                    const hasException = emp.hasPreExisting || emp.hasHospitalized12m || emp.hasOngoingTreatment;
+                    const riskDetails = getEmpRiskDetails(emp);
+                    const hasException = riskDetails.hasRisk;
                     
                     return (
                       <tr key={emp.id} className="hover:bg-slate-50/50 transition">
                         <td className="p-3">
-                          <span className="font-semibold text-slate-800 block text-sm">{emp.name}</span>
-                          <span className="text-xs text-slate-400">{emp.dob}</span>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-slate-800 text-sm flex items-center gap-1">
+                              {emp.name}
+                            </span>
+                            <span className="text-[11px] text-slate-400">NS: {emp.dob} · Nghề nghiệp: <strong className="text-slate-600">{emp.occupation || 'Văn phòng'}</strong></span>
+                          </div>
                         </td>
                         <td className="p-3">
                           <span className="font-mono text-slate-700 block text-xs">{emp.cccd}</span>
@@ -588,30 +788,58 @@ export default function UnderwritingPanel({
                         <td className="p-3 text-xs text-slate-600">{emp.gender}</td>
                         <td className="p-3">
                           <span className="text-xs font-semibold text-slate-700 block">{empTier?.name || 'Nhân viên'}</span>
-                          <span className="text-[10px] text-blue-600 font-bold uppercase block">
-                            Program ID: {emp.tierId === 'tier-1' ? 'CT3' : emp.tierId === 'tier-2' ? 'CT2' : 'CT1'}
+                          <span className="text-[10px] text-[#03377B] font-bold uppercase block">
+                            Phí tiêu chuẩn {emp.tierId === 'tier-1' ? 'Hạng Kim cương' : emp.tierId === 'tier-2' ? 'Hạng Vàng' : 'Hạng Bạc'}
                           </span>
                         </td>
-                        <td className="p-3 text-center">
-                          {hasException ? (
-                            <span className="inline-flex items-center gap-0.5 bg-rose-50 text-rose-700 border border-rose-100 text-[10px] font-bold px-2 py-0.5 rounded">
-                              Có rủi ro
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded">
-                              Sạch kịch bản
-                            </span>
-                          )}
+                        <td className="p-3">
+                          <div className="flex flex-col items-center justify-center gap-1">
+                            {hasException ? (
+                              <>
+                                <span className="inline-flex items-center gap-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+                                  Có rủi ro ({riskDetails.coefficient}x)
+                                </span>
+                                <div className="text-[9px] text-slate-400 text-center max-w-[150px] leading-tight">
+                                  {riskDetails.reasons.map((r, i) => (
+                                    <div key={i} className="truncate" title={r}>• {r}</div>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <span className="inline-flex items-center gap-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded">
+                                Sạch (STP)
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="p-3 text-center text-xs">
                           {hasException ? (
-                            emp.underwritingAction === 'none' ? (
-                              <span className="text-amber-600 font-semibold">Chờ quyết định</span>
-                            ) : (
-                              <span className="text-emerald-600 font-semibold">Đã duyệt xử lý</span>
-                            )
+                            <div className="space-y-1">
+                              {emp.underwritingAction === 'none' && (
+                                <span className="text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Chờ duyệt</span>
+                              )}
+                              {emp.underwritingAction === 'approve' && (
+                                <span className="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Duyệt gốc</span>
+                              )}
+                              {emp.underwritingAction === 'exclude' && (
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span className="text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">Loại trừ</span>
+                                  {emp.customExclusionClause && (
+                                    <span className="text-[9px] text-blue-500 italic max-w-[140px] truncate" title={emp.customExclusionClause}>
+                                      "{emp.customExclusionClause}"
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              {emp.underwritingAction === 'request_files' && (
+                                <span className="text-purple-600 font-bold bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">Yêu cầu hồ sơ</span>
+                              )}
+                              {emp.underwritingAction === 'decline' && (
+                                <span className="text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Từ chối</span>
+                              )}
+                            </div>
                           ) : (
-                            <span className="text-slate-400 font-medium">Bỏ qua thẩm định</span>
+                            <span className="text-slate-400 font-medium">Tự động duyệt</span>
                           )}
                         </td>
                         <td className="p-3 text-right">

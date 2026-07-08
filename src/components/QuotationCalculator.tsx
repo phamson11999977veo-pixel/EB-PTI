@@ -1,6 +1,6 @@
-import React from 'react';
-import { Award, ShieldCheck, HelpCircle, DollarSign, Users, Sparkles, TrendingDown, ArrowRightLeft } from 'lucide-react';
-import { EmployeeTier, InsuranceProgram, UserRole } from '../types';
+import React, { useState } from 'react';
+import { Award, ShieldCheck, HelpCircle, DollarSign, Users, Sparkles, TrendingDown, ArrowRightLeft, History, ShieldAlert, Plus, RefreshCw, FileText, Check, CheckSquare } from 'lucide-react';
+import { EmployeeTier, InsuranceProgram, UserRole, QuoteVersion } from '../types';
 
 interface QuotationCalculatorProps {
   tiers: EmployeeTier[];
@@ -12,6 +12,11 @@ interface QuotationCalculatorProps {
   onChangeCommissionRate: (rate: number) => void;
   role: UserRole;
   headcount: number;
+  quoteVersions: QuoteVersion[];
+  onCreateNewVersion: (notes: string) => void;
+  onRestoreVersion: (version: QuoteVersion) => void;
+  quoteApprovalStatus: 'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected';
+  onChangeApprovalStatus: (status: 'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected') => void;
 }
 
 export default function QuotationCalculator({
@@ -23,7 +28,12 @@ export default function QuotationCalculator({
   commissionRate,
   onChangeCommissionRate,
   role,
-  headcount
+  headcount,
+  quoteVersions,
+  onCreateNewVersion,
+  onRestoreVersion,
+  quoteApprovalStatus,
+  onChangeApprovalStatus
 }: QuotationCalculatorProps) {
 
   // Update headcount or program for a tier
@@ -416,6 +426,168 @@ export default function QuotationCalculator({
         </div>
 
       </div>
+
+      {/* NEW: STP/MCV Approval and Quotation Version History Controls */}
+      {(() => {
+        const isOutOfStandard = discountRate > 20 || tiers.some(t => 
+          t.customInpatientBenefit !== undefined || 
+          t.customOutpatientBenefit !== undefined || 
+          t.customAccidentBenefit !== undefined || 
+          t.customMaternityBenefit !== undefined
+        );
+
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* STP/MCV Underwriting Approval Queue Simulation */}
+            <div className="card border border-slate-200 shadow-sm text-left">
+              <div className="card-title justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="text-orange-600" size={18} />
+                  <span className="text-sm font-bold text-slate-800">Kiểm soát nghiệp vụ (STP/MCV)</span>
+                </div>
+                {isOutOfStandard ? (
+                  <span className="text-[10px] bg-rose-100 text-rose-800 border border-rose-200 font-extrabold px-2.5 py-1 rounded-full animate-pulse">
+                    ⚠️ CẦN TRƯỞNG NHÓM DUYỆT
+                  </span>
+                ) : (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold px-2.5 py-1 rounded-full">
+                    ✓ ĐẠT CHUẨN (STP)
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mb-3">
+                Hàng đợi kiểm soát của Trưởng nhóm nghiệp vụ đối với các bản chào có chiết khấu &gt; 20% hoặc sửa đổi quyền lợi chuẩn của chương trình.
+              </p>
+
+              <div className="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
+                <div className="font-bold text-slate-800 mb-1">Trạng thái phê duyệt báo giá:</div>
+                <div className="flex items-center gap-2">
+                  {quoteApprovalStatus === 'Auto_Approved' && (
+                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
+                      ✓ Hệ thống Tự động duyệt (STP)
+                    </span>
+                  )}
+                  {quoteApprovalStatus === 'Pending_Approval' && (
+                    <span className="bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1 animate-pulse">
+                      ⚠️ Đang chờ Trưởng nhóm phê duyệt (MCV)
+                    </span>
+                  )}
+                  {quoteApprovalStatus === 'Supervisor_Approved' && (
+                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
+                      ✓ Đã được Trưởng nhóm phê duyệt
+                    </span>
+                  )}
+                  {quoteApprovalStatus === 'Supervisor_Rejected' && (
+                    <span className="bg-rose-50 text-rose-700 border border-rose-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
+                      ✕ Trưởng nhóm Từ chối cấp dưới chuẩn
+                    </span>
+                  )}
+                </div>
+
+                <div className="border-t border-slate-200 pt-2 space-y-1 text-slate-600 text-[11px]">
+                  <div>• Giới hạn tự duyệt chiết khấu: <strong className="text-slate-800">Tối đa 20%</strong></div>
+                  <div>• Chiết khấu hiện tại: <strong className={discountRate > 20 ? "text-rose-600 font-bold" : "text-emerald-600"}>{discountRate}%</strong></div>
+                  <div>• Điều chỉnh quyền lợi: <strong className={tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) ? "text-rose-600 font-bold" : "text-slate-700"}>{tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) ? "Có tùy chỉnh vượt chuẩn" : "Quyền lợi chuẩn hệ thống"}</strong></div>
+                </div>
+
+                {/* Simulation controls */}
+                <div className="border-t border-slate-200 pt-3 mt-1 space-y-2">
+                  <span className="font-extrabold text-[10px] text-slate-500 uppercase block">Trình giả lập phê duyệt (Supervisor Role):</span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={quoteApprovalStatus !== 'Pending_Approval'}
+                      onClick={() => onChangeApprovalStatus('Supervisor_Approved')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${quoteApprovalStatus === 'Pending_Approval' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow cursor-pointer' : 'bg-slate-150 text-slate-400 cursor-not-allowed'}`}
+                    >
+                      Phê duyệt (Approve)
+                    </button>
+                    <button
+                      type="button"
+                      disabled={quoteApprovalStatus !== 'Pending_Approval'}
+                      onClick={() => onChangeApprovalStatus('Supervisor_Rejected')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${quoteApprovalStatus === 'Pending_Approval' ? 'bg-rose-600 hover:bg-rose-700 text-white shadow cursor-pointer' : 'bg-slate-150 text-slate-400 cursor-not-allowed'}`}
+                    >
+                      Từ chối (Reject)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quote Version Control History */}
+            <div className="card border border-slate-200 shadow-sm text-left">
+              <div className="card-title justify-between">
+                <div className="flex items-center gap-2">
+                  <History className="text-[#03377B]" size={18} />
+                  <span className="text-sm font-bold text-slate-800">Lịch sử các phiên bản Báo giá (v6.3)</span>
+                </div>
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
+                  {quoteVersions.length} phiên bản
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mb-3">
+                Lưu vết lịch sử thay đổi để làm bằng chứng về quyền lợi và tỷ lệ chiết khấu đã đề xuất cho khách hàng tại từng thời điểm.
+              </p>
+
+              <div className="space-y-2 max-h-[190px] overflow-y-auto mb-3.5 pr-1 divide-y divide-slate-100">
+                {quoteVersions.map((v) => (
+                  <div key={v.id} className="pt-2 flex items-start justify-between gap-2 text-xs">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-extrabold text-slate-800">{v.version}</span>
+                        <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase ${
+                          v.status === 'Supervisor_Approved' ? 'bg-emerald-100 text-emerald-800' :
+                          v.status === 'Pending_Approval' ? 'bg-amber-100 text-amber-800' :
+                          v.status === 'Supervisor_Rejected' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {v.status === 'Supervisor_Approved' ? 'Đã duyệt' :
+                           v.status === 'Pending_Approval' ? 'Chờ duyệt' :
+                           v.status === 'Supervisor_Rejected' ? 'Từ chối' : 'Tự duyệt'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">{v.timestamp} · Người lập: {v.createdBy}</span>
+                      <span className="text-[10px] text-slate-500 block">
+                        Chiết khấu: <strong className="text-slate-700">{v.discountRate}%</strong> · Thù lao: <strong className="text-slate-700">{v.commissionRate}%</strong> · Phí sau CK: <strong className="text-slate-700">{formatVnd(v.totalPremium)}</strong>
+                      </span>
+                      {v.notes && <p className="text-[10px] text-slate-600 italic mt-0.5">"{v.notes}"</p>}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(`Bạn có chắc muốn khôi phục thiết kế báo giá của phiên bản ${v.version}?`)) {
+                          onRestoreVersion(v);
+                        }
+                      }}
+                      className="text-[10px] text-[#03377B] hover:underline font-bold self-center shrink-0"
+                    >
+                      Khôi phục
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const note = prompt('Nhập mô tả/lý do tạo phiên bản báo giá mới này (ví dụ: Áp dụng chiết khấu 15% theo quy mô mới):', 'Cập nhật lại quyền lợi và chiết khấu');
+                    if (note !== null) {
+                      onCreateNewVersion(note || 'Cập nhật thủ công');
+                    }
+                  }}
+                  className="w-full py-2 bg-[#03377B] hover:bg-[#022D66] text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>TẠO VERSION MỚI (MIN DM 6.3)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
 }

@@ -40,7 +40,8 @@ import {
   Trash2,
   Mail,
   Send,
-  Maximize2
+  Maximize2,
+  ShieldAlert
 } from 'lucide-react';
 
 import { 
@@ -50,7 +51,8 @@ import {
   InsuranceProgram, 
   EmployeeTier, 
   InsuredEmployee, 
-  InvoiceInfo 
+  InvoiceInfo,
+  QuoteVersion
 } from './types';
 
 import BiometricModal from './components/BiometricModal';
@@ -273,6 +275,84 @@ export default function App() {
   const [gpkdFileName, setGpkdFileName] = useState<string>('');
   const [excelFileName, setExcelFileName] = useState<string>('');
 
+  // Quote Versioning & STP/MCV Approvals (Mindmap v5 & v6.3)
+  const [quoteVersions, setQuoteVersions] = useState<QuoteVersion[]>([
+    {
+      id: 'v1.0.0',
+      version: 'v1.0.0 (Gốc)',
+      timestamp: '2026-07-07 10:15',
+      tiers: [
+        { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'ct-3' },
+        { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'ct-2' },
+        { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'ct-1' }
+      ],
+      discountRate: 5,
+      commissionRate: 5,
+      totalPremium: 17850000,
+      status: 'Auto_Approved',
+      createdBy: 'Hệ thống',
+      notes: 'Khởi tạo báo giá ban đầu'
+    }
+  ]);
+  const [quoteApprovalStatus, setQuoteApprovalStatus] = useState<'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected'>('Auto_Approved');
+
+  const handleCreateNewVersion = (notes: string) => {
+    const basePremium = tiers.reduce((sum, tier) => {
+      const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
+      const rate = prog ? prog.ratePerHead : 0;
+      return sum + (tier.headcount * rate);
+    }, 0);
+    const discountAmount = Math.round((basePremium * discountRate) / 100);
+    const finalPrem = basePremium - discountAmount;
+
+    const isOutOfStandard = discountRate > 20 || tiers.some(t => 
+      t.customInpatientBenefit !== undefined || 
+      t.customOutpatientBenefit !== undefined || 
+      t.customAccidentBenefit !== undefined || 
+      t.customMaternityBenefit !== undefined
+    );
+    const status = isOutOfStandard ? 'Pending_Approval' : 'Auto_Approved';
+
+    const newVersion: QuoteVersion = {
+      id: `v1.${quoteVersions.length}.0`,
+      version: `v1.${quoteVersions.length}.0`,
+      timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      tiers: JSON.parse(JSON.stringify(tiers)),
+      discountRate,
+      commissionRate,
+      totalPremium: finalPrem,
+      status,
+      createdBy: 'CA - Thẩm định viên',
+      notes
+    };
+
+    setQuoteVersions([newVersion, ...quoteVersions]);
+    setQuoteApprovalStatus(status);
+  };
+
+  const handleRestoreVersion = (version: QuoteVersion) => {
+    setTiers(JSON.parse(JSON.stringify(version.tiers)));
+    setDiscountRate(version.discountRate);
+    setCommissionRate(version.commissionRate);
+    setQuoteApprovalStatus(version.status);
+  };
+
+  useEffect(() => {
+    const isOutOfStandard = discountRate > 20 || tiers.some(t => 
+      t.customInpatientBenefit !== undefined || 
+      t.customOutpatientBenefit !== undefined || 
+      t.customAccidentBenefit !== undefined || 
+      t.customMaternityBenefit !== undefined
+    );
+    if (!isOutOfStandard) {
+      setQuoteApprovalStatus('Auto_Approved');
+    } else {
+      if (quoteApprovalStatus === 'Auto_Approved') {
+        setQuoteApprovalStatus('Pending_Approval');
+      }
+    }
+  }, [discountRate, tiers]);
+
   // Fetching States
   const [isSearchingMst, setIsSearchingMst] = useState(false);
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
@@ -458,6 +538,8 @@ export default function App() {
   const handleSendQuoteEmail = () => {
     setIsSendingQuote(true);
     setQuoteSuccessType('email');
+    // Save snapshot with audit trail as requested (Mindmap v6.3)
+    handleCreateNewVersion('Tự động lưu: Đã gửi email báo giá cho đại diện doanh nghiệp');
     setTimeout(() => {
       setIsSendingQuote(false);
       setShowQuoteSentSuccess(true);
@@ -467,6 +549,8 @@ export default function App() {
   const handleDownloadQuotePdf = () => {
     setIsDownloadingQuote(true);
     setQuoteSuccessType('download');
+    // Save snapshot with audit trail as requested (Mindmap v6.3)
+    handleCreateNewVersion('Tự động lưu: Đại lý xuất/Tải báo giá dạng bản chào PDF');
     setTimeout(() => {
       setIsDownloadingQuote(false);
       setShowQuoteDownloadSuccess(true);
@@ -2865,19 +2949,42 @@ export default function App() {
                                 <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tổng số lượng nhân viên (Min 5) *</label>
                                 <span className="text-lg font-black text-[#03377B] font-mono">{groupSizeInfo.headcount} người</span>
                               </div>
-                              <input
-                                type="range"
-                                min="5"
-                                max="150"
-                                value={groupSizeInfo.headcount}
-                                onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, headcount: parseInt(e.target.value) })}
-                                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#03377B]"
-                              />
-                              <div className="flex justify-between text-[10px] text-slate-400 font-bold">
-                                <span>5 người (Tối thiểu nhóm)</span>
-                                <span>50 người (Nhóm trung bình)</span>
-                                <span>150 người</span>
+                              <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                  <input
+                                    type="number"
+                                    min="5"
+                                    max="500"
+                                    value={groupSizeInfo.headcount}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value);
+                                      setGroupSizeInfo({ ...groupSizeInfo, headcount: isNaN(val) ? 0 : val });
+                                    }}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-black text-slate-800"
+                                    placeholder="VD: 15"
+                                  />
+                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">nhân viên</span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: Math.max(5, groupSizeInfo.headcount - 1) })}
+                                    className="px-4 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
+                                  >
+                                    -
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: groupSizeInfo.headcount + 1 })}
+                                    className="px-4 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               </div>
+                              {groupSizeInfo.headcount < 5 && (
+                                <p className="text-[10px] text-rose-500 font-bold">⚠️ Bảo hiểm sức khỏe nhóm PTI Care yêu cầu tối thiểu 5 nhân viên.</p>
+                              )}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -3110,59 +3217,92 @@ export default function App() {
                         discountRate={discountRate}
                         onChangeDiscountRate={setDiscountRate}
                         commissionRate={commissionRate}
-                        onChangeCommissionRate={setDiscountRate}
+                        onChangeCommissionRate={setCommissionRate}
                         role={user.role}
                         headcount={groupSizeInfo.headcount}
+                        quoteVersions={quoteVersions}
+                        onCreateNewVersion={handleCreateNewVersion}
+                        onRestoreVersion={handleRestoreVersion}
+                        quoteApprovalStatus={quoteApprovalStatus}
+                        onChangeApprovalStatus={setQuoteApprovalStatus}
                       />
 
                       {/* Instant Quotation Action Buttons */}
-                      <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 text-left space-y-4">
-                        <div>
-                          <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-wider block">CHỐT SƠ BỘ — BÁO GIÁ NHANH</span>
-                          <h4 className="text-sm font-black text-slate-800 mt-1">Xuất bản chào gửi Khách hàng duyệt trước</h4>
-                          <p className="text-xs text-slate-500">Chưa ràng buộc pháp lý. Hỗ trợ xuất bản chào đẹp gửi đối tác.</p>
+                      {quoteApprovalStatus === 'Pending_Approval' ? (
+                        <div className="bg-amber-50/70 border border-amber-200/80 rounded-3xl p-6 text-left space-y-3 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <ShieldAlert className="text-amber-600 mt-0.5 shrink-0" size={18} />
+                            <div>
+                              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block">YÊU CẦU DUYỆT VƯỢT CHUẨN (STP/MCV)</span>
+                              <h4 className="text-sm font-black text-amber-900 mt-1">Đang chờ phê duyệt từ Trưởng nhóm nghiệp vụ</h4>
+                              <p className="text-xs text-amber-800 leading-relaxed">
+                                Báo giá này có chiết khấu vượt chuẩn 20% hoặc có tùy chỉnh quyền lợi riêng. Hệ thống đã tự động route vào hàng đợi duyệt của Trưởng nhóm. Vui lòng bấm <strong>Phê duyệt (Approve)</strong> tại bảng giả lập phía trên trước khi tiếp tục gửi cho khách hàng.
+                              </p>
+                            </div>
+                          </div>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-3 border-t border-slate-200">
-                          <button
-                            type="button"
-                            onClick={handleDownloadQuotePdf}
-                            disabled={isDownloadingQuote}
-                            className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#03377B] border border-slate-300 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                          >
-                            {isDownloadingQuote ? (
-                              <>
-                                <RefreshCw className="animate-spin text-[#03377B]" size={14} />
-                                <span>Đang xuất PDF...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Download size={14} />
-                                <span>TẢI BẢN CHÀO PHÍ (PDF)</span>
-                              </>
-                            )}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={handleSendQuoteEmail}
-                            disabled={isSendingQuote}
-                            className="px-6 py-2.5 bg-[#03377B] hover:bg-[#022D66] text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95"
-                          >
-                            {isSendingQuote ? (
-                              <>
-                                <RefreshCw className="animate-spin text-white" size={14} />
-                                <span>Đang gửi mail...</span>
-                              </>
-                            ) : (
-                              <>
-                                <FileCheck size={14} strokeWidth={2.5} />
-                                <span>GỬI BÁO GIÁ CHO KHÁCH HÀNG</span>
-                              </>
-                            )}
-                          </button>
+                      ) : quoteApprovalStatus === 'Supervisor_Rejected' ? (
+                        <div className="bg-rose-50/70 border border-rose-200/80 rounded-3xl p-6 text-left space-y-3 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <ShieldAlert className="text-rose-600 mt-0.5 shrink-0" size={18} />
+                            <div>
+                              <span className="text-[10px] font-extrabold text-rose-700 uppercase tracking-wider block">BẢN CHÀO BỊ TỪ CHỐI</span>
+                              <h4 className="text-sm font-black text-rose-900 mt-1">Trưởng nhóm đã từ chối bản chào vượt chuẩn này</h4>
+                              <p className="text-xs text-rose-800 leading-relaxed">
+                                Vui lòng giảm tỷ lệ chiết khấu xuống &le; 20% và đưa các quyền lợi chương trình về chuẩn cũ, hoặc khôi phục một phiên bản cũ hợp lệ từ mục <strong>Lịch sử các phiên bản Báo giá</strong>.
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 text-left space-y-4">
+                          <div>
+                            <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-wider block">CHỐT SƠ BỘ — BÁO GIÁ NHANH</span>
+                            <h4 className="text-sm font-black text-slate-800 mt-1">Xuất bản chào gửi Khách hàng duyệt trước</h4>
+                            <p className="text-xs text-slate-500">Chưa ràng buộc pháp lý. Hỗ trợ xuất bản chào đẹp gửi đối tác.</p>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-3 border-t border-slate-200">
+                            <button
+                              type="button"
+                              onClick={handleDownloadQuotePdf}
+                              disabled={isDownloadingQuote}
+                              className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#03377B] border border-slate-300 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                            >
+                              {isDownloadingQuote ? (
+                                <>
+                                  <RefreshCw className="animate-spin text-[#03377B]" size={14} />
+                                  <span>Đang xuất PDF...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Download size={14} />
+                                  <span>TẢI BẢN CHÀO PHÍ (PDF)</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleSendQuoteEmail}
+                              disabled={isSendingQuote}
+                              className="px-6 py-2.5 bg-[#03377B] hover:bg-[#022D66] text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95 cursor-pointer"
+                            >
+                              {isSendingQuote ? (
+                                <>
+                                  <RefreshCw className="animate-spin text-white" size={14} />
+                                  <span>Đang gửi mail...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FileCheck size={14} strokeWidth={2.5} />
+                                  <span>GỬI BÁO GIÁ CHO KHÁCH HÀNG</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   {currentStep === 3 && (

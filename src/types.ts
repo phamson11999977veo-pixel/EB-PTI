@@ -71,6 +71,12 @@ export interface InsuredEmployee {
   treatmentDetails: string;
   underwritingAction: 'approve' | 'exclude' | 'decline' | 'request_files' | 'none';
   medicalFileUploaded?: boolean;
+  occupation?: string;
+  claimHistory?: 'good' | 'normal' | 'bad';
+  supplementaryFiles?: string[];
+  riskReasons?: string[];
+  riskCoefficient?: number;
+  customExclusionClause?: string;
 }
 
 export interface InvoiceInfo {
@@ -93,4 +99,17 @@ export interface ContractState {
   policyNumber: string;
   isPaid: boolean;
   role: UserRole;
+}
+
+export interface QuoteVersion {
+  id: string;
+  version: string;
+  timestamp: string;
+  tiers: EmployeeTier[];
+  discountRate: number;
+  commissionRate: number;
+  totalPremium: number;
+  status: 'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected';
+  createdBy: string;
+  notes?: string;
 }
