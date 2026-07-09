@@ -54,6 +54,18 @@ export interface EmployeeTier {
   customOutpatientBenefit?: string;
   customAccidentBenefit?: string;
   customMaternityBenefit?: string;
+  // Detailed benefit fields (CA can edit)
+  customAccidentPersonalBenefit?: string;
+  customAccidentRelativeBenefit?: string;
+  customDeathOrDisabilityBenefit?: string;
+  customInpatientCriticalIllnessBenefit?: string;
+  customInpatientOtherDiseasesBenefit?: string;
+  customInpatientMaternityBenefit?: string;
+  customOutpatientTreatmentBenefit?: string;
+  customOutpatientBasicDentalBenefit?: string;
+  customOutpatientFullDentalBenefit?: string;
+  customOutpatientEasternMedicineBenefit?: string;
+  customVaccineComplicationsBenefit?: string;
 }
 
 export interface InsuredEmployee {

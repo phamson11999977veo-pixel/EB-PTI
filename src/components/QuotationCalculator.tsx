@@ -19,6 +19,102 @@ interface QuotationCalculatorProps {
   onChangeApprovalStatus: (status: 'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected') => void;
 }
 
+export function getDefaultBenefitsForProgram(programId: string) {
+  switch (programId) {
+    case 'lvl-1':
+      return {
+        accidentPersonalBenefit: '100.000.000 đ',
+        accidentRelativeBenefit: '50.000.000 đ',
+        deathOrDisabilityBenefit: '100.000.000 đ',
+        inpatientCriticalIllnessBenefit: '75.000.000 đ',
+        inpatientOtherDiseasesBenefit: '50.000.000 đ',
+        inpatientMaternityBenefit: 'Không áp dụng',
+        outpatientTreatmentBenefit: '6.000.000 đ/năm (1.200.000 đ/lần)',
+        outpatientBasicDentalBenefit: '2.000.000 đ/năm',
+        outpatientFullDentalBenefit: 'Không áp dụng',
+        outpatientEasternMedicineBenefit: '1.500.000 đ/năm',
+        vaccineComplicationsBenefit: '10.000.000 đ',
+      };
+    case 'lvl-2':
+      return {
+        accidentPersonalBenefit: '150.000.000 đ',
+        accidentRelativeBenefit: '75.000.000 đ',
+        deathOrDisabilityBenefit: '150.000.000 đ',
+        inpatientCriticalIllnessBenefit: '100.000.000 đ',
+        inpatientOtherDiseasesBenefit: '70.000.000 đ',
+        inpatientMaternityBenefit: '10.000.000 đ',
+        outpatientTreatmentBenefit: '10.500.000 đ/năm (2.100.000 đ/lần)',
+        outpatientBasicDentalBenefit: '3.000.000 đ/năm',
+        outpatientFullDentalBenefit: 'Không áp dụng',
+        outpatientEasternMedicineBenefit: '2.000.000 đ/năm',
+        vaccineComplicationsBenefit: '15.000.000 đ',
+      };
+    case 'lvl-3':
+      return {
+        accidentPersonalBenefit: '200.000.000 đ',
+        accidentRelativeBenefit: '100.000.000 đ',
+        deathOrDisabilityBenefit: '200.000.000 đ',
+        inpatientCriticalIllnessBenefit: '150.000.000 đ',
+        inpatientOtherDiseasesBenefit: '115.000.000 đ',
+        inpatientMaternityBenefit: '20.000.000 đ',
+        outpatientTreatmentBenefit: '21.000.000 đ/năm (4.200.000 đ/lần)',
+        outpatientBasicDentalBenefit: '4.000.000 đ/năm',
+        outpatientFullDentalBenefit: '6.000.000 đ/năm',
+        outpatientEasternMedicineBenefit: '3.000.000 đ/năm',
+        vaccineComplicationsBenefit: '20.000.000 đ',
+      };
+    case 'lvl-4':
+      return {
+        accidentPersonalBenefit: '300.000.000 đ',
+        accidentRelativeBenefit: '150.000.000 đ',
+        deathOrDisabilityBenefit: '300.000.000 đ',
+        inpatientCriticalIllnessBenefit: '300.000.000 đ',
+        inpatientOtherDiseasesBenefit: '230.000.000 đ',
+        inpatientMaternityBenefit: '30.000.000 đ',
+        outpatientTreatmentBenefit: '21.000.000 đ/năm (4.200.000 đ/lần)',
+        outpatientBasicDentalBenefit: '5.000.000 đ/năm',
+        outpatientFullDentalBenefit: '10.000.000 đ/năm',
+        outpatientEasternMedicineBenefit: '4.000.000 đ/năm',
+        vaccineComplicationsBenefit: '30.000.000 đ',
+      };
+    case 'lvl-5':
+    default:
+      return {
+        accidentPersonalBenefit: '500.000.000 đ',
+        accidentRelativeBenefit: '250.000.000 đ',
+        deathOrDisabilityBenefit: '500.000.000 đ',
+        inpatientCriticalIllnessBenefit: '600.000.000 đ',
+        inpatientOtherDiseasesBenefit: '460.000.000 đ',
+        inpatientMaternityBenefit: '40.000.000 đ',
+        outpatientTreatmentBenefit: '25.000.000 đ/năm (5.000.000 đ/lần)',
+        outpatientBasicDentalBenefit: '6.000.000 đ/năm',
+        outpatientFullDentalBenefit: '15.000.000 đ/năm',
+        outpatientEasternMedicineBenefit: '5.000.000 đ/năm',
+        vaccineComplicationsBenefit: '50.000.000 đ',
+      };
+  }
+}
+
+export function isTierBenefitsModified(tier: EmployeeTier) {
+  return (
+    tier.customAccidentPersonalBenefit !== undefined ||
+    tier.customAccidentRelativeBenefit !== undefined ||
+    tier.customDeathOrDisabilityBenefit !== undefined ||
+    tier.customInpatientCriticalIllnessBenefit !== undefined ||
+    tier.customInpatientOtherDiseasesBenefit !== undefined ||
+    tier.customInpatientMaternityBenefit !== undefined ||
+    tier.customOutpatientTreatmentBenefit !== undefined ||
+    tier.customOutpatientBasicDentalBenefit !== undefined ||
+    tier.customOutpatientFullDentalBenefit !== undefined ||
+    tier.customOutpatientEasternMedicineBenefit !== undefined ||
+    tier.customVaccineComplicationsBenefit !== undefined ||
+    tier.customInpatientBenefit !== undefined ||
+    tier.customOutpatientBenefit !== undefined ||
+    tier.customAccidentBenefit !== undefined ||
+    tier.customMaternityBenefit !== undefined
+  );
+}
+
 export default function QuotationCalculator({
   tiers,
   programs,
@@ -159,118 +255,262 @@ export default function QuotationCalculator({
                 </div>
 
                 {/* Micro benefit summary for selected program */}
-                {selectedProg && (
-                  <div className="mt-3.5 pt-3.5 border-t border-slate-200/60">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-700">
-                        <span>✨ Chi tiết quyền lợi chương trình</span>
-                        {role === 'CA' && (
-                          <span className="text-[9px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider animate-pulse">
-                            Quyền chỉnh sửa của CA
-                          </span>
+                {selectedProg && (() => {
+                  const defaults = getDefaultBenefitsForProgram(selectedProg.id);
+                  const bAccidentPersonal = tier.customAccidentPersonalBenefit !== undefined ? tier.customAccidentPersonalBenefit : defaults.accidentPersonalBenefit;
+                  const bAccidentRelative = tier.customAccidentRelativeBenefit !== undefined ? tier.customAccidentRelativeBenefit : defaults.accidentRelativeBenefit;
+                  const bDeathOrDisability = tier.customDeathOrDisabilityBenefit !== undefined ? tier.customDeathOrDisabilityBenefit : defaults.deathOrDisabilityBenefit;
+
+                  const bInpatientCriticalIllness = tier.customInpatientCriticalIllnessBenefit !== undefined ? tier.customInpatientCriticalIllnessBenefit : defaults.inpatientCriticalIllnessBenefit;
+                  const bInpatientOtherDiseases = tier.customInpatientOtherDiseasesBenefit !== undefined ? tier.customInpatientOtherDiseasesBenefit : defaults.inpatientOtherDiseasesBenefit;
+                  const bInpatientMaternity = tier.customInpatientMaternityBenefit !== undefined ? tier.customInpatientMaternityBenefit : defaults.inpatientMaternityBenefit;
+
+                  const bOutpatientTreatment = tier.customOutpatientTreatmentBenefit !== undefined ? tier.customOutpatientTreatmentBenefit : defaults.outpatientTreatmentBenefit;
+                  const bOutpatientBasicDental = tier.customOutpatientBasicDentalBenefit !== undefined ? tier.customOutpatientBasicDentalBenefit : defaults.outpatientBasicDentalBenefit;
+                  const bOutpatientFullDental = tier.customOutpatientFullDentalBenefit !== undefined ? tier.customOutpatientFullDentalBenefit : defaults.outpatientFullDentalBenefit;
+                  const bOutpatientEasternMedicine = tier.customOutpatientEasternMedicineBenefit !== undefined ? tier.customOutpatientEasternMedicineBenefit : defaults.outpatientEasternMedicineBenefit;
+
+                  const bVaccineComplications = tier.customVaccineComplicationsBenefit !== undefined ? tier.customVaccineComplicationsBenefit : defaults.vaccineComplicationsBenefit;
+
+                  return (
+                    <div className="mt-3.5 pt-3.5 border-t border-slate-200/60">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <div className="flex items-center gap-1.5 text-[11px] font-black text-slate-700">
+                          <span>✨ Chi tiết quyền lợi chương trình</span>
+                          {role === 'CA' && (
+                            <span className="text-[9px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider animate-pulse">
+                              Quyền chỉnh sửa của CA
+                            </span>
+                          )}
+                        </div>
+                        
+                        {role === 'CA' && isTierBenefitsModified(tier) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleUpdateTier(tier.id, {
+                                customInpatientBenefit: undefined,
+                                customOutpatientBenefit: undefined,
+                                customAccidentBenefit: undefined,
+                                customMaternityBenefit: undefined,
+                                customAccidentPersonalBenefit: undefined,
+                                customAccidentRelativeBenefit: undefined,
+                                customDeathOrDisabilityBenefit: undefined,
+                                customInpatientCriticalIllnessBenefit: undefined,
+                                customInpatientOtherDiseasesBenefit: undefined,
+                                customInpatientMaternityBenefit: undefined,
+                                customOutpatientTreatmentBenefit: undefined,
+                                customOutpatientBasicDentalBenefit: undefined,
+                                customOutpatientFullDentalBenefit: undefined,
+                                customOutpatientEasternMedicineBenefit: undefined,
+                                customVaccineComplicationsBenefit: undefined,
+                              });
+                            }}
+                            className="text-[10px] text-rose-500 hover:text-rose-600 font-extrabold transition-all hover:underline flex items-center gap-1"
+                          >
+                            ✕ Khôi phục mặc định
+                          </button>
                         )}
                       </div>
-                      
-                      {role === 'CA' && (tier.customInpatientBenefit !== undefined || tier.customOutpatientBenefit !== undefined || tier.customAccidentBenefit !== undefined || tier.customMaternityBenefit !== undefined) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleUpdateTier(tier.id, {
-                              customInpatientBenefit: undefined,
-                              customOutpatientBenefit: undefined,
-                              customAccidentBenefit: undefined,
-                              customMaternityBenefit: undefined
-                            });
-                          }}
-                          className="text-[10px] text-rose-500 hover:text-rose-600 font-extrabold transition-all hover:underline flex items-center gap-1"
-                        >
-                          ✕ Khôi phục mặc định
-                        </button>
+
+                      {role === 'CA' ? (
+                        <div className="space-y-4">
+                          {/* Nhóm 1: Tai nạn & Sinh mạng */}
+                          <div className="p-3 bg-slate-100/50 rounded-2xl border border-slate-200/40">
+                            <h5 className="text-[10px] font-black text-[#03377B] uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#03377B]"></span>
+                              1. Tai nạn & Sinh mạng (Cá nhân & Người thân)
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Tai nạn cá nhân tối đa</span>
+                                <input
+                                  type="text"
+                                  value={bAccidentPersonal}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customAccidentPersonalBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Tai nạn người thân tối đa</span>
+                                <input
+                                  type="text"
+                                  value={bAccidentRelative}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customAccidentRelativeBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Tử vong hoặc thương tật TBVV</span>
+                                <input
+                                  type="text"
+                                  value={bDeathOrDisability}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customDeathOrDisabilityBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Nhóm 2: Quyền lợi Nội trú */}
+                          <div className="p-3 bg-slate-100/50 rounded-2xl border border-slate-200/40">
+                            <h5 className="text-[10px] font-black text-[#03377B] uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#03377B]"></span>
+                              2. Quyền lợi Nội trú (Bệnh & Thai sản)
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Nội trú - Bệnh hiểm nghèo</span>
+                                <input
+                                  type="text"
+                                  value={bInpatientCriticalIllness}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customInpatientCriticalIllnessBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Nội trú - Bệnh khác (ngoài BHN)</span>
+                                <input
+                                  type="text"
+                                  value={bInpatientOtherDiseases}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customInpatientOtherDiseasesBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Nội trú - Thai sản</span>
+                                <input
+                                  type="text"
+                                  value={bInpatientMaternity}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customInpatientMaternityBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Nhóm 3: Quyền lợi Ngoại trú & Nha khoa */}
+                          <div className="p-3 bg-slate-100/50 rounded-2xl border border-slate-200/40">
+                            <h5 className="text-[10px] font-black text-[#03377B] uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#03377B]"></span>
+                              3. Quyền lợi Ngoại trú, Nha khoa & Đông y
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Điều trị ngoại trú</span>
+                                <input
+                                  type="text"
+                                  value={bOutpatientTreatment}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customOutpatientTreatmentBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Chăm sóc răng cơ bản</span>
+                                <input
+                                  type="text"
+                                  value={bOutpatientBasicDental}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customOutpatientBasicDentalBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Chăm sóc răng toàn diện</span>
+                                <input
+                                  type="text"
+                                  value={bOutpatientFullDental}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customOutpatientFullDentalBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Điều trị đông y</span>
+                                <input
+                                  type="text"
+                                  value={bOutpatientEasternMedicine}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customOutpatientEasternMedicineBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Nhóm 4: Quyền lợi Mở rộng */}
+                          <div className="p-3 bg-slate-100/50 rounded-2xl border border-slate-200/40">
+                            <h5 className="text-[10px] font-black text-[#03377B] uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#03377B]"></span>
+                              4. Quyền lợi Mở rộng (Biến chứng tiêm chủng)
+                            </h5>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                <span className="text-slate-500 block text-[9px] font-bold">Điều trị biến chứng vắc xin</span>
+                                <input
+                                  type="text"
+                                  value={bVaccineComplications}
+                                  onChange={(e) => handleUpdateTier(tier.id, { customVaccineComplicationsBenefit: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Tai nạn cá nhân tối đa</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bAccidentPersonal}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Tai nạn người thân tối đa</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bAccidentRelative}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Tử vong/thương tật TBVV</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bDeathOrDisability}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Nội trú - Bệnh hiểm nghèo</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bInpatientCriticalIllness}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Nội trú - Bệnh khác (ngoài BHN)</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bInpatientOtherDiseases}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Nội trú - Thai sản</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bInpatientMaternity}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Điều trị ngoại trú</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bOutpatientTreatment}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Chăm sóc răng cơ bản</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bOutpatientBasicDental}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Chăm sóc răng toàn diện</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bOutpatientFullDental}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Điều trị đông y</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bOutpatientEasternMedicine}</span>
+                          </div>
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)] col-span-1 sm:col-span-2 md:col-span-2">
+                            <span className="text-slate-400 block text-[9px] font-semibold">Mở rộng điều trị y tế do tiêm vacxin</span>
+                            <span className="font-extrabold text-slate-700 block mt-0.5">{bVaccineComplications}</span>
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {role === 'CA' ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs space-y-1">
-                          <span className="text-slate-500 block text-[10px] font-bold">Nội trú tối đa</span>
-                          <input
-                            type="text"
-                            value={tier.customInpatientBenefit !== undefined ? tier.customInpatientBenefit : (selectedProg.inpatientBenefit || '')}
-                            onChange={(e) => handleUpdateTier(tier.id, { customInpatientBenefit: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200/85 rounded-lg px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                            placeholder="Nhập mức tối đa"
-                          />
-                        </div>
-
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs space-y-1">
-                          <span className="text-slate-500 block text-[10px] font-bold">Ngoại trú tối đa</span>
-                          <input
-                            type="text"
-                            value={tier.customOutpatientBenefit !== undefined ? tier.customOutpatientBenefit : (selectedProg.outpatientBenefit || '')}
-                            onChange={(e) => handleUpdateTier(tier.id, { customOutpatientBenefit: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200/85 rounded-lg px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                            placeholder="Nhập mức tối đa"
-                          />
-                        </div>
-
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs space-y-1">
-                          <span className="text-slate-500 block text-[10px] font-bold">Tai nạn cá nhân tối đa</span>
-                          <input
-                            type="text"
-                            value={tier.customAccidentBenefit !== undefined ? tier.customAccidentBenefit : (selectedProg.accidentBenefit || '')}
-                            onChange={(e) => handleUpdateTier(tier.id, { customAccidentBenefit: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200/85 rounded-lg px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                            placeholder="Nhập mức tai nạn"
-                          />
-                        </div>
-
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs space-y-1">
-                          <span className="text-slate-500 block text-[10px] font-bold">Thai sản</span>
-                          <input
-                            type="text"
-                            value={tier.customMaternityBenefit !== undefined ? tier.customMaternityBenefit : (selectedProg.maternityBenefit || '')}
-                            onChange={(e) => handleUpdateTier(tier.id, { customMaternityBenefit: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200/85 rounded-lg px-2 py-1.5 text-xs font-black text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                            placeholder="Nhập mức thai sản"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100">
-                          <span className="text-slate-400 block text-[10px]">Nội trú tối đa</span>
-                          <span className="font-semibold text-slate-700">
-                            {tier.customInpatientBenefit !== undefined ? tier.customInpatientBenefit : selectedProg.inpatientBenefit}
-                          </span>
-                        </div>
-                        <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100">
-                          <span className="text-slate-400 block text-[10px]">Ngoại trú tối đa</span>
-                          <span className="font-semibold text-slate-700">
-                            {tier.customOutpatientBenefit !== undefined ? tier.customOutpatientBenefit : selectedProg.outpatientBenefit}
-                          </span>
-                        </div>
-                        <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100">
-                          <span className="text-slate-400 block text-[10px]">Tai nạn tối đa</span>
-                          <span className="font-semibold text-slate-700">
-                            {tier.customAccidentBenefit !== undefined ? tier.customAccidentBenefit : selectedProg.accidentBenefit}
-                          </span>
-                        </div>
-                        <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100">
-                          <span className="text-slate-400 block text-[10px]">Thai sản</span>
-                          <span className="font-semibold text-slate-700">
-                            {tier.customMaternityBenefit !== undefined ? tier.customMaternityBenefit : selectedProg.maternityBenefit}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             );
           })}
           
           {/* Compliance note for modified benefits */}
-          {tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) && (
+          {tiers.some(t => isTierBenefitsModified(t)) && (
             <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200/60 flex items-start gap-3 text-left animate-fade-in mt-4">
               <ShieldAlert className="text-blue-600 mt-0.5 flex-shrink-0" size={16} />
               <div className="space-y-1">
@@ -442,98 +682,14 @@ export default function QuotationCalculator({
 
       {/* NEW: STP/MCV Approval and Quotation Version History Controls */}
       {(() => {
-        const isOutOfStandard = discountRate > 20 || tiers.some(t => 
-          t.customInpatientBenefit !== undefined || 
-          t.customOutpatientBenefit !== undefined || 
-          t.customAccidentBenefit !== undefined || 
-          t.customMaternityBenefit !== undefined
-        );
-
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            {/* STP/MCV Underwriting Approval Queue Simulation */}
-            <div className="card border border-slate-200 shadow-sm text-left">
-              <div className="card-title justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="text-orange-600" size={18} />
-                  <span className="text-sm font-bold text-slate-800">Kiểm soát nghiệp vụ (STP/MCV)</span>
-                </div>
-                {isOutOfStandard ? (
-                  <span className="text-[10px] bg-rose-100 text-rose-800 border border-rose-200 font-extrabold px-2.5 py-1 rounded-full animate-pulse">
-                    ⚠️ CẦN TRƯỞNG NHÓM DUYỆT
-                  </span>
-                ) : (
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold px-2.5 py-1 rounded-full">
-                    ✓ ĐẠT CHUẨN (STP)
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 mb-3">
-                Hàng đợi kiểm soát của Trưởng nhóm nghiệp vụ đối với các bản chào có chiết khấu &gt; 20% hoặc sửa đổi quyền lợi chuẩn của chương trình.
-              </p>
-
-              <div className="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
-                <div className="font-bold text-slate-800 mb-1">Trạng thái phê duyệt báo giá:</div>
-                <div className="flex items-center gap-2">
-                  {quoteApprovalStatus === 'Auto_Approved' && (
-                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
-                      ✓ Hệ thống Tự động duyệt (STP)
-                    </span>
-                  )}
-                  {quoteApprovalStatus === 'Pending_Approval' && (
-                    <span className="bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1 animate-pulse">
-                      ⚠️ Đang chờ Trưởng nhóm phê duyệt (MCV)
-                    </span>
-                  )}
-                  {quoteApprovalStatus === 'Supervisor_Approved' && (
-                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
-                      ✓ Đã được Trưởng nhóm phê duyệt
-                    </span>
-                  )}
-                  {quoteApprovalStatus === 'Supervisor_Rejected' && (
-                    <span className="bg-rose-50 text-rose-700 border border-rose-200 font-bold px-2.5 py-1 rounded inline-flex items-center gap-1">
-                      ✕ Trưởng nhóm Từ chối cấp dưới chuẩn
-                    </span>
-                  )}
-                </div>
-
-                <div className="border-t border-slate-200 pt-2 space-y-1 text-slate-600 text-[11px]">
-                  <div>• Giới hạn tự duyệt chiết khấu: <strong className="text-slate-800">Tối đa 20%</strong></div>
-                  <div>• Chiết khấu hiện tại: <strong className={discountRate > 20 ? "text-rose-600 font-bold" : "text-emerald-600"}>{discountRate}%</strong></div>
-                  <div>• Điều chỉnh quyền lợi: <strong className={tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) ? "text-rose-600 font-bold" : "text-slate-700"}>{tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) ? "Có tùy chỉnh vượt chuẩn" : "Quyền lợi chuẩn hệ thống"}</strong></div>
-                </div>
-
-                {/* Simulation controls */}
-                <div className="border-t border-slate-200 pt-3 mt-1 space-y-2">
-                  <span className="font-extrabold text-[10px] text-slate-500 uppercase block">Trình giả lập phê duyệt (Supervisor Role):</span>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      disabled={quoteApprovalStatus !== 'Pending_Approval'}
-                      onClick={() => onChangeApprovalStatus('Supervisor_Approved')}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${quoteApprovalStatus === 'Pending_Approval' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow cursor-pointer' : 'bg-slate-150 text-slate-400 cursor-not-allowed'}`}
-                    >
-                      Phê duyệt (Approve)
-                    </button>
-                    <button
-                      type="button"
-                      disabled={quoteApprovalStatus !== 'Pending_Approval'}
-                      onClick={() => onChangeApprovalStatus('Supervisor_Rejected')}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 ${quoteApprovalStatus === 'Pending_Approval' ? 'bg-rose-600 hover:bg-rose-700 text-white shadow cursor-pointer' : 'bg-slate-150 text-slate-400 cursor-not-allowed'}`}
-                    >
-                      Từ chối (Reject)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <div className="pt-2">
             {/* Quote Version Control History */}
-            <div className="card border border-slate-200 shadow-sm text-left">
+            <div className="card border border-slate-200 shadow-sm text-left w-full">
               <div className="card-title justify-between">
                 <div className="flex items-center gap-2">
                   <History className="text-[#03377B]" size={18} />
-                  <span className="text-sm font-bold text-slate-800">Lịch sử các phiên bản Báo giá (v6.3)</span>
+                  <span className="text-sm font-bold text-slate-800">Lịch sử các phiên bản Báo giá</span>
                 </div>
                 <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
                   {quoteVersions.length} phiên bản
@@ -543,7 +699,7 @@ export default function QuotationCalculator({
                 Lưu vết lịch sử thay đổi để làm bằng chứng về quyền lợi và tỷ lệ chiết khấu đã đề xuất cho khách hàng tại từng thời điểm.
               </p>
 
-              <div className="space-y-2 max-h-[190px] overflow-y-auto mb-3.5 pr-1 divide-y divide-slate-100">
+              <div className="space-y-2 max-h-[250px] overflow-y-auto mb-1 pr-1 divide-y divide-slate-100">
                 {quoteVersions.map((v) => (
                   <div key={v.id} className="pt-2 flex items-start justify-between gap-2 text-xs">
                     <div>
@@ -579,22 +735,6 @@ export default function QuotationCalculator({
                     </button>
                   </div>
                 ))}
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const note = prompt('Nhập mô tả/lý do tạo phiên bản báo giá mới này (ví dụ: Áp dụng chiết khấu 15% theo quy mô mới):', 'Cập nhật lại quyền lợi và chiết khấu');
-                    if (note !== null) {
-                      onCreateNewVersion(note || 'Cập nhật thủ công');
-                    }
-                  }}
-                  className="w-full py-2 bg-[#03377B] hover:bg-[#022D66] text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <Plus size={14} />
-                  <span>TẠO VERSION MỚI (MIN DM 6.3)</span>
-                </button>
               </div>
             </div>
           </div>

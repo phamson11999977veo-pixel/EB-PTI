@@ -42,7 +42,14 @@ import {
   Send,
   Maximize2,
   ShieldAlert,
-  UserPlus
+  UserPlus,
+  Crown,
+  Gem,
+  Trophy,
+  Heart,
+  Shield,
+  Coins,
+  Activity
 } from 'lucide-react';
 
 import { 
@@ -77,48 +84,74 @@ import {
 // Static programs list based on rules
 const PROGRAMS: InsuranceProgram[] = [
   {
-    id: 'ct-1',
-    name: 'Chương trình 1',
-    tierLabel: 'Hạng Đồng (Bronze)',
-    accidentBenefit: '50.000.000 đ',
-    accidentMedical: '10.000.000 đ',
-    inpatientBenefit: '150.000.000 đ',
+    id: 'lvl-1',
+    name: 'Level 1',
+    tierLabel: 'Chương trình Tiêu chuẩn',
+    accidentBenefit: 'Bồi thường sinh mạng lên đến 30 tháng lương + Hỗ trợ lương 6 tháng + 140M y tế (Đồng mức 200M tử vong/thương tật ốm bệnh)',
+    accidentMedical: 'Đồng chi trả 30% nội/ngoại trú tuyến cao cấp',
+    inpatientBenefit: '50.000.000 đ',
     outpatientBenefit: '6.000.000 đ',
-    maternityBenefit: 'Không áp dụng',
-    dentalBenefit: 'Không áp dụng',
+    maternityBenefit: 'Trợ cấp bệnh hiểm nghèo: 75.000.000 đ',
+    dentalBenefit: 'Đồng chi trả 30% ngoại trú',
     ratePerHead: 1200000
   },
   {
-    id: 'ct-2',
-    name: 'Chương trình 2',
-    tierLabel: 'Hạng Bạc (Silver)',
-    accidentBenefit: '100.000.000 đ',
-    accidentMedical: '20.000.000 đ',
-    inpatientBenefit: '250.000.000 đ',
-    outpatientBenefit: '10.000.000 đ',
-    maternityBenefit: '15.000.000 đ',
-    dentalBenefit: '2.000.000 đ',
-    ratePerHead: 2400000
+    id: 'lvl-2',
+    name: 'Level 2',
+    tierLabel: 'Chương trình Cơ bản',
+    accidentBenefit: 'Bồi thường sinh mạng lên đến 30 tháng lương + Hỗ trợ lương 6 tháng + 140M y tế (Đồng mức 200M tử vong/thương tật ốm bệnh)',
+    accidentMedical: 'Đồng chi trả 30% nội/ngoại trú tuyến cao cấp',
+    inpatientBenefit: '70.000.000 đ',
+    outpatientBenefit: '10.500.000 đ',
+    maternityBenefit: 'Trợ cấp bệnh hiểm nghèo: 100.000.000 đ',
+    dentalBenefit: 'Đồng chi trả 30% ngoại trú',
+    ratePerHead: 2000000
   },
   {
-    id: 'ct-3',
-    name: 'Chương trình 3',
-    tierLabel: 'Hạng Vàng (Gold)',
-    accidentBenefit: '200.000.000 đ',
-    accidentMedical: '40.000.000 đ',
-    inpatientBenefit: '400.000.000 đ',
-    outpatientBenefit: '20.000.000 đ',
-    maternityBenefit: '30.000.000 đ',
-    dentalBenefit: '5.000.000 đ',
-    ratePerHead: 4800000
+    id: 'lvl-3',
+    name: 'Level 3',
+    tierLabel: 'Chương trình Nâng cao',
+    accidentBenefit: 'Bồi thường sinh mạng lên đến 30 tháng lương + Hỗ trợ lương 6 tháng + 140M y tế (Đồng mức 200M tử vong/thương tật ốm bệnh)',
+    accidentMedical: 'Đồng chi trả 30% nội/ngoại trú tuyến cao cấp',
+    inpatientBenefit: '115.000.000 đ',
+    outpatientBenefit: '21.000.000 đ',
+    maternityBenefit: 'Trợ cấp bệnh hiểm nghèo: 150.000.000 đ',
+    dentalBenefit: 'Đồng chi trả 30% ngoại trú',
+    ratePerHead: 3500000
+  },
+  {
+    id: 'lvl-4',
+    name: 'Level 4',
+    tierLabel: 'Chương trình Ưu việt',
+    accidentBenefit: 'Bồi thường sinh mạng lên đến 30 tháng lương + Hỗ trợ lương 6 tháng + 140M y tế (Đồng mức 200M tử vong/thương tật ốm bệnh)',
+    accidentMedical: 'Đồng chi trả 30% nội/ngoại trú tuyến cao cấp',
+    inpatientBenefit: '230.000.000 đ',
+    outpatientBenefit: '21.000.000 đ',
+    maternityBenefit: 'Trợ cấp bệnh hiểm nghèo: 300.000.000 đ',
+    dentalBenefit: 'Đồng chi trả 30% ngoại trú',
+    ratePerHead: 5500000
+  },
+  {
+    id: 'lvl-5',
+    name: 'Level 5 (VIP)',
+    tierLabel: 'Chương trình VIP',
+    accidentBenefit: 'Bồi thường sinh mạng lên đến 30 tháng lương + Hỗ trợ lương 6 tháng + 140M y tế (Đồng mức 200M tử vong/thương tật ốm bệnh)',
+    accidentMedical: 'Đồng chi trả 30% nội/ngoại trú tuyến cao cấp',
+    inpatientBenefit: '460.000.000 đ',
+    outpatientBenefit: '25.000.000 đ',
+    maternityBenefit: 'Trợ cấp bệnh hiểm nghèo: 600.000.000 đ',
+    dentalBenefit: 'Đồng chi trả 30% ngoại trú',
+    ratePerHead: 9500000
   }
 ];
 
 // Dynamic estimated range calculation based on package and industry risk factor
 const getEstimatedRange = (programId: string, industry: string) => {
   let base = 1200000;
-  if (programId === 'ct-2') base = 2400000;
-  if (programId === 'ct-3') base = 4800000;
+  if (programId === 'lvl-2') base = 2000000;
+  if (programId === 'lvl-3') base = 3500000;
+  if (programId === 'lvl-4') base = 5500000;
+  if (programId === 'lvl-5') base = 9500000;
 
   // Industry risk loading factors
   let factorMin = 0.95;
@@ -176,6 +209,62 @@ export function IptiLogo({ className = "h-8", light = false }: { className?: str
   );
 }
 
+const MOCK_CUSTOMERS: Record<string, {
+  name: string;
+  taxCode: string;
+  contactName: string;
+  contactRole: string;
+  phone: string;
+  email: string;
+  address: string;
+}> = {
+  'KH-1024': {
+    name: 'Công ty Cổ phần Công nghệ VEO',
+    taxCode: '0102934827',
+    contactName: 'Phạm Sơn',
+    contactRole: 'Giám đốc Nhân sự',
+    phone: '0987654321',
+    email: 'hr@companyveo.vn',
+    address: 'Tòa nhà VEO, Cầu Giấy, Hà Nội'
+  },
+  'KH-2048': {
+    name: 'Công ty TNHH Giải pháp TechDev',
+    taxCode: '0315928374',
+    contactName: 'Trần Minh Hoàng',
+    contactRole: 'CEO',
+    phone: '0987654321',
+    email: 'hoang.tran@techdev.vn',
+    address: 'Quận 3, TP. Hồ Chí Minh'
+  },
+  'KH-4096': {
+    name: 'Công ty Cổ phần Thép Việt',
+    taxCode: '0293847561',
+    contactName: 'Lê Văn Thắng',
+    contactRole: 'Trưởng phòng HCNS',
+    phone: '0905123456',
+    email: 'thang.le@thepviet.vn',
+    address: 'KCN Sóng Thần, Bình Dương'
+  },
+  'KH-7777': {
+    name: 'Công ty Cổ phần Thương mại & Dịch vụ iPTI',
+    taxCode: '0109283746',
+    contactName: 'Nguyễn Thị Hương',
+    contactRole: 'Trưởng phòng Hành chính',
+    phone: '0912345678',
+    email: 'huong.nguyen@ipti.vn',
+    address: '81 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'
+  },
+  'KH-9999': {
+    name: 'Tập đoàn Đầu tư & Phát triển Hoàng Gia',
+    taxCode: '0316748291',
+    contactName: 'Vũ Minh Khang',
+    contactRole: 'Giám đốc HCNS',
+    phone: '0977889900',
+    email: 'khang.vu@hoanggia.group',
+    address: 'Lê Duẩn, Quận 1, TP. Hồ Chí Minh'
+  }
+};
+
 export default function App() {
   // Authentication & Role
   const [user, setUser] = useState<{ name: string; username: string; role: UserRole } | null>(null);
@@ -191,6 +280,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'listing' | 'pending' | 'history' | 'open_id'>('dashboard');
   const [selectedProduct, setSelectedProduct] = useState<'accident' | 'travel_intl' | 'travel_dom' | 'health_pti' | 'elitecare' | 'workers_comp' | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'personal' | 'corporate' | null>(null);
+  const [corporateSubMode, setCorporateSubMode] = useState<'chao_phi' | 'cap_don' | null>(null);
+  const [isCorporateMenuExpanded, setIsCorporateMenuExpanded] = useState<boolean>(true);
   const [portfolioTab, setPortfolioTab] = useState<'all' | 'draft' | 'completed'>('all');
 
   // Draft management views search, sort, filters and deletion confirmation
@@ -201,9 +292,10 @@ export default function App() {
 
   // Progressive information distribution: "Quick Quote" (Báo giá nhanh) & "Firm Quote" (Báo giá chính thức)
   const [quoteMode, setQuoteMode] = useState<'quick' | 'firm'>('quick');
-  const [quickProgramId, setQuickProgramId] = useState<string>('ct-1');
+  const [quickProgramId, setQuickProgramId] = useState<string>('lvl-1');
 
   // Multi-step Application States
+  const [customerId, setCustomerId] = useState('');
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: '',
     taxCode: '',
@@ -232,9 +324,9 @@ export default function App() {
   });
 
   const [tiers, setTiers] = useState<EmployeeTier[]>([
-    { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'ct-3' },
-    { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'ct-2' },
-    { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'ct-1' }
+    { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'lvl-5' },
+    { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'lvl-3' },
+    { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'lvl-1' }
   ]);
 
   const [employees, setEmployees] = useState<InsuredEmployee[]>([]);
@@ -278,6 +370,7 @@ export default function App() {
   const [quoteSuccessType, setQuoteSuccessType] = useState<'email' | 'download'>('email');
   const [gpkdFileName, setGpkdFileName] = useState<string>('');
   const [excelFileName, setExcelFileName] = useState<string>('');
+  const [toastNotification, setToastNotification] = useState<{ show: boolean; message: string; type: 'success' | 'info' } | null>(null);
 
   // Quote Versioning & STP/MCV Approvals (Mindmap v5 & v6.3)
   const [quoteVersions, setQuoteVersions] = useState<QuoteVersion[]>([
@@ -286,9 +379,9 @@ export default function App() {
       version: 'v1.0.0 (Gốc)',
       timestamp: '2026-07-07 10:15',
       tiers: [
-        { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'ct-3' },
-        { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'ct-2' },
-        { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'ct-1' }
+        { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'lvl-5' },
+        { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'lvl-3' },
+        { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'lvl-1' }
       ],
       discountRate: 5,
       commissionRate: 5,
@@ -313,7 +406,18 @@ export default function App() {
       t.customInpatientBenefit !== undefined || 
       t.customOutpatientBenefit !== undefined || 
       t.customAccidentBenefit !== undefined || 
-      t.customMaternityBenefit !== undefined
+      t.customMaternityBenefit !== undefined ||
+      t.customAccidentPersonalBenefit !== undefined ||
+      t.customAccidentRelativeBenefit !== undefined ||
+      t.customDeathOrDisabilityBenefit !== undefined ||
+      t.customInpatientCriticalIllnessBenefit !== undefined ||
+      t.customInpatientOtherDiseasesBenefit !== undefined ||
+      t.customInpatientMaternityBenefit !== undefined ||
+      t.customOutpatientTreatmentBenefit !== undefined ||
+      t.customOutpatientBasicDentalBenefit !== undefined ||
+      t.customOutpatientFullDentalBenefit !== undefined ||
+      t.customOutpatientEasternMedicineBenefit !== undefined ||
+      t.customVaccineComplicationsBenefit !== undefined
     );
     const status = isOutOfStandard ? 'Pending_Approval' : 'Auto_Approved';
 
@@ -346,7 +450,18 @@ export default function App() {
       t.customInpatientBenefit !== undefined || 
       t.customOutpatientBenefit !== undefined || 
       t.customAccidentBenefit !== undefined || 
-      t.customMaternityBenefit !== undefined
+      t.customMaternityBenefit !== undefined ||
+      t.customAccidentPersonalBenefit !== undefined ||
+      t.customAccidentRelativeBenefit !== undefined ||
+      t.customDeathOrDisabilityBenefit !== undefined ||
+      t.customInpatientCriticalIllnessBenefit !== undefined ||
+      t.customInpatientOtherDiseasesBenefit !== undefined ||
+      t.customInpatientMaternityBenefit !== undefined ||
+      t.customOutpatientTreatmentBenefit !== undefined ||
+      t.customOutpatientBasicDentalBenefit !== undefined ||
+      t.customOutpatientFullDentalBenefit !== undefined ||
+      t.customOutpatientEasternMedicineBenefit !== undefined ||
+      t.customVaccineComplicationsBenefit !== undefined
     );
     if (!isOutOfStandard) {
       setQuoteApprovalStatus('Auto_Approved');
@@ -356,6 +471,15 @@ export default function App() {
       }
     }
   }, [discountRate, tiers]);
+
+  useEffect(() => {
+    if (toastNotification?.show) {
+      const timer = setTimeout(() => {
+        setToastNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastNotification]);
 
   // Fetching States
   const [isSearchingMst, setIsSearchingMst] = useState(false);
@@ -439,6 +563,45 @@ export default function App() {
         lastUpdated: '2026-05-15T10:00:00-07:00',
         companyInfo: { name: 'Công ty Cổ phần Thép Việt', taxCode: '0293847561', industry: 'Sản xuất / Chế biến', size: 'Nhỏ (dưới 50 NV)', contactName: 'Lê Văn Thắng', contactRole: 'Giám đốc Nhân sự', phone: '0905123456', email: 'thang.le@thepviet.vn', address: 'KCN Sóng Thần, Bình Dương', channel: 'Zalo' },
         groupSizeInfo: { headcount: 35, femaleRatio: 15, averageAge: 40, ageBracket18_35: 30, ageBracket36_50: 50, ageBracket51_65: 20, prevInsurance: 'yes', lossRatio: 45, budgetPerHead: 1200000, geography: 'Việt Nam', duration: '1 năm' }
+      },
+      {
+        id: 'PTI-CARE-DFT-3301',
+        company: 'Công ty Cổ phần TechGlobal',
+        taxCode: '0108746251',
+        date: '08/07/2026',
+        step: 5,
+        headcount: 42,
+        amount: 54600000,
+        quoteApprovalStatus: 'Pending_Approval',
+        lastUpdated: '2026-07-08T09:15:00-07:00',
+        companyInfo: { name: 'Công ty Cổ phần TechGlobal', taxCode: '0108746251', industry: 'Công nghệ thông tin / Phần mềm', size: 'Nhỏ (dưới 50 NV)', contactName: 'Nguyễn Thị Hoa', contactRole: 'HR Manager', phone: '0977665544', email: 'hoa.nt@techglobal.vn', address: 'Quận Cầu Giấy, Hà Nội', channel: 'Email' },
+        groupSizeInfo: { headcount: 42, femaleRatio: 35, averageAge: 31, ageBracket18_35: 65, ageBracket36_50: 30, ageBracket51_65: 5, prevInsurance: 'no', lossRatio: 0, budgetPerHead: 2000000, geography: 'Việt Nam', duration: '1 năm' }
+      },
+      {
+        id: 'PTI-CARE-DFT-3302',
+        company: 'Công ty TNHH Thực phẩm An Phát',
+        taxCode: '0314958372',
+        date: '07/07/2026',
+        step: 5,
+        headcount: 18,
+        amount: 22800000,
+        quoteApprovalStatus: 'Sent_To_Customer',
+        lastUpdated: '2026-07-07T14:20:00-07:00',
+        companyInfo: { name: 'Công ty TNHH Thực phẩm An Phát', taxCode: '0314958372', industry: 'Sản xuất / Chế biến', size: 'Nhỏ (dưới 50 NV)', contactName: 'Lê Hoàng Hải', contactRole: 'Director', phone: '0988776655', email: 'hai.lh@anphatfood.vn', address: 'Bình Tân, TP. Hồ Chí Minh', channel: 'Zalo' },
+        groupSizeInfo: { headcount: 18, femaleRatio: 50, averageAge: 34, ageBracket18_35: 45, ageBracket36_50: 45, ageBracket51_65: 10, prevInsurance: 'no', lossRatio: 0, budgetPerHead: 1800000, geography: 'Việt Nam', duration: '1 năm' }
+      },
+      {
+        id: 'PTI-CARE-DFT-3303',
+        company: 'Công ty Cổ phần GreenEnergy',
+        taxCode: '0204958361',
+        date: '06/07/2026',
+        step: 5,
+        headcount: 28,
+        amount: 38200000,
+        quoteApprovalStatus: 'Supervisor_Approved',
+        lastUpdated: '2026-07-06T11:00:00-07:00',
+        companyInfo: { name: 'Công ty Cổ phần GreenEnergy', taxCode: '0204958361', industry: 'Năng lượng / Môi trường', size: 'Nhỏ (dưới 50 NV)', contactName: 'Vũ Minh Tuấn', contactRole: 'CFO', phone: '0909112233', email: 'tuan.vm@greenenergy.vn', address: 'Ngô Quyền, Hải Phòng', channel: 'Email' },
+        groupSizeInfo: { headcount: 28, femaleRatio: 25, averageAge: 38, ageBracket18_35: 35, ageBracket36_50: 50, ageBracket51_65: 15, prevInsurance: 'yes', lossRatio: 30, budgetPerHead: 2200000, geography: 'Việt Nam', duration: '1 năm' }
       }
     ];
   });
@@ -470,12 +633,16 @@ export default function App() {
   // Auto classification logic details
   const getAutoRecommendedProgram = () => {
     const budget = groupSizeInfo.budgetPerHead;
-    if (budget >= 4000000) {
-      return { id: 'ct-3', name: 'Chương trình 3', reason: 'Ngân sách cao tương thích Gói Vàng (Gold)' };
-    } else if (budget >= 2000000) {
-      return { id: 'ct-2', name: 'Chương trình 2', reason: 'Ngân sách trung bình tương thích Gói Bạc (Silver) đề xuất.' };
+    if (budget >= 7500000) {
+      return { id: 'lvl-5', name: 'Level 5 (VIP)', reason: 'Ngân sách cao tương thích Level 5 (VIP)' };
+    } else if (budget >= 4500000) {
+      return { id: 'lvl-4', name: 'Level 4', reason: 'Ngân sách tương thích Level 4' };
+    } else if (budget >= 2500000) {
+      return { id: 'lvl-3', name: 'Level 3', reason: 'Ngân sách tương thích Level 3 đề xuất.' };
+    } else if (budget >= 1500000) {
+      return { id: 'lvl-2', name: 'Level 2', reason: 'Ngân sách tương thích Level 2' };
     } else {
-      return { id: 'ct-1', name: 'Chương trình 1', reason: 'Ngân sách tiêu chuẩn tương thích Gói Đồng (Bronze)' };
+      return { id: 'lvl-1', name: 'Level 1', reason: 'Ngân sách tương thích Level 1' };
     }
   };
 
@@ -484,9 +651,12 @@ export default function App() {
   const getFirmQuoteCalculations = () => {
     // Determine the program base rate based on budget recommendation
     const recommended = getAutoRecommendedProgram();
-    let baseRate = 2400000; // Default for ct-2 (Bạc)
-    if (recommended.id === 'ct-1') baseRate = 1200000;
-    if (recommended.id === 'ct-3') baseRate = 4800000;
+    let baseRate = 3500000; // Default for lvl-3
+    if (recommended.id === 'lvl-1') baseRate = 1200000;
+    if (recommended.id === 'lvl-2') baseRate = 2000000;
+    if (recommended.id === 'lvl-3') baseRate = 3500000;
+    if (recommended.id === 'lvl-4') baseRate = 5500000;
+    if (recommended.id === 'lvl-5') baseRate = 9500000;
 
     let loadingFactor = 1.0;
     const loadings: string[] = [];
@@ -559,6 +729,109 @@ export default function App() {
       setIsDownloadingQuote(false);
       setShowQuoteDownloadSuccess(true);
     }, 1800);
+  };
+
+  const handleSendApprovalRequest = () => {
+    // 1. Set the state locally
+    setQuoteApprovalStatus('Pending_Approval');
+    
+    // 2. Save draft state with quoteApprovalStatus = 'Pending_Approval'
+    if (!contractId) return;
+
+    let draftStepDisplay = 3; // corresponds to currentStep === 2
+
+    const estAmount = tiers.reduce((sum, tier) => {
+      const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
+      return sum + (tier.headcount * (prog?.ratePerHead || 0));
+    }, 0);
+
+    const nowStr = new Date('2026-07-05T23:17:37-07:00').toISOString();
+
+    setDraftContracts(prev => {
+      const existingIdx = prev.findIndex(d => d.id === contractId);
+      const draftData = {
+        id: contractId,
+        company: companyInfo.name || 'Công ty chưa đặt tên',
+        taxCode: companyInfo.taxCode || '',
+        date: existingIdx >= 0 ? prev[existingIdx].date : new Date('2026-07-05T23:17:37-07:00').toLocaleDateString('vi-VN'),
+        step: draftStepDisplay,
+        headcount: groupSizeInfo.headcount || 10,
+        amount: estAmount,
+        lastUpdated: nowStr,
+        companyInfo,
+        groupSizeInfo,
+        tiers,
+        employees,
+        invoiceInfo,
+        clientType,
+        discountRate,
+        commissionRate,
+        selectedPaymentMethod,
+        isPaid,
+        quoteApprovalStatus: 'Pending_Approval'
+      };
+
+      const updated = [...prev];
+      if (existingIdx >= 0) {
+        updated[existingIdx] = draftData;
+      } else {
+        updated.unshift(draftData);
+      }
+      localStorage.setItem('ipti_draft_contracts', JSON.stringify(updated));
+      return updated;
+    });
+
+    // 3. Show notification
+    setToastNotification({
+      show: true,
+      message: "Đã gửi yêu cầu phê duyệt thành công cho Trưởng bộ phận!",
+      type: 'success'
+    });
+
+    // 4. Return to main list
+    setCurrentStep(0);
+    setActiveTab('dashboard');
+    setSelectedProduct(null);
+    setSelectedCategory('corporate');
+    setCorporateSubMode('chao_phi');
+  };
+
+  const handleApproveDraftBySupervisor = (draft: any) => {
+    setDraftContracts(prev => {
+      const updated = prev.map(d => {
+        if (d.id === draft.id) {
+          return { ...d, quoteApprovalStatus: 'Supervisor_Approved' };
+        }
+        return d;
+      });
+      localStorage.setItem('ipti_draft_contracts', JSON.stringify(updated));
+      return updated;
+    });
+
+    setToastNotification({
+      show: true,
+      message: `Trưởng bộ phận đã phê duyệt thành công hồ sơ ${draft.id}!`,
+      type: 'success'
+    });
+  };
+
+  const handleSendDraftToCustomer = (draft: any) => {
+    setDraftContracts(prev => {
+      const updated = prev.map(d => {
+        if (d.id === draft.id) {
+          return { ...d, quoteApprovalStatus: 'Sent_To_Customer' };
+        }
+        return d;
+      });
+      localStorage.setItem('ipti_draft_contracts', JSON.stringify(updated));
+      return updated;
+    });
+
+    setToastNotification({
+      show: true,
+      message: `Đã xuất PDF & gửi email chào phí thành công cho người đại diện ${draft.company}!`,
+      type: 'success'
+    });
   };
 
   useEffect(() => {
@@ -783,7 +1056,8 @@ export default function App() {
         discountRate,
         commissionRate,
         selectedPaymentMethod,
-        isPaid
+        isPaid,
+        quoteApprovalStatus
       };
 
       const updated = [...prev];
@@ -841,7 +1115,8 @@ export default function App() {
             discountRate,
             commissionRate,
             selectedPaymentMethod,
-            isPaid
+            isPaid,
+            quoteApprovalStatus
           };
 
           const updated = [...prev];
@@ -852,7 +1127,8 @@ export default function App() {
                 existing.company !== draftData.company || 
                 existing.taxCode !== draftData.taxCode || 
                 existing.amount !== draftData.amount ||
-                existing.headcount !== draftData.headcount) {
+                existing.headcount !== draftData.headcount ||
+                existing.quoteApprovalStatus !== draftData.quoteApprovalStatus) {
               updated[existingIdx] = draftData;
               localStorage.setItem('ipti_draft_contracts', JSON.stringify(updated));
               return updated;
@@ -867,7 +1143,7 @@ export default function App() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, companyInfo.name, companyInfo.taxCode, groupSizeInfo.headcount, tiers, employees.length, contractId, selectedProduct]);
+  }, [currentStep, companyInfo.name, companyInfo.taxCode, groupSizeInfo.headcount, tiers, employees.length, contractId, selectedProduct, quoteApprovalStatus]);
 
   // Resume Draft
   const handleResumeDraft = (draft: any) => {
@@ -904,9 +1180,9 @@ export default function App() {
       setTiers(draft.tiers);
     } else {
       setTiers([
-        { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: Math.round(draft.headcount * 0.1) || 1, selectedProgramId: 'ct-3' },
-        { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: Math.round(draft.headcount * 0.2) || 2, selectedProgramId: 'ct-2' },
-        { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: draft.headcount - (Math.round(draft.headcount * 0.1) || 1) - (Math.round(draft.headcount * 0.2) || 2), selectedProgramId: 'ct-1' }
+        { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: Math.round(draft.headcount * 0.1) || 1, selectedProgramId: 'lvl-5' },
+        { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: Math.round(draft.headcount * 0.2) || 2, selectedProgramId: 'lvl-3' },
+        { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: draft.headcount - (Math.round(draft.headcount * 0.1) || 1) - (Math.round(draft.headcount * 0.2) || 2), selectedProgramId: 'lvl-1' }
       ]);
     }
 
@@ -939,6 +1215,29 @@ export default function App() {
     if (draft.commissionRate !== undefined) setCommissionRate(draft.commissionRate);
     if (draft.selectedPaymentMethod) setSelectedPaymentMethod(draft.selectedPaymentMethod);
     if (draft.isPaid !== undefined) setIsPaid(draft.isPaid);
+
+    if (draft.quoteApprovalStatus) {
+      setQuoteApprovalStatus(draft.quoteApprovalStatus);
+    } else {
+      const isOutOfStandard = (draft.discountRate || 0) > 20 || (draft.tiers || []).some((t: any) => 
+        t.customInpatientBenefit !== undefined || 
+        t.customOutpatientBenefit !== undefined || 
+        t.customAccidentBenefit !== undefined || 
+        t.customMaternityBenefit !== undefined ||
+        t.customAccidentPersonalBenefit !== undefined ||
+        t.customAccidentRelativeBenefit !== undefined ||
+        t.customDeathOrDisabilityBenefit !== undefined ||
+        t.customInpatientCriticalIllnessBenefit !== undefined ||
+        t.customInpatientOtherDiseasesBenefit !== undefined ||
+        t.customInpatientMaternityBenefit !== undefined ||
+        t.customOutpatientTreatmentBenefit !== undefined ||
+        t.customOutpatientBasicDentalBenefit !== undefined ||
+        t.customOutpatientFullDentalBenefit !== undefined ||
+        t.customOutpatientEasternMedicineBenefit !== undefined ||
+        t.customVaccineComplicationsBenefit !== undefined
+      );
+      setQuoteApprovalStatus(isOutOfStandard ? 'Pending_Approval' : 'Auto_Approved');
+    }
 
     // Remap step (1-8) to the new 5 steps
     const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
@@ -1021,6 +1320,11 @@ export default function App() {
         });
         setEmployees(generated);
       }
+    }
+
+    if (currentStep === 2) {
+      handleSendQuoteEmail();
+      return;
     }
 
     if (currentStep === 3) {
@@ -1148,6 +1452,25 @@ export default function App() {
   return (
     <div className="font-sans min-h-screen bg-slate-50 flex flex-col text-slate-800">
       
+      {/* Toast Notification */}
+      {toastNotification?.show && (
+        <div className="fixed top-6 right-6 z-[9999] max-w-sm w-full bg-slate-900 text-white rounded-2xl px-4 py-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-slate-800/80 flex items-center justify-between gap-3 transition-all duration-300 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center gap-2.5">
+            <div className={`p-1.5 rounded-lg ${toastNotification.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'}`}>
+              <CheckCircle2 size={16} />
+            </div>
+            <span className="text-xs font-bold leading-snug text-left">{toastNotification.message}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setToastNotification(null)}
+            className="text-slate-400 hover:text-white transition p-1"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+      
       {/* Modals */}
       <BiometricModal 
         isOpen={isBiometricOpen} 
@@ -1165,7 +1488,18 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative border border-slate-100 text-center space-y-4">
             <button
-              onClick={() => setShowQuoteSentSuccess(false)}
+              onClick={() => {
+                setShowQuoteSentSuccess(false);
+                setCurrentStep(0);
+                setActiveTab('dashboard');
+                setSelectedCategory('corporate');
+                setCorporateSubMode('chao_phi');
+                setToastNotification({
+                  show: true,
+                  message: "Báo giá đã được gửi thành công cho khách hàng và lưu trạng thái!",
+                  type: 'success'
+                });
+              }}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition text-sm font-black p-1"
             >
               ✕
@@ -1204,10 +1538,21 @@ export default function App() {
 
             <button
               type="button"
-              onClick={() => setShowQuoteSentSuccess(false)}
+              onClick={() => {
+                setShowQuoteSentSuccess(false);
+                setCurrentStep(0);
+                setActiveTab('dashboard');
+                setSelectedCategory('corporate');
+                setCorporateSubMode('chao_phi');
+                setToastNotification({
+                  show: true,
+                  message: "Báo giá đã được gửi thành công cho khách hàng và lưu trạng thái!",
+                  type: 'success'
+                });
+              }}
               className="w-full py-2.5 bg-[#03377B] hover:bg-blue-800 text-white font-extrabold text-xs rounded-xl shadow-md transition"
             >
-              HOÀN TẤT & ĐÓNG
+              HOÀN TẤT &amp; ĐÓNG
             </button>
           </div>
         </div>
@@ -1669,14 +2014,66 @@ export default function App() {
                   <span className="truncate">Bảo hiểm Khách hàng cá nhân</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('dashboard'); setSelectedProduct(null); setSelectedCategory('corporate'); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'corporate' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <Building size={15} className={activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'corporate' ? 'text-white' : 'text-slate-400'} />
-                  <span className="truncate">Khách hàng doanh nghiệp</span>
-                </button>
+                <div className="space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCorporateMenuExpanded(!isCorporateMenuExpanded);
+                      setCurrentStep(0);
+                      setActiveTab('dashboard');
+                      setSelectedProduct(null);
+                      setSelectedCategory('corporate');
+                      setCorporateSubMode(null);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'corporate' ? 'bg-white/10 text-white border border-white/5 shadow-xs' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Building size={15} className={selectedCategory === 'corporate' ? 'text-white' : 'text-slate-400'} />
+                      <span className="truncate">Khách hàng doanh nghiệp</span>
+                    </span>
+                    <ChevronRight size={13} className={`text-slate-400 transition-transform duration-200 ${isCorporateMenuExpanded ? 'rotate-90 text-white' : ''}`} />
+                  </button>
+
+                  {isCorporateMenuExpanded && (
+                    <div className="pl-3 ml-3.5 border-l border-white/10 space-y-1 mt-1 mb-2 animate-slide-in">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(0);
+                          setActiveTab('dashboard');
+                          setSelectedProduct(null);
+                          setSelectedCategory('corporate');
+                          setCorporateSubMode('chao_phi');
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[11px] font-bold transition-all text-left ${selectedCategory === 'corporate' && corporateSubMode === 'chao_phi' ? 'bg-white/15 text-white shadow-xs border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full ${selectedCategory === 'corporate' && corporateSubMode === 'chao_phi' ? 'bg-amber-400' : 'bg-slate-500'}`} />
+                          <span>Chào phí (GĐ 1)</span>
+                        </span>
+                        <span className="text-[8px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded shadow-xs">BÁO GIÁ</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(0);
+                          setActiveTab('dashboard');
+                          setSelectedProduct(null);
+                          setSelectedCategory('corporate');
+                          setCorporateSubMode('cap_don');
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[11px] font-bold transition-all text-left ${selectedCategory === 'corporate' && corporateSubMode === 'cap_don' ? 'bg-white/15 text-white shadow-xs border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full ${selectedCategory === 'corporate' && corporateSubMode === 'cap_don' ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                          <span>Cấp đơn (GĐ 2)</span>
+                        </span>
+                        <span className="text-[8px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded shadow-xs">CẤP ĐƠN</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mt-6 mb-2">DANH MỤC HỒ SƠ</span>
                 <button
@@ -1908,7 +2305,7 @@ export default function App() {
 
                         {/* CATEGORY CARD 2: DOANH NGHIỆP (iOS Dark/Deep Blue Glassmorphic Banner) */}
                         <div 
-                          onClick={() => setSelectedCategory('corporate')}
+                          onClick={() => { setSelectedCategory('corporate'); setCorporateSubMode(null); }}
                           className="bg-gradient-to-br from-[#022D66]/95 via-[#03377B]/85 to-[#011430]/95 backdrop-blur-xl border border-white/10 hover:border-amber-400/20 rounded-[2.5rem] p-7 text-left cursor-pointer group transition-all duration-500 transform hover:-translate-y-2 hover:shadow-[0_25px_60px_-15px_rgba(1,20,48,0.35)] relative overflow-hidden flex flex-col justify-between h-[360px]"
                         >
                           {/* Ambient gold/orange background lighting glow */}
@@ -2088,33 +2485,208 @@ export default function App() {
 
                   {/* CASE 3: CORPORATE INSURANCE CATEGORY PREVIEW (With "Tạo hồ sơ mới" & Portfolio Table) */}
                   {selectedCategory === 'corporate' && (
-                    <div className="space-y-8 animate-fade-in">
-                      
-                      {/* Back button and title */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCategory(null)}
-                          className="flex items-center gap-2 text-slate-500 hover:text-[#03377B] font-extrabold text-xs transition-colors py-1.5 px-3 bg-white border border-slate-100 rounded-xl shadow-sm self-start"
-                        >
-                          <ArrowLeft size={14} />
-                          <span>Quay lại Tổng quan</span>
-                        </button>
+                    corporateSubMode === null ? (
+                      <div className="space-y-8 animate-fade-in text-left">
+                        {/* Title and Back Button */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCategory(null)}
+                            className="flex items-center gap-2 text-slate-500 hover:text-[#03377B] font-extrabold text-xs transition-colors py-1.5 px-3 bg-white border border-slate-100 rounded-xl shadow-sm self-start hover:-translate-y-0.5 active:scale-95 duration-150"
+                          >
+                            <ArrowLeft size={14} />
+                            <span>Quay lại Tổng quan</span>
+                          </button>
+                          
+                          <div className="text-left sm:text-right">
+                            <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-wider block">BẢO HIỂM DOANH NGHIỆP</span>
+                            <h2 className="text-lg font-black text-slate-800 tracking-tight font-sans mt-0.5">Giới thiệu Quy trình 2 Giai đoạn</h2>
+                          </div>
+                        </div>
+
+                        {/* Top Hero Card introducing the 2 Stages */}
+                        <div className="relative rounded-[2.5rem] p-8 text-white overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-br from-[#022D66] via-[#03377B] to-[#011430] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                          {/* Ambient colorful backdrop lights */}
+                          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
+                          <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                          <div className="lg:col-span-8 space-y-4 text-left relative z-10">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[9px] bg-white/15 border border-white/10 text-sky-200 font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                                Flagship EB Product
+                              </span>
+                              <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-3 py-1 rounded-full uppercase tracking-wider font-sans">
+                                QUY TRÌNH SỐ HÓA 24/7
+                              </span>
+                            </div>
+                            <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+                              Chương trình Bảo hiểm Sức khỏe PTI Care (EB)
+                            </h3>
+                            <p className="text-blue-100/80 text-xs font-medium leading-relaxed max-w-2xl">
+                              Hệ thống quản lý phúc lợi và phát hành đơn bảo hiểm nhóm thông minh dành cho doanh nghiệp. Lựa chọn một trong hai giai đoạn bên dưới để bắt đầu luồng nghiệp vụ tương ứng.
+                            </p>
+                          </div>
+
+                          {/* Beautiful iOS Style Glass Card Wrapper for Graphic illustration */}
+                          <div className="lg:col-span-4 relative flex justify-center items-center h-40 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] p-4">
+                            <div className="w-full max-w-[160px] h-full flex items-center justify-center">
+                              <HealthPti3D />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Two Columns / Cards for the 2 Phases */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                          
+                          {/* CARD Giai đoạn 1: Chào phí */}
+                          <div className="bg-white border border-slate-100 hover:border-amber-400/30 rounded-[2.5rem] p-8 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden text-left h-full">
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 to-amber-500"></div>
+                            
+                            <div className="space-y-6">
+                              <div className="flex items-center justify-between">
+                                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 border border-amber-100">
+                                  <Building size={24} className="stroke-[2.5]" />
+                                </div>
+                                <span className="text-[10px] bg-amber-100 text-amber-800 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200">
+                                  Giai đoạn 1
+                                </span>
+                              </div>
+
+                              <div className="space-y-2">
+                                <h4 className="text-xl font-black text-slate-800 tracking-tight group-hover:text-amber-600 transition-colors">
+                                  Chào phí & Báo giá sơ bộ
+                                </h4>
+                                <p className="text-slate-500 text-xs leading-relaxed">
+                                  Khảo sát quy mô doanh nghiệp, tự động tra cứu mã số thuế (MST) và sử dụng trợ lý AI đề xuất gói quyền lợi & bảng phí nháp nhanh chỉ trong 30 giây.
+                                </p>
+                              </div>
+
+                              <div className="border-t border-slate-100 pt-4 space-y-3">
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Tính năng nghiệp vụ:</span>
+                                <ul className="space-y-2 text-xs text-slate-600 font-medium">
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span>Tự động tra cứu thông tin doanh nghiệp qua MST</span>
+                                  </li>
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span>Thiết lập biểu phí, phân nhóm chương trình linh hoạt</span>
+                                  </li>
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span>Tải file báo giá PDF chính thức tức thì</span>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => { setCorporateSubMode('chao_phi'); }}
+                              className="mt-8 w-full py-3.5 bg-[#03377B] hover:bg-amber-500 hover:text-slate-950 text-white font-black text-xs rounded-2xl transition-all shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
+                            >
+                              <span>Bắt đầu Chào phí sơ bộ</span>
+                              <ArrowRight size={14} className="stroke-[3]" />
+                            </button>
+                          </div>
+
+                          {/* CARD Giai đoạn 2: Cấp đơn */}
+                          <div className="bg-white border border-slate-100 hover:border-emerald-400/30 rounded-[2.5rem] p-8 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden text-left h-full">
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-400 to-emerald-500"></div>
+                            
+                            <div className="space-y-6">
+                              <div className="flex items-center justify-between">
+                                <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 border border-emerald-100">
+                                  <CheckCircle2 size={24} className="stroke-[2.5]" />
+                                </div>
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-200">
+                                  Giai đoạn 2
+                                </span>
+                              </div>
+
+                              <div className="space-y-2">
+                                <h4 className="text-xl font-black text-slate-800 tracking-tight group-hover:text-emerald-600 transition-colors">
+                                  Cấp đơn Chính thức
+                                </h4>
+                                <p className="text-slate-500 text-xs leading-relaxed">
+                                  Thực hiện nhập danh sách cán bộ nhân sự thực tế từ file Excel (.xlsx), tự động rà soát loại trừ bệnh đặc biệt, ký e-contract và thanh toán trực tuyến.
+                                </p>
+                              </div>
+
+                              <div className="border-t border-slate-100 pt-4 space-y-3">
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Tính năng nghiệp vụ:</span>
+                                <ul className="space-y-2 text-xs text-slate-600 font-medium">
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Import & thẩm định danh sách hàng trăm nhân viên từ Excel</span>
+                                  </li>
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Tự động hóa loại trừ các bệnh lý đặc biệt chính xác</span>
+                                  </li>
+                                  <li className="flex items-center gap-2.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>Ký hợp đồng khung qua chữ ký số e-contract nhanh gọn</span>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => { setCorporateSubMode('cap_don'); }}
+                              className="mt-8 w-full py-3.5 bg-[#03377B] hover:bg-emerald-600 hover:text-white text-white font-black text-xs rounded-2xl transition-all shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
+                            >
+                              <span>Tiến hành Cấp đơn chính thức</span>
+                              <ArrowRight size={14} className="stroke-[3]" />
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-8 animate-fade-in">
+                        
+                        {/* Back button and title */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <button
+                            type="button"
+                            onClick={() => setCorporateSubMode(null)}
+                            className="flex items-center gap-2 text-slate-500 hover:text-[#03377B] font-extrabold text-xs transition-colors py-1.5 px-3 bg-white border border-slate-100 rounded-xl shadow-sm self-start hover:-translate-y-0.5 active:scale-95 duration-150"
+                          >
+                            <ArrowLeft size={14} />
+                            <span>Quay lại chọn Giai đoạn</span>
+                          </button>
+                        
                         <div className="text-left sm:text-right">
-                          <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-wider block">BẢO HIỂM DOANH NGHIỆP</span>
-                          <h2 className="text-lg font-black text-slate-800 tracking-tight font-sans">Khai thác & Theo dõi Hồ sơ Doanh nghiệp</h2>
+                          <div className="flex items-center sm:justify-end gap-2">
+                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider ${
+                              corporateSubMode === 'chao_phi' 
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            }`}>
+                              {corporateSubMode === 'chao_phi' ? 'GIAI ĐOẠN 1: CHÀO PHÍ' : 'GIAI ĐOẠN 2: CẤP ĐƠN'}
+                            </span>
+                          </div>
+                          <h2 className="text-lg font-black text-slate-800 tracking-tight font-sans mt-1">
+                            {corporateSubMode === 'chao_phi' ? 'Luồng "Chào phí" - Báo giá & Chốt sơ bộ' : 'Luồng "Cấp đơn" - Phát hành chính thức'}
+                          </h2>
                         </div>
                       </div>
 
                       {/* Flagship PTI Care banner block with quick "Tạo hồ sơ mới" trigger */}
-                      <div className="relative rounded-[2.5rem] p-7 sm:p-8 text-white overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-br from-[#022D66] via-[#03377B] to-[#011430] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                      <div className={`relative rounded-[2.5rem] p-7 sm:p-8 text-white overflow-hidden shadow-2xl border border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-500 ${
+                        corporateSubMode === 'chao_phi' 
+                          ? 'bg-gradient-to-br from-[#022D66] via-[#03377B] to-[#011430]' 
+                          : 'bg-gradient-to-br from-[#012F20] via-[#033F2E] to-[#011B14]'
+                      }`}>
                         {/* Ambient colorful backdrop lights */}
                         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
                         <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                         <div className="lg:col-span-7 space-y-5 text-left relative z-10">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[9px] bg-blue-500/20 border border-blue-400/30 text-sky-200 font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                            <span className="text-[9px] bg-white/15 border border-white/10 text-sky-200 font-black px-3 py-1 rounded-full uppercase tracking-wider">
                               Flagship EB Product
                             </span>
                             <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-3 py-1 rounded-full uppercase tracking-wider">
@@ -2126,19 +2698,27 @@ export default function App() {
                               Bảo hiểm Sức khỏe PTI Care (EB)
                             </h3>
                             <p className="text-blue-100/80 text-xs font-medium leading-relaxed">
-                              Chương trình chăm sóc sức khỏe phúc lợi toàn diện dành cho cán bộ nhân viên các doanh nghiệp. Tự động đề xuất chương trình phù hợp nhóm ngành nghề, đối soát nhân sự trực tuyến, thẩm định loại trừ tự động và phát hành đơn bảo hiểm số hóa 24/7.
+                              {corporateSubMode === 'chao_phi' 
+                                ? 'Luồng Chào phí sơ bộ: Nhập thông tin quy mô, ngành nghề kinh doanh, tra cứu MST tự động và sử dụng trợ lý AI đề xuất gói quyền lợi & bảng phí nháp nhanh chỉ trong 30 giây.'
+                                : 'Luồng Cấp đơn chính thức: Đính kèm danh sách nhân sự thực tế (.xlsx), rà soát loại trừ bệnh có sẵn, thực hiện ký số hợp đồng khung điện tử e-contract và thanh toán phát hành thẻ bồi thường số.'}
                             </p>
                           </div>
                           
                           <div className="pt-2 flex flex-wrap gap-4 items-center">
-                            <button
-                              type="button"
-                              onClick={() => { setSelectedProduct('health_pti'); handleStartNewListing(); }}
-                              className="py-3 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 flex items-center gap-2 active:scale-95"
-                            >
-                              <span>Tạo hồ sơ mới</span>
-                              <ArrowRight size={14} className="stroke-[3]" />
-                            </button>
+                            {corporateSubMode === 'chao_phi' ? (
+                              <button
+                                type="button"
+                                onClick={() => { setSelectedProduct('health_pti'); handleStartNewListing(); }}
+                                className="py-3 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 flex items-center gap-2 active:scale-95"
+                              >
+                                <span>Tạo hồ sơ Chào phí mới</span>
+                                <ArrowRight size={14} className="stroke-[3]" />
+                              </button>
+                            ) : (
+                              <div className="text-xs text-emerald-200 font-bold bg-white/5 py-2 px-4 rounded-xl border border-white/10">
+                                💡 Chọn một Báo giá sơ bộ bên dưới để tiến hành Cấp đơn chính thức (GĐ 2)
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -2154,16 +2734,410 @@ export default function App() {
                         </div>
                       </div>
 
+                      {/* ── SECTION: CHAO PHI PENDING APPROVAL FOR ISSUE (ONLY IN CAP_DON MODE) ── */}
+                      {corporateSubMode === 'cap_don' && (
+                        <div className="bg-gradient-to-r from-amber-50/50 to-orange-50/30 rounded-3xl p-6 border border-amber-100 space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                              <h3 className="text-amber-900 font-extrabold text-sm tracking-tight flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span>Danh sách Báo giá sơ bộ chờ Cấp đơn (Giai đoạn 1 đã duyệt)</span>
+                              </h3>
+                              <p className="text-amber-700/70 text-[11px] font-medium mt-0.5">Danh sách các hồ sơ đã hoàn thành Giai đoạn 1 (Chào phí), khách hàng đã đồng ý biểu phí và sẵn sàng phát hành.</p>
+                            </div>
+                            <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-800 font-bold px-2.5 py-1 rounded-lg self-start">
+                              {draftContracts.filter(d => {
+                                const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                return step <= 2;
+                              }).length} hồ sơ chờ xử lý
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {draftContracts.filter(d => {
+                              const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                              return step <= 2;
+                            }).map((draft) => (
+                              <div key={draft.id} className="bg-white border border-slate-100 hover:border-emerald-200 p-4 rounded-2xl shadow-sm hover:shadow transition flex flex-col justify-between space-y-4">
+                                <div className="space-y-1.5 text-left">
+                                  <div className="flex justify-between items-start">
+                                    <span className="font-mono font-extrabold text-xs text-slate-800 block truncate max-w-[120px]">{draft.id}</span>
+                                    <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded uppercase">Báo giá OK</span>
+                                  </div>
+                                  <h4 className="font-black text-slate-800 text-[11px] leading-tight line-clamp-1">{draft.company}</h4>
+                                  <div className="text-[10px] text-slate-400 flex flex-col space-y-0.5 font-medium">
+                                    <span>Quy mô: <strong>{draft.headcount} nhân sự</strong></span>
+                                    <span>Ngày tạo: {draft.date}</span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleResumeDraft(draft);
+                                    // Override currentStep to force Step 3 (GĐ 2) since we are in Issuance mode
+                                    setCurrentStep(3);
+                                  }}
+                                  className="w-full py-2 bg-[#03377B] hover:bg-emerald-600 text-white font-black text-[10px] rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                >
+                                  <span>Tiến hành Cấp đơn ngay ➔</span>
+                                </button>
+                              </div>
+                            ))}
+
+                            {draftContracts.filter(d => {
+                              const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                              return step <= 2;
+                            }).length === 0 && (
+                              <div className="col-span-full py-6 text-center text-slate-400 font-bold text-xs bg-white/40 border border-dashed border-slate-200 rounded-2xl">
+                                📭 Hiện tại không có báo giá sơ bộ nào đang chờ cấp đơn.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ── STATUS TRACKING SECTION (MỤC THEO DÕI TRẠNG THÁI BẢN CHÀO PHÍ) ── */}
+                      {corporateSubMode === 'chao_phi' && (
+                        <div className="space-y-6">
+                          <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-6 text-left space-y-4 shadow-xs">
+                            <div className="flex items-center gap-2">
+                              <FileText className="text-[#03377B]" size={20} />
+                              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                                Theo dõi Trạng thái Bản chào phí (GĐ 1)
+                              </h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* Card 1: Đang chờ duyệt */}
+                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
+                                <div className="p-2 bg-amber-50 rounded-xl text-amber-600 border border-amber-100 mt-0.5">
+                                  <Clock size={18} />
+                                </div>
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest block">Đang chờ duyệt</span>
+                                  <span className="text-xl font-black text-slate-800 block">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
+                                    }).length} hồ sơ
+                                  </span>
+                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Bản chào vượt chuẩn hoặc chiết khấu cao đang chờ duyệt STP/MCV.</p>
+                                </div>
+                              </div>
+
+                              {/* Card 2: Đã gửi cho khách hàng */}
+                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
+                                <div className="p-2 bg-sky-50 rounded-xl text-sky-600 border border-sky-100 mt-0.5">
+                                  <Send size={18} />
+                                </div>
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-black text-sky-700 uppercase tracking-widest block">Đã gửi cho khách hàng</span>
+                                  <span className="text-xl font-black text-slate-800 block">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
+                                    }).length} hồ sơ
+                                  </span>
+                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Đã xuất PDF &amp; gửi email chào phí cho người đại diện DN.</p>
+                                </div>
+                              </div>
+
+                              {/* Card 3: Hoàn tất */}
+                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
+                                <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600 border border-emerald-100 mt-0.5">
+                                  <CheckCircle2 size={18} />
+                                </div>
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest block">Hoàn tất</span>
+                                  <span className="text-xl font-black text-slate-800 block">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && (
+                                        d.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                        d.quoteApprovalStatus === 'Auto_Approved' ||
+                                        (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
+                                      );
+                                    }).length} hồ sơ
+                                  </span>
+                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Khách hàng đồng ý, biểu phí được chốt thành công.</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ── 3 PHÂN PHÂN LOẠI DANH SÁCH CHI TIẾT THEO YÊU CẦU ── */}
+                          <div className="grid grid-cols-1 gap-6">
+                            {/* 1. DANH SÁCH HỒ SƠ ĐANG CHỜ DUYỆT */}
+                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
+                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
+                                    Danh sách hồ sơ đang chờ duyệt (GĐ 1)
+                                  </h4>
+                                </div>
+                                <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                  {draftContracts.filter(d => {
+                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
+                                  }).length} hồ sơ
+                                </span>
+                              </div>
+                              
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs min-w-[700px]">
+                                  <thead>
+                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày tạo</th>
+                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
+                                      <th className="pb-2 px-2">Sản phẩm</th>
+                                      <th className="pb-2 px-2 text-center">Trạng thái duyệt</th>
+                                      <th className="pb-2 px-2 text-right">Phí dự kiến</th>
+                                      <th className="pb-2 px-2 text-right">Thao tác</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100/50">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
+                                    }).length === 0 ? (
+                                      <tr>
+                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
+                                          Không có hồ sơ nào đang chờ duyệt.
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      draftContracts.filter(d => {
+                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                        return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
+                                      }).map((draft) => (
+                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
+                                          <td className="py-3 px-2">
+                                            <span className="font-mono font-extrabold text-amber-600 block">{draft.id}</span>
+                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
+                                          </td>
+                                          <td className="py-3 px-2">
+                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
+                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
+                                          </td>
+                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
+                                          <td className="py-3 px-2 text-center">
+                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white animate-pulse">
+                                              Chờ Trưởng phòng duyệt (STP)
+                                            </span>
+                                          </td>
+                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
+                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
+                                          </td>
+                                          <td className="py-3 px-2 text-right">
+                                            <span className="text-[11px] text-slate-400 font-extrabold italic">Không có thao tác</span>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* 2. DANH SÁCH HỒ SƠ ĐÃ GỬI CHO KHÁCH HÀNG */}
+                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
+                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
+                                    Danh sách hồ sơ đã gửi cho khách hàng (GĐ 1)
+                                  </h4>
+                                </div>
+                                <span className="text-[10px] bg-sky-50 border border-sky-100 text-sky-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                  {draftContracts.filter(d => {
+                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
+                                  }).length} hồ sơ
+                                </span>
+                              </div>
+
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs min-w-[700px]">
+                                  <thead>
+                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày gửi</th>
+                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
+                                      <th className="pb-2 px-2">Sản phẩm</th>
+                                      <th className="pb-2 px-2 text-center">Trạng thái gửi</th>
+                                      <th className="pb-2 px-2 text-right">Phí chào</th>
+                                      <th className="pb-2 px-2 text-right">Thao tác</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100/50">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
+                                    }).length === 0 ? (
+                                      <tr>
+                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
+                                          Không có hồ sơ nào đã gửi cho khách hàng.
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      draftContracts.filter(d => {
+                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                        return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
+                                      }).map((draft) => (
+                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
+                                          <td className="py-3 px-2">
+                                            <span className="font-mono font-extrabold text-sky-600 block">{draft.id}</span>
+                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
+                                          </td>
+                                          <td className="py-3 px-2">
+                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
+                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
+                                          </td>
+                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
+                                          <td className="py-3 px-2 text-center">
+                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-sky-500 text-white">
+                                              Đã gửi khách hàng
+                                            </span>
+                                          </td>
+                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
+                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
+                                          </td>
+                                          <td className="py-3 px-2 text-right">
+                                            <button
+                                              type="button"
+                                              onClick={() => setToastNotification({
+                                                show: true,
+                                                message: `🔔 Đã gửi nhắc lại thành công cho khách hàng đại diện của ${draft.company}!`,
+                                                type: 'success'
+                                              })}
+                                              className="px-3 py-1 bg-sky-100 hover:bg-sky-200 text-sky-700 hover:scale-105 active:scale-95 font-extrabold rounded-lg text-[10px] transition-all inline-flex items-center gap-1 shadow-xs"
+                                            >
+                                              <span>Gửi nhắc lại khách hàng</span>
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* 3. DANH SÁCH HỒ SƠ HOÀN TẤT */}
+                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
+                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
+                                    Danh sách hồ sơ hoàn tất (GĐ 1)
+                                  </h4>
+                                </div>
+                                <span className="text-[10px] bg-emerald-50 border border-emerald-150 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                  {draftContracts.filter(d => {
+                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    return mapped <= 2 && (
+                                      d.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                      d.quoteApprovalStatus === 'Auto_Approved' ||
+                                      (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
+                                    );
+                                  }).length} hồ sơ
+                                </span>
+                              </div>
+
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs min-w-[700px]">
+                                  <thead>
+                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày chốt</th>
+                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
+                                      <th className="pb-2 px-2">Sản phẩm</th>
+                                      <th className="pb-2 px-2 text-center">Trạng thái chốt</th>
+                                      <th className="pb-2 px-2 text-right">Phí bảo hiểm chốt</th>
+                                      <th className="pb-2 px-2 text-right">Thao tác</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100/50">
+                                    {draftContracts.filter(d => {
+                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mapped <= 2 && (
+                                        d.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                        d.quoteApprovalStatus === 'Auto_Approved' ||
+                                        (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
+                                      );
+                                    }).length === 0 ? (
+                                      <tr>
+                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
+                                          Không có hồ sơ nào đã hoàn tất chào phí.
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      draftContracts.filter(d => {
+                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                        return mapped <= 2 && (
+                                          d.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                          d.quoteApprovalStatus === 'Auto_Approved' ||
+                                          (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
+                                        );
+                                      }).map((draft) => (
+                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
+                                          <td className="py-3 px-2">
+                                            <span className="font-mono font-extrabold text-emerald-600 block">{draft.id}</span>
+                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
+                                          </td>
+                                          <td className="py-3 px-2">
+                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
+                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
+                                          </td>
+                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
+                                          <td className="py-3 px-2 text-center">
+                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500 text-white">
+                                              Đã duyệt / Hoàn tất
+                                            </span>
+                                          </td>
+                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
+                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
+                                          </td>
+                                          <td className="py-3 px-2 text-right">
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                handleResumeDraft(draft);
+                                                setCurrentStep(3); // Start Step 3 (Giai đoạn 2: Cấp Đơn)
+                                              }}
+                                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white hover:scale-105 active:scale-95 font-extrabold rounded-lg text-[10px] transition-all inline-flex items-center gap-1 shadow-xs"
+                                            >
+                                              <span>Cấp đơn</span>
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* ── BẢNG THEO DÕI DANH MỤC HỒ SƠ (Apple Glassmorphic Style Portfolio Table) ── */}
                       <div className="bg-white rounded-3xl p-6 shadow-[0_20px_50px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-6">
                         
                         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
                           <div className="space-y-1 text-left">
                             <h3 className="text-slate-900 font-extrabold text-base tracking-tight flex items-center gap-2">
-                              <span className="w-2.5 h-2.5 rounded-full bg-[#03377B] animate-pulse"></span>
-                              <span>Bảng theo dõi danh mục hồ sơ</span>
+                              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${corporateSubMode === 'chao_phi' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+                              <span>
+                                {corporateSubMode === 'chao_phi' 
+                                  ? 'Danh mục Hồ sơ Chào phí & Báo giá (GĐ 1)' 
+                                  : 'Danh mục Hợp đồng & Đơn bảo hiểm phát hành (GĐ 2)'}
+                              </span>
                             </h3>
-                            <p className="text-slate-400 text-[11px] font-medium">Theo dõi các hồ sơ nháp và hợp đồng đã cấp trực tuyến của doanh nghiệp</p>
+                            <p className="text-slate-400 text-[11px] font-medium">
+                              {corporateSubMode === 'chao_phi' 
+                                ? 'Danh sách các hồ sơ chào phí nhanh và lập phương án nháp đang xử lý.' 
+                                : 'Danh sách các hồ sơ đang trong tiến trình ký hợp đồng khung, thanh toán và các hợp đồng đã cấp.'}
+                            </p>
                           </div>
 
                           {/* Filter Tabs */}
@@ -2173,22 +3147,44 @@ export default function App() {
                               onClick={() => setPortfolioTab('all')}
                               className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'all' ? 'bg-white text-[#03377B] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                              Tất cả ({draftContracts.length + completedContracts.length})
+                              Tất cả ({
+                                corporateSubMode === 'chao_phi' 
+                                  ? draftContracts.filter(d => {
+                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mappedStep <= 2;
+                                    }).length
+                                  : draftContracts.filter(d => {
+                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mappedStep >= 3;
+                                    }).length + completedContracts.length
+                              })
                             </button>
                             <button
                               type="button"
                               onClick={() => setPortfolioTab('draft')}
                               className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'draft' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                              Hồ sơ nháp ({draftContracts.length})
+                              Hồ sơ nháp ({
+                                corporateSubMode === 'chao_phi'
+                                  ? draftContracts.filter(d => {
+                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mappedStep <= 2;
+                                    }).length
+                                  : draftContracts.filter(d => {
+                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mappedStep >= 3;
+                                    }).length
+                              })
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => setPortfolioTab('completed')}
-                              className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'completed' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                              Đã cấp ({completedContracts.length})
-                            </button>
+                            {corporateSubMode === 'cap_don' && (
+                              <button
+                                type="button"
+                                onClick={() => setPortfolioTab('completed')}
+                                className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'completed' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                              >
+                                Đã cấp ({completedContracts.length})
+                              </button>
+                            )}
                           </div>
                         </div>
 
@@ -2207,42 +3203,106 @@ export default function App() {
                             </thead>
                             <tbody className="divide-y divide-slate-100/50">
                               
-                              {/* RENDER DRAFT CONTRACTS */}
-                              {(portfolioTab === 'all' || portfolioTab === 'draft') && draftContracts.map((draft) => (
-                                <tr key={draft.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
-                                  <td className="py-4 px-2">
-                                    <span className="font-mono font-extrabold block text-amber-600 tracking-tight">{draft.id}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium block mt-0.5">{draft.date}</span>
-                                  </td>
-                                  <td className="py-4 px-2">
-                                    <span className="font-extrabold text-slate-800 block">{draft.company}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium block mt-0.5">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
-                                  </td>
-                                  <td className="py-4 px-2">
-                                    <span className="font-semibold text-slate-600">Sức khỏe PTI Care (EB)</span>
-                                  </td>
-                                  <td className="py-4 px-2 text-center">
-                                    <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 border border-amber-500/20">
-                                      Nháp: Bước {draft.step}/8
-                                    </span>
-                                  </td>
-                                  <td className="py-4 px-2 text-right">
-                                    <span className="text-slate-400 font-semibold">—</span>
-                                  </td>
-                                  <td className="py-4 px-2 text-right">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleResumeDraft(draft)}
-                                      className="px-3.5 py-1.5 bg-[#03377B] hover:bg-[#00285d] hover:scale-105 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md shadow-blue-900/10"
-                                    >
-                                      Làm tiếp
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
+                              {/* RENDER DRAFT CONTRACTS (Filtered by corporateSubMode) */}
+                              {(portfolioTab === 'all' || portfolioTab === 'draft') && draftContracts
+                                .filter(draft => {
+                                  const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
+                                  if (corporateSubMode === 'chao_phi') {
+                                    return mappedStep <= 2;
+                                  } else {
+                                    return mappedStep >= 3;
+                                  }
+                                })
+                                .map((draft) => {
+                                  const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
+                                  return (
+                                    <tr key={draft.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
+                                      <td className="py-4 px-2">
+                                        <span className="font-mono font-extrabold block text-amber-600 tracking-tight">{draft.id}</span>
+                                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">{draft.date}</span>
+                                      </td>
+                                      <td className="py-4 px-2">
+                                        <span className="font-extrabold text-slate-800 block">{draft.company}</span>
+                                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
+                                      </td>
+                                      <td className="py-4 px-2">
+                                        <span className="font-semibold text-slate-600">Sức khỏe PTI Care (EB)</span>
+                                      </td>
+                                      <td className="py-4 px-2 text-center">
+                                        {mappedStep <= 2 ? (
+                                          <div className="flex flex-col items-center justify-center gap-1">
+                                            <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 border border-amber-500/20 animate-none">
+                                              Chào phí: Bước {mappedStep}/2 (Nháp)
+                                            </span>
+                                            {draft.quoteApprovalStatus === 'Pending_Approval' && (
+                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white animate-pulse">
+                                                Chờ Trưởng bộ phận duyệt (STP)
+                                              </span>
+                                            )}
+                                            {draft.quoteApprovalStatus === 'Supervisor_Approved' && (
+                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white">
+                                                Trưởng bộ phận đã duyệt
+                                              </span>
+                                            )}
+                                            {draft.quoteApprovalStatus === 'Supervisor_Rejected' && (
+                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white">
+                                                Bị từ chối duyệt
+                                              </span>
+                                            )}
+                                            {draft.quoteApprovalStatus === 'Sent_To_Customer' && (
+                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-600 text-white">
+                                                Đã gửi cho khách hàng
+                                              </span>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 animate-none">
+                                            Cấp đơn: Bước {mappedStep - 2}/3 (Đang phát hành)
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="py-4 px-2 text-right">
+                                        <span className="text-slate-400 font-semibold">—</span>
+                                      </td>
+                                      <td className="py-4 px-2 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                          {/* If pending approval, let anyone (or supervisor simulation) approve it directly in the table */}
+                                          {mappedStep <= 2 && draft.quoteApprovalStatus === 'Pending_Approval' && (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleApproveDraftBySupervisor(draft)}
+                                              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md"
+                                            >
+                                              Duyệt nhanh
+                                            </button>
+                                          )}
 
-                              {/* RENDER COMPLETED CONTRACTS */}
-                              {(portfolioTab === 'all' || portfolioTab === 'completed') && completedContracts.map((cnt) => (
+                                          {/* If approved, show "Gửi cho khách hàng" */}
+                                          {mappedStep <= 2 && draft.quoteApprovalStatus === 'Supervisor_Approved' && (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleSendDraftToCustomer(draft)}
+                                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md"
+                                            >
+                                              Gửi cho khách hàng
+                                            </button>
+                                          )}
+
+                                          <button
+                                            type="button"
+                                            onClick={() => handleResumeDraft(draft)}
+                                            className="px-3.5 py-1.5 bg-[#03377B] hover:bg-[#00285d] hover:scale-105 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md shadow-blue-900/10"
+                                          >
+                                            {mappedStep <= 2 ? 'Làm tiếp' : 'Làm tiếp'}
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+
+                              {/* RENDER COMPLETED CONTRACTS (ONLY IN CAP_DON MODE) */}
+                              {corporateSubMode === 'cap_don' && (portfolioTab === 'all' || portfolioTab === 'completed') && completedContracts.map((cnt) => (
                                 <tr key={cnt.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
                                   <td className="py-4 px-2">
                                     <span className="font-mono font-extrabold block text-emerald-600 tracking-tight">{cnt.id}</span>
@@ -2277,9 +3337,22 @@ export default function App() {
                               ))}
 
                               {/* Empty State */}
-                              {((portfolioTab === 'draft' && draftContracts.length === 0) || 
-                                (portfolioTab === 'completed' && completedContracts.length === 0) || 
-                                (draftContracts.length === 0 && completedContracts.length === 0)) && (
+                              {((corporateSubMode === 'chao_phi' && draftContracts.filter(d => {
+                                  const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                  return mappedStep <= 2;
+                                }).length === 0) ||
+                                (corporateSubMode === 'cap_don' && (portfolioTab === 'draft' ? 
+                                  draftContracts.filter(d => {
+                                    const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    return mappedStep >= 3;
+                                  }).length === 0 :
+                                  portfolioTab === 'completed' ? 
+                                    completedContracts.length === 0 :
+                                    draftContracts.filter(d => {
+                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                      return mappedStep >= 3;
+                                    }).length + completedContracts.length === 0
+                                ))) && (
                                 <tr>
                                   <td colSpan={6} className="py-8 text-center text-slate-400 font-semibold">
                                     Không tìm thấy hồ sơ nào trong mục này.
@@ -2294,7 +3367,7 @@ export default function App() {
                       </div>
 
                     </div>
-                  )}
+                  ))}
 
                 </div>
               )}
@@ -2750,16 +3823,16 @@ export default function App() {
                       
                       <div className="flex items-center gap-3">
                         <span className="bg-[#03377B] text-white w-9 h-9 flex items-center justify-center font-black rounded-xl text-sm shadow">
-                          {currentStep}
+                          {currentStep <= 2 ? currentStep : currentStep - 2}
                         </span>
                         <div>
                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">BẢO HIỂM DOANH NGHIỆP PTI CARE</span>
                           <span className="text-sm font-black text-slate-800">
-                            {currentStep === 1 && 'Bước 1: Khảo sát và Upload giấy kèm ĐKKD'}
-                            {currentStep === 2 && 'Bước 2: Bảng chào phí nhanh và AI phân bổ'}
-                            {currentStep === 3 && 'Bước 3: Khai báo Sức khỏe &amp; Danh sách Nhân sự'}
-                            {currentStep === 4 && 'Bước 4: Thiết lập Hợp đồng khung &amp; Hóa đơn'}
-                            {currentStep === 5 && 'Bước 5: Thanh toán phí &amp; Auto phát hành e-card'}
+                            {currentStep === 1 && 'Bước 1: Khảo sát và Upload Đăng ký Kinh doanh'}
+                            {currentStep === 2 && 'Bước 2: Bảng chào phí nhanh'}
+                            {currentStep === 3 && 'Bước 1: Khai báo Sức khỏe &amp; Danh sách Nhân sự'}
+                            {currentStep === 4 && 'Bước 2: Thiết lập Hợp đồng khung &amp; Hóa đơn'}
+                            {currentStep === 5 && 'Bước 3: Thanh toán phí &amp; Auto phát hành e-card'}
                           </span>
                         </div>
                       </div>
@@ -2769,23 +3842,32 @@ export default function App() {
                         {currentStep <= 2 ? (
                           <div className="bg-[#03377B]/10 border border-[#03377B]/20 text-[#03377B] px-3.5 py-1.5 rounded-xl text-left">
                             <span className="text-[8px] font-extrabold uppercase tracking-widest block text-[#03377B]/60">GIAI ĐOẠN 1</span>
-                            <span className="text-[11px] font-black block">Báo giá &amp; Chốt sơ bộ (Xem nháp)</span>
+                            <span className="text-[11px] font-black block">Báo giá &amp; Chốt sơ bộ (Chào phí)</span>
                           </div>
                         ) : (
                           <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-1.5 rounded-xl text-left">
                             <span className="text-[8px] font-extrabold uppercase tracking-widest block text-emerald-600">GIAI ĐOẠN 2</span>
-                            <span className="text-[11px] font-black block">Phát hành chính thức (Đã đồng ý)</span>
+                            <span className="text-[11px] font-black block">Phát hành chính thức (Cấp đơn)</span>
                           </div>
                         )}
 
                         {/* Step progress dots */}
                         <div className="flex items-center gap-1.5">
-                          {Array.from({ length: 5 }).map((_, idx) => (
-                            <div 
-                              key={idx} 
-                              className={`h-2 rounded-full transition-all duration-300 ${idx + 1 === currentStep ? 'w-8 bg-[#03377B]' : idx + 1 < currentStep ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-200'}`}
-                            ></div>
-                          ))}
+                          {currentStep <= 2 ? (
+                            Array.from({ length: 2 }).map((_, idx) => (
+                              <div 
+                                key={idx} 
+                                className={`h-2 rounded-full transition-all duration-300 ${idx + 1 === currentStep ? 'w-8 bg-[#03377B]' : idx + 1 < currentStep ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-200'}`}
+                              ></div>
+                            ))
+                          ) : (
+                            Array.from({ length: 3 }).map((_, idx) => (
+                              <div 
+                                key={idx} 
+                                className={`h-2 rounded-full transition-all duration-300 ${idx + 3 === currentStep ? 'w-8 bg-emerald-600' : idx + 3 < currentStep ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-200'}`}
+                              ></div>
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2799,156 +3881,261 @@ export default function App() {
                       
                       {/* 1. Thông tin doanh nghiệp */}
                       <div className="card border border-slate-100">
-                        <div className="card-title justify-between">
+                        <div className="card-title justify-between flex-wrap gap-2">
                           <span className="text-slate-800 font-bold flex items-center gap-2">
                             <Building className="text-[#03377B]" size={18} />
-                            <span>1. Thông tin cơ bản Doanh nghiệp</span>
+                            <span>1. Thông tin Doanh nghiệp &amp; Người liên hệ</span>
                           </span>
-                          <button
-                            type="button"
-                            onClick={handleLookupTaxId}
-                            disabled={isSearchingMst}
-                            className="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#03377B] text-xs font-bold rounded-lg border border-blue-200 transition flex items-center gap-1"
-                          >
-                            {isSearchingMst ? (
-                              <>
-                                <RefreshCw className="animate-spin" size={12} />
-                                <span>Đang tra cứu...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Search size={12} />
-                                <span>⚡ Tra cứu MST nhanh</span>
-                              </>
-                            )}
-                          </button>
+                          <span className="text-xs font-semibold text-slate-400">Giai đoạn 1: Chào phí</span>
                         </div>
-                        <p className="text-xs text-slate-500 mb-6">Điền thông tin doanh nghiệp mua bảo hiểm. Click Tra cứu MST nhanh để tự động điền thông tin mẫu.</p>
+                        <p className="text-xs text-slate-500 mb-6">
+                          Nhập <strong>ID khách hàng</strong> để hệ thống tự động đẩy dữ liệu doanh nghiệp và người liên hệ từ cơ sở dữ liệu CRM/PTI Care. Sau đó bổ sung thêm quy mô, ngành nghề và kênh khai thác.
+                        </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Mã số thuế doanh nghiệp *</label>
-                            <input
-                              type="text"
-                              value={companyInfo.taxCode}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, taxCode: e.target.value })}
-                              placeholder="Nhập mã số thuế doanh nghiệp"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            />
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Tên doanh nghiệp mua bảo hiểm *</label>
-                            <input
-                              type="text"
-                              value={companyInfo.name}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
-                              placeholder="Nhập tên đầy đủ của công ty"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-bold text-slate-800"
-                            />
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Ngành nghề kinh doanh chính *</label>
-                            <select
-                              value={companyInfo.industry}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, industry: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
+                        {/* ID KHÁCH HÀNG LOOKUP SECTION */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 text-left space-y-4">
+                          <div className="flex flex-col sm:flex-row gap-3 items-end">
+                            <div className="flex-1 space-y-1.5">
+                              <label className="text-xs font-black text-[#03377B] uppercase tracking-wider flex items-center gap-1.5">
+                                <span>🔑 Nhập ID Khách Hàng *</span>
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={customerId}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setCustomerId(val);
+                                    if (MOCK_CUSTOMERS[val]) {
+                                      setCompanyInfo({
+                                        ...companyInfo,
+                                        ...MOCK_CUSTOMERS[val]
+                                      });
+                                    }
+                                  }}
+                                  placeholder="VD: KH-1024, KH-2048, KH-7777..."
+                                  className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-xs outline-none focus:border-[#03377B] font-bold text-[#03377B] tracking-wide shadow-sm"
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                  <Search size={16} />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!customerId.trim()) {
+                                  alert('Vui lòng nhập ID khách hàng');
+                                  return;
+                                }
+                                const matched = MOCK_CUSTOMERS[customerId.trim().toUpperCase()];
+                                if (matched) {
+                                  setCustomerId(customerId.trim().toUpperCase());
+                                  setCompanyInfo({
+                                    ...companyInfo,
+                                    ...matched
+                                  });
+                                  alert(`✓ Tìm thấy khách hàng: ${matched.name}. Dữ liệu đã tự động đẩy vào hệ thống.`);
+                                } else {
+                                  alert(`⚠️ Không tìm thấy thông tin cho ID "${customerId}". Bạn có thể chọn ID mẫu bên dưới để xem luồng tự động.`);
+                                }
+                              }}
+                              className="py-3 px-5 bg-[#03377B] hover:bg-[#022D66] text-white font-black text-xs rounded-xl transition shadow-xs flex items-center gap-1.5 h-[42px] shrink-0"
                             >
-                              <option value="">-- Chọn ngành nghề --</option>
-                              <option value="Công nghệ thông tin / Phần mềm">Công nghệ thông tin / Phần mềm</option>
-                              <option value="Sản xuất / Chế biến">Sản xuất / Chế biến</option>
-                              <option value="Tài chính / Ngân hàng / Bảo hiểm">Tài chính / Ngân hàng / Bảo hiểm</option>
-                              <option value="Thương mại / Bán lẻ">Thương mại / Bán lẻ</option>
-                              <option value="Xây dựng / Bất động sản">Xây dựng / Bất động sản</option>
-                              <option value="Y tế / Dược phẩm">Y tế / Dược phẩm</option>
-                            </select>
+                              <RefreshCw size={12} className="animate-spin-slow" />
+                              <span>Tra cứu CRM</span>
+                            </button>
                           </div>
 
+                          {/* Quick selection pill badges */}
                           <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Quy mô doanh nghiệp</label>
-                            <select
-                              value={companyInfo.size}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, size: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            >
-                              <option value="">-- Chọn quy mô --</option>
-                              <option value="Nhỏ (dưới 50 NV)">Nhỏ (dưới 50 NV)</option>
-                              <option value="Vừa (50 – 200 NV)">Vừa (50 – 200 NV)</option>
-                              <option value="Lớn (200 – 1000 NV)">Lớn (200 – 1000 NV)</option>
-                              <option value="Tập đoàn (trên 1000 NV)">Tập đoàn (trên 1000 NV)</option>
-                            </select>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">ID Khách hàng mẫu (Click để đẩy nhanh):</span>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.keys(MOCK_CUSTOMERS).map((id) => (
+                                <button
+                                  type="button"
+                                  key={id}
+                                  onClick={() => {
+                                    setCustomerId(id);
+                                    setCompanyInfo({
+                                      ...companyInfo,
+                                      ...MOCK_CUSTOMERS[id]
+                                    });
+                                  }}
+                                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide border transition-all ${
+                                    customerId === id 
+                                      ? 'bg-amber-100 text-amber-800 border-amber-300 shadow-xs' 
+                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  ⚡ {id} - {MOCK_CUSTOMERS[id].name.split(' ').slice(-2).join(' ')}
+                                </button>
+                              ))}
+                            </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Người đại diện liên hệ (HR / Admin) *</label>
-                            <input
-                              type="text"
-                              value={companyInfo.contactName}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, contactName: e.target.value })}
-                              placeholder="Họ và tên người liên hệ trực tiếp"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            />
+                          {customerId && MOCK_CUSTOMERS[customerId] && (
+                            <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-2 rounded-xl flex items-center gap-2 animate-fade-in">
+                              <span className="text-emerald-500 text-base">✓</span>
+                              <span>Đã tự động đẩy thông tin của ID <strong>{customerId}</strong> thành công! Dữ liệu được bảo mật bởi CRM.</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* SPLIT LAYOUT: AUTO-FILLED vs USER-FILLED */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left pt-2">
+                          
+                          {/* COLUMN 1: AUTOMATED DATA FROM ID (READ-ONLY WITH MAN OVERRIDE) */}
+                          <div className="lg:col-span-7 bg-slate-50/50 border border-slate-150 rounded-2xl p-5 space-y-4">
+                            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                              <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
+                                <span className="text-amber-500">📥</span>
+                                <span>Thông tin hệ thống tự đẩy (CRM)</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const name = prompt("Sửa Tên công ty:", companyInfo.name);
+                                  const taxCode = prompt("Sửa Mã số thuế:", companyInfo.taxCode);
+                                  const contactName = prompt("Sửa Người liên hệ:", companyInfo.contactName);
+                                  const contactRole = prompt("Sửa Chức vụ:", companyInfo.contactRole);
+                                  const phone = prompt("Sửa Sđt:", companyInfo.phone);
+                                  const email = prompt("Sửa Email:", companyInfo.email);
+                                  const address = prompt("Sửa Địa chỉ:", companyInfo.address);
+                                  
+                                  setCompanyInfo({
+                                    ...companyInfo,
+                                    name: name !== null ? name : companyInfo.name,
+                                    taxCode: taxCode !== null ? taxCode : companyInfo.taxCode,
+                                    contactName: contactName !== null ? contactName : companyInfo.contactName,
+                                    contactRole: contactRole !== null ? contactRole : companyInfo.contactRole,
+                                    phone: phone !== null ? phone : companyInfo.phone,
+                                    email: email !== null ? email : companyInfo.email,
+                                    address: address !== null ? address : companyInfo.address,
+                                  });
+                                }}
+                                className="text-[10px] font-black text-[#03377B] hover:underline"
+                              >
+                                ✍️ Sửa thủ công
+                              </button>
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Tên doanh nghiệp mua bảo hiểm</span>
+                                  <div className="text-xs font-extrabold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.name || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Mã số thuế doanh nghiệp</span>
+                                  <div className="text-xs font-mono font-bold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.taxCode || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-slate-400 block uppercase">Địa chỉ trụ sở chính</span>
+                                <div className="text-xs font-semibold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                  {companyInfo.address || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Người đại diện liên hệ</span>
+                                  <div className="text-xs font-semibold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.contactName || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Chức vụ người liên hệ</span>
+                                  <div className="text-xs font-semibold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.contactRole || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Số điện thoại liên hệ</span>
+                                  <div className="text-xs font-mono font-bold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.phone || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Email liên hệ báo giá &amp; hóa đơn</span>
+                                  <div className="text-xs font-semibold text-slate-800 bg-slate-100/80 border border-slate-200 px-3 py-2 rounded-xl min-h-[34px] flex items-center break-all">
+                                    {companyInfo.email || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Chức vụ người liên hệ</label>
-                            <input
-                              type="text"
-                              value={companyInfo.contactRole}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, contactRole: e.target.value })}
-                              placeholder="VD: Trưởng phòng nhân sự, Admin..."
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            />
+                          {/* COLUMN 2: ADDITIONAL INFORMATION REQUIRED (USER MANUAL FILL) */}
+                          <div className="lg:col-span-5 bg-white border border-slate-150 rounded-2xl p-5 space-y-5">
+                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest block border-b border-slate-100 pb-3 flex items-center gap-1.5">
+                              <span className="text-blue-500">✍️</span>
+                              <span>Thông tin bổ sung cần điền</span>
+                            </span>
+
+                            <div className="space-y-4">
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Quy mô doanh nghiệp *</label>
+                                <select
+                                  value={companyInfo.size}
+                                  onChange={(e) => setCompanyInfo({ ...companyInfo, size: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
+                                >
+                                  <option value="">-- Chọn quy mô --</option>
+                                  <option value="Nhỏ (dưới 50 NV)">Nhỏ (dưới 50 NV)</option>
+                                  <option value="Vừa (50 – 200 NV)">Vừa (50 – 200 NV)</option>
+                                  <option value="Lớn (200 – 1000 NV)">Lớn (200 – 1000 NV)</option>
+                                  <option value="Tập đoàn (trên 1000 NV)">Tập đoàn (trên 1000 NV)</option>
+                                </select>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Ngành nghề kinh doanh chính *</label>
+                                <select
+                                  value={companyInfo.industry}
+                                  onChange={(e) => setCompanyInfo({ ...companyInfo, industry: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
+                                >
+                                  <option value="">-- Chọn ngành nghề --</option>
+                                  <option value="Công nghệ thông tin / Phần mềm">Công nghệ thông tin / Phần mềm</option>
+                                  <option value="Sản xuất / Chế biến">Sản xuất / Chế biến</option>
+                                  <option value="Tài chính / Ngân hàng / Bảo hiểm">Tài chính / Ngân hàng / Bảo hiểm</option>
+                                  <option value="Thương mại / Bán lẻ">Thương mại / Bán lẻ</option>
+                                  <option value="Xây dựng / Bất động sản">Xây dựng / Bất động sản</option>
+                                  <option value="Y tế / Dược phẩm">Y tế / Dược phẩm</option>
+                                </select>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Kênh khai thác tiếp cận *</label>
+                                <select
+                                  value={companyInfo.channel}
+                                  onChange={(e) => setCompanyInfo({ ...companyInfo, channel: e.target.value })}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
+                                >
+                                  <option value="Zalo">Zalo liên hệ trực tiếp</option>
+                                  <option value="Email">Email Marketing</option>
+                                  <option value="Hotline">Hotline / Tổng đài PTI</option>
+                                  <option value="Tự tìm kiếm">Cán bộ CA tự khai thác tìm kiếm</option>
+                                  <option value="Đại lý giới thiệu">Qua đại lý liên kết giới thiệu</option>
+                                </select>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Số điện thoại liên hệ *</label>
-                            <input
-                              type="text"
-                              value={companyInfo.phone}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, phone: e.target.value })}
-                              placeholder="Nhập số điện thoại liên lạc"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            />
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Email liên hệ nhận báo giá &amp; hóa đơn *</label>
-                            <input
-                              type="email"
-                              value={companyInfo.email}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, email: e.target.value })}
-                              placeholder="VD: hr@congty.com"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-semibold"
-                            />
-                          </div>
-
-                          <div className="col-span-1 md:col-span-2 space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Địa chỉ trụ sở chính doanh nghiệp</label>
-                            <input
-                              type="text"
-                              value={companyInfo.address}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, address: e.target.value })}
-                              placeholder="Nhập số nhà, tên đường, phường, quận, tỉnh/thành phố..."
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            />
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 tracking-wide">Kênh khai thác tiếp cận</label>
-                            <select
-                              value={companyInfo.channel}
-                              onChange={(e) => setCompanyInfo({ ...companyInfo, channel: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
-                            >
-                              <option value="Zalo">Zalo liên hệ trực tiếp</option>
-                              <option value="Email">Email Marketing</option>
-                              <option value="Hotline">Hotline / Tổng đài PTI</option>
-                              <option value="Tự tìm kiếm">Cán bộ CA tự khai thác tìm kiếm</option>
-                              <option value="Đại lý giới thiệu">Qua đại lý liên kết giới thiệu</option>
-                            </select>
-                          </div>
                         </div>
                       </div>
 
@@ -2988,11 +4175,19 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* 3. Quy mô, ngân sách và lịch sử bồi thường */}
-                      <div className="card border border-slate-100">
+                    </div>
+                  )}
+                                {/* ──────────────────────────────────────────────────
+                       STEP 2: BẢNG CHÀO GIÁ TỨC THỜI (GIAI ĐOẠN 1)
+                     ────────────────────────────────────────────────── */}
+                  {currentStep === 2 && (
+                    <div className="space-y-6">
+                      
+                      {/* Quy mô, ngân sách và lịch sử bồi thường */}
+                      <div className="card border border-slate-100 text-left">
                         <div className="card-title">
                           <Users className="text-[#03377B]" size={18} />
-                          <span>3. Quy mô nhân sự &amp; Cơ cấu Ngân sách dự kiến</span>
+                          <span>Quy mô nhân sự &amp; Cơ cấu Ngân sách dự kiến</span>
                         </div>
                         <p className="text-xs text-slate-500 mb-6">Xác định tổng số lượng nhân sự tham gia bảo hiểm, thiết lập độ tuổi, giới tính và khoảng ngân sách đầu người để PTI Care đề xuất gói bảo hiểm tối ưu.</p>
 
@@ -3150,120 +4345,190 @@ export default function App() {
                         </div>
                       </div>
 
-                    </div>
-                  )}
-                                {/* ──────────────────────────────────────────────────
-                       STEP 2: BẢNG CHÀO GIÁ TỨC THỜI (GIAI ĐOẠN 1)
-                     ────────────────────────────────────────────────── */}
-                  {currentStep === 2 && (
-                    <div className="space-y-6">
-                      
-                      {/* Interactive Auto Recommendation Panel */}
-                      <div className="bg-gradient-to-br from-[#03377B] to-slate-900 text-white rounded-3xl p-6 shadow-xl border border-white/5 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">🤖</span>
-                          <div>
-                            <h4 className="text-sm font-black tracking-wider text-blue-200 uppercase">Engine Gợi ý Phân loại Quyền lợi Tự động</h4>
-                            <p className="text-[11px] text-white/60">Bộ quy chuẩn đề xuất iPTI Premium dựa trên Ngân sách &amp; Quy mô</p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs pt-1">
-                          <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                            <span className="text-[10px] text-blue-200/70 block uppercase tracking-wide">Quy mô nhân viên</span>
-                            <span className="font-bold block mt-1">{groupSizeInfo.headcount} người</span>
-                            <span className="text-[9px] text-emerald-400 block mt-0.5">
-                              {groupSizeInfo.headcount >= 50 ? '✓ Nhóm lớn: Miễn thời gian chờ' : 'ℹ️ Nhóm nhỏ: Có thời gian chờ'}
-                            </span>
-                          </div>
-
-                          <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                            <span className="text-[10px] text-blue-200/70 block uppercase tracking-wide">Ngân sách bình quân</span>
-                            <span className="font-bold block mt-1">{formatVnd(groupSizeInfo.budgetPerHead)} /người</span>
-                            <span className="text-[9px] text-blue-300 block mt-0.5">Tương thích: {recommendedProgram.name}</span>
-                          </div>
-
-                          <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                            <span className="text-[10px] text-blue-200/70 block uppercase tracking-wide">Tỷ lệ Nữ giới</span>
-                            <span className="font-bold block mt-1">{groupSizeInfo.femaleRatio}%</span>
-                            <span className="text-[9px] text-amber-300 block mt-0.5">
-                              {groupSizeInfo.femaleRatio > 40 ? '⚡ Đề xuất mua kèm Thai Sản' : 'Bỏ qua tùy chọn Thai sản'}
-                            </span>
-                          </div>
-
-                          <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                            <span className="text-[10px] text-blue-200/70 block uppercase tracking-wide">Độ tuổi trung bình</span>
-                            <span className="font-bold block mt-1">{groupSizeInfo.averageAge} tuổi</span>
-                            <span className="text-[9px] text-emerald-400 block mt-0.5">Nhóm tuổi lao động trẻ, rủi ro thấp</span>
-                          </div>
-                        </div>
-
-                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 flex items-center justify-between gap-4">
-                          <div className="space-y-1 text-left">
-                            <span className="text-[10px] uppercase tracking-wide text-amber-300 font-bold">Chương trình đề xuất chủ đạo</span>
-                            <div className="text-sm font-black text-white flex items-center gap-1">
-                              <Sparkles size={14} className="text-amber-400 animate-pulse" />
-                              <span>{recommendedProgram.name} ({recommendedProgram.id === 'ct-3' ? 'Hạng Vàng' : recommendedProgram.id === 'ct-2' ? 'Hạng Bạc' : 'Hạng Đồng'})</span>
+                      {/* Display of programs side-by-side with common conditions */}
+                      <div className="card border border-blue-500/10 text-left space-y-6 bg-slate-50/30 p-1 rounded-[2.5rem]">
+                        
+                        {/* 1. Quyền lợi chung */}
+                        <div className="relative overflow-hidden bg-gradient-to-br from-blue-50/70 to-white/95 border border-blue-500/15 rounded-[2.5rem] p-6 shadow-xl space-y-5 backdrop-blur-md">
+                          {/* Ambient background blur elements for Glass style */}
+                          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-blue-400/10 blur-3xl pointer-events-none"></div>
+                          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none"></div>
+                          
+                          <div className="flex items-center gap-2.5 border-b border-blue-500/10 pb-3 relative z-10">
+                            <div className="p-2 bg-gradient-to-tr from-[#03377B] to-blue-600 text-white rounded-xl shadow-md shadow-blue-500/10">
+                              <ShieldCheck size={18} />
                             </div>
-                            <p className="text-xs text-slate-200">{recommendedProgram.reason}</p>
+                            <span className="text-xs font-black text-[#03377B] uppercase tracking-widest">
+                              Quy chuẩn Quyền lợi chung (Áp dụng đồng đều cho cả 5 Level)
+                            </span>
                           </div>
-                          <span className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-wider shadow">
-                            RECOMMENDED
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Display of programs side-by-side */}
-                      <div className="card border border-slate-100 text-left">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Award className="text-[#03377B]" size={18} />
-                          <span className="text-sm font-extrabold text-slate-800">Quy chuẩn Quyền lợi 3 Chương trình PTI Care</span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                          {PROGRAMS.map((prog) => {
-                            const isRecommended = prog.id === recommendedProgram.id;
-                            return (
-                              <div 
-                                key={prog.id} 
-                                className={`rounded-2xl border-2 p-4 relative transition-all duration-200 ${isRecommended ? 'border-[#03377B] bg-blue-50/20 shadow-lg' : 'border-slate-100 bg-white hover:border-slate-200'}`}
-                              >
-                                {isRecommended && (
-                                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#03377B] text-white text-[8px] font-black px-3 py-0.5 rounded-full uppercase tracking-widest shadow">
-                                    ĐỀ XUẤT
-                                  </span>
-                                )}
-
-                                <div className="space-y-0.5">
-                                  <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block">{prog.tierLabel}</span>
-                                  <h4 className="text-sm font-black text-slate-900">{prog.name}</h4>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs relative z-10">
+                            {/* Card 1: Tai nan */}
+                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#03377B] border border-blue-500/15 shadow-inner">
+                                  <Activity size={15} />
                                 </div>
-
-                                <div className="border-t border-slate-100 pt-3 mt-3 space-y-2 text-[11px]">
-                                  <div className="flex justify-between border-b border-slate-50 pb-1.5">
-                                    <span className="text-slate-400">Nội trú tối đa:</span>
-                                    <span className="font-bold text-slate-800">{prog.inpatientBenefit}</span>
-                                  </div>
-                                  <div className="flex justify-between border-b border-slate-50 pb-1.5">
-                                    <span className="text-slate-400">Ngoại trú tối đa:</span>
-                                    <span className="font-bold text-slate-800">{prog.outpatientBenefit}</span>
-                                  </div>
-                                  <div className="flex justify-between border-b border-slate-50 pb-1.5">
-                                    <span className="text-slate-400">Tai nạn cá nhân:</span>
-                                    <span className="font-bold text-slate-800">{prog.accidentBenefit}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-slate-400">Chăm sóc Răng:</span>
-                                    <span className={`font-bold ${prog.dentalBenefit === 'Không áp dụng' ? 'text-slate-400' : 'text-emerald-600'}`}>{prog.dentalBenefit}</span>
-                                  </div>
-                                </div>
-                                <div className="border-t border-slate-150 pt-3 mt-3 text-center">
-                                  <span className="text-[9px] text-slate-400 block">Đơn giá cơ bản / người / năm</span>
-                                  <span className="text-base font-black text-[#03377B] block mt-0.5">{formatVnd(prog.ratePerHead)}</span>
-                                </div>
+                                <span className="font-extrabold text-[#03377B] text-[12px]">Bảo hiểm Tai nạn 24/24</span>
                               </div>
-                            );
-                          })}
+                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
+                                <p>• <strong className="text-slate-800">Nhân viên:</strong> Bồi thường sinh mạng lên đến <span className="text-[#03377B] font-extrabold">30 tháng lương</span> + Hỗ trợ lương 6 tháng + 140M y tế.</p>
+                                <p>• <strong className="text-slate-800">Người thân:</strong> 100M VNĐ sinh mạng + 80M VNĐ y tế.</p>
+                              </div>
+                            </div>
+
+                            {/* Card 2: Benh hiem ngheo */}
+                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-600 border border-rose-500/15 shadow-inner">
+                                  <Heart size={15} />
+                                </div>
+                                <span className="font-extrabold text-[#03377B] text-[12px]">Bệnh hiểm nghèo / Ốm đau</span>
+                              </div>
+                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
+                                <p>• Tử vong / Thương tật toàn bộ vĩnh viễn do ốm đau, bệnh tật thông thường: <strong className="text-rose-600 font-extrabold">Đồng mức 200 triệu VNĐ</strong>.</p>
+                              </div>
+                            </div>
+
+                            {/* Card 3: Vaccine */}
+                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/15 shadow-inner">
+                                  <Sparkles size={15} />
+                                </div>
+                                <span className="font-extrabold text-[#03377B] text-[12px]">Phản ứng sau tiêm Vaccine</span>
+                              </div>
+                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
+                                <p>• Được bảo vệ tối đa cho các chi phí y tế và sinh mạng phát sinh (nằm trong hạn mức nội trú/ngoại trú tương ứng).</p>
+                              </div>
+                            </div>
+
+                            {/* Card 4: Dong chi tra */}
+                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/15 shadow-inner">
+                                  <Coins size={15} />
+                                </div>
+                                <span className="font-extrabold text-[#03377B] text-[12px]">Quy định Đồng chi trả (30%)</span>
+                              </div>
+                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
+                                <p>• <strong className="text-slate-800">Nội trú:</strong> Đồng chi trả 30% khi điều trị tại các tuyến cao cấp, quốc tế (Vinmec, Việt Pháp, Hồng Ngọc...).</p>
+                                <p>• <strong className="text-slate-800">Ngoại trú:</strong> Đồng chi trả 30% khám ngoại trú, nha khoa và VLTL.</p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
+
+                        {/* 2. Điểm khác biệt giữa các Level */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-gradient-to-tr from-[#03377B] to-blue-600 text-white rounded-xl shadow-md shadow-blue-500/10">
+                              <Award size={18} />
+                            </div>
+                            <span className="text-xs font-black text-[#03377B] uppercase tracking-widest">
+                              Điểm khác biệt &amp; Quyền lợi Sức khỏe theo từng Level
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {PROGRAMS.map((prog) => {
+                              // Custom iOS Glass Vector Icon styles for each Level
+                              let LevelIcon = Shield;
+                              let iconBg = 'from-blue-500/15 to-blue-600/5';
+                              let iconBorder = 'border-blue-500/25';
+                              let iconColor = 'text-blue-700';
+                              let accentColor = 'bg-blue-500/5 border-blue-500/15 text-blue-700';
+                              let glowBg = 'shadow-[0_12px_30px_rgba(59,130,246,0.03)]';
+
+                              if (prog.id === 'lvl-2') {
+                                LevelIcon = Heart;
+                                iconBg = 'from-sky-500/15 to-sky-600/5';
+                                iconBorder = 'border-sky-500/25';
+                                iconColor = 'text-sky-700';
+                                accentColor = 'bg-sky-500/5 border-sky-500/15 text-sky-700';
+                                glowBg = 'shadow-[0_12px_30px_rgba(14,165,233,0.03)]';
+                              } else if (prog.id === 'lvl-3') {
+                                LevelIcon = Award;
+                                iconBg = 'from-indigo-500/15 to-indigo-600/5';
+                                iconBorder = 'border-indigo-500/25';
+                                iconColor = 'text-indigo-700';
+                                accentColor = 'bg-indigo-500/5 border-indigo-500/15 text-indigo-700';
+                                glowBg = 'shadow-[0_12px_30px_rgba(99,102,241,0.03)]';
+                              } else if (prog.id === 'lvl-4') {
+                                LevelIcon = Gem;
+                                iconBg = 'from-[#03377B]/15 to-blue-600/5';
+                                iconBorder = 'border-blue-800/25';
+                                iconColor = 'text-[#03377B]';
+                                accentColor = 'bg-blue-800/5 border-blue-800/15 text-blue-900';
+                                glowBg = 'shadow-[0_12px_30px_rgba(3,55,123,0.04)]';
+                              } else if (prog.id === 'lvl-5') {
+                                LevelIcon = Crown;
+                                iconBg = 'from-amber-500/15 to-yellow-600/5';
+                                iconBorder = 'border-amber-500/25';
+                                iconColor = 'text-amber-600';
+                                accentColor = 'bg-amber-500/5 border-amber-500/15 text-amber-800';
+                                glowBg = 'shadow-[0_12px_30px_rgba(245,158,11,0.04)]';
+                              }
+
+                              return (
+                                <div 
+                                  key={prog.id} 
+                                  className={`rounded-[2rem] border border-blue-500/10 bg-gradient-to-b from-white to-slate-50/40 p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#03377B]/30 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden backdrop-blur-md ${glowBg}`}
+                                >
+                                  {/* Glassmorphism gradient background glow */}
+                                  <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent pointer-events-none"></div>
+                                  
+                                  <div className="space-y-4.5 relative z-10">
+                                    {/* Glass vector badge icon */}
+                                    <div className="flex items-center justify-between">
+                                      <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${iconBg} ${iconBorder} border flex items-center justify-center ${iconColor} shadow-inner`}>
+                                        <LevelIcon size={18} className="stroke-[2.2]" />
+                                      </div>
+                                      <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-extrabold uppercase tracking-widest border ${accentColor}`}>
+                                        {prog.id === 'lvl-5' ? '👑 VIP' : `LEVEL ${prog.id.split('-')[1]}`}
+                                      </span>
+                                    </div>
+
+                                    <div>
+                                      <h4 className="text-xs font-black text-slate-800 tracking-tight">{prog.name}</h4>
+                                      <span className="text-[9px] text-slate-400 font-bold block mt-0.5">{prog.tierLabel}</span>
+                                    </div>
+
+                                    <div className="border-t border-slate-100/80 pt-3.5 space-y-3 text-[11px] leading-tight">
+                                      <div>
+                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Tổng Nội trú / Năm</span>
+                                        <span className="font-extrabold text-[#03377B] text-xs bg-[#03377B]/5 px-2 py-0.5 rounded-md inline-block">{prog.inpatientBenefit}</span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Bệnh hiểm nghèo</span>
+                                        <span className="font-extrabold text-amber-600 bg-amber-500/5 px-2 py-0.5 rounded-md inline-block">
+                                          {prog.id === 'lvl-1' && '75 Triệu đ'}
+                                          {prog.id === 'lvl-2' && '100 Triệu đ'}
+                                          {prog.id === 'lvl-3' && '150 Triệu đ'}
+                                          {prog.id === 'lvl-4' && '300 Triệu đ'}
+                                          {prog.id === 'lvl-5' && '600 Triệu đ'}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Tổng Ngoại trú / Năm</span>
+                                        <span className="font-extrabold text-emerald-600 bg-emerald-500/5 px-2 py-0.5 rounded-md inline-block">{prog.outpatientBenefit}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="border-t border-slate-100/80 pt-4 mt-4 text-center relative z-10">
+                                    <span className="text-[9px] text-slate-400 font-bold block">Đơn giá cơ bản / người</span>
+                                    <span className="text-sm font-black text-[#03377B] block mt-1 tracking-tight">
+                                      {formatVnd(prog.ratePerHead)}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
                       </div>
 
                       {/* Interactive Allocation & Pricing Customizer */}
@@ -3335,25 +4600,6 @@ export default function App() {
                                 <>
                                   <Download size={14} />
                                   <span>TẢI BẢN CHÀO PHÍ (PDF)</span>
-                                </>
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={handleSendQuoteEmail}
-                              disabled={isSendingQuote}
-                              className="px-6 py-2.5 bg-[#03377B] hover:bg-[#022D66] text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95 cursor-pointer"
-                            >
-                              {isSendingQuote ? (
-                                <>
-                                  <RefreshCw className="animate-spin text-white" size={14} />
-                                  <span>Đang gửi mail...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <FileCheck size={14} strokeWidth={2.5} />
-                                  <span>GỬI BÁO GIÁ CHO KHÁCH HÀNG</span>
                                 </>
                               )}
                             </button>
@@ -4266,7 +5512,7 @@ export default function App() {
                       <span>Lưu hồ sơ nháp</span>
                     </button>
 
-                    {currentStep < 5 ? (
+                    {currentStep === 1 || (currentStep >= 3 && currentStep < 5) ? (
                       <button
                         type="button"
                         onClick={handleNextStep}
@@ -4275,8 +5521,52 @@ export default function App() {
                         <span>Tiếp theo</span>
                         <ArrowRight size={14} />
                       </button>
+                    ) : currentStep === 2 ? (
+                      (() => {
+                        const isOutOfStandard = discountRate > 20 || tiers.some(t => 
+                          t.customInpatientBenefit !== undefined || 
+                          t.customOutpatientBenefit !== undefined || 
+                          t.customAccidentBenefit !== undefined || 
+                          t.customMaternityBenefit !== undefined ||
+                          t.customAccidentPersonalBenefit !== undefined ||
+                          t.customAccidentRelativeBenefit !== undefined ||
+                          t.customDeathOrDisabilityBenefit !== undefined ||
+                          t.customInpatientCriticalIllnessBenefit !== undefined ||
+                          t.customInpatientOtherDiseasesBenefit !== undefined ||
+                          t.customInpatientMaternityBenefit !== undefined ||
+                          t.customOutpatientTreatmentBenefit !== undefined ||
+                          t.customOutpatientBasicDentalBenefit !== undefined ||
+                          t.customOutpatientFullDentalBenefit !== undefined ||
+                          t.customOutpatientEasternMedicineBenefit !== undefined ||
+                          t.customVaccineComplicationsBenefit !== undefined
+                        );
+
+                        if (isOutOfStandard && quoteApprovalStatus !== 'Supervisor_Approved') {
+                          return (
+                            <button
+                              type="button"
+                              onClick={handleSendApprovalRequest}
+                              className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs rounded-xl shadow transition flex items-center gap-1.5"
+                            >
+                              <span>GỬI PHÊ DUYỆT</span>
+                              <ArrowRight size={14} />
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <button
+                            type="button"
+                            onClick={handleSendQuoteEmail}
+                            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow transition flex items-center gap-1.5"
+                          >
+                            <span>Gửi Báo Giá &amp; Hoàn Tất</span>
+                            <ArrowRight size={14} />
+                          </button>
+                        );
+                      })()
                     ) : (
-                      <span className="text-xs text-slate-400 italic">Thanh toán để kết thúc cấp đơn</span>
+                      <span className="text-xs text-slate-400 italic">Thanh toán &amp; Ký số để phát hành chính thức</span>
                     )}
                   </div>
 
