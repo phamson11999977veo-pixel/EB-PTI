@@ -58,7 +58,7 @@ import {
 import BiometricModal from './components/BiometricModal';
 import RegisterModal from './components/RegisterModal';
 import QuotationCalculator from './components/QuotationCalculator';
-import UnderwritingPanel from './components/UnderwritingPanel';
+import UnderwritingPanel, { getEmpRiskDetails } from './components/UnderwritingPanel';
 import ContractReview from './components/ContractReview';
 import UnifiedIssuanceFlow from './components/UnifiedIssuanceFlow';
 import { 
@@ -250,6 +250,8 @@ export default function App() {
   });
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'qr' | 'bank'>('qr');
+  const [paymentTerm, setPaymentTerm] = useState<'once' | 'period' | 'debt'>('once');
+  const [actualTransferredInput, setActualTransferredInput] = useState('');
   const [contractId, setContractId] = useState('');
   const [policyNumber, setPolicyNumber] = useState('');
   const [isPaid, setIsPaid] = useState(false);
@@ -1095,6 +1097,52 @@ export default function App() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
   };
 
+  const calculateNetPayment = () => {
+    let total = 0;
+    if (employees && employees.length > 0) {
+      employees.forEach(emp => {
+        if (emp.underwritingAction !== 'decline') {
+          const tier = tiers.find(t => t.id === emp.tierId);
+          const prog = PROGRAMS.find(p => p.id === (tier?.selectedProgramId || 'ct-1'));
+          const baseRate = prog ? prog.ratePerHead : 0;
+          
+          const risk = getEmpRiskDetails(emp);
+          let coeff = 1.0;
+          if (risk.hasRisk) {
+            if (emp.underwritingAction === 'exclude') {
+              coeff = 1.0; // Exclusion applied, no surcharge
+            } else {
+              coeff = risk.coefficient; // Apply risk surcharge coefficient (e.g. 1.15x)
+            }
+          }
+          total += Math.round(baseRate * coeff);
+        }
+      });
+    } else {
+      total = tiers.reduce((sum, tier) => {
+        const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
+        return sum + (tier.headcount * (prog?.ratePerHead || 0));
+      }, 0);
+    }
+    
+    // Apply discount rate
+    const disc = Math.round((total * discountRate) / 100);
+    const postDiscount = total - disc;
+    
+    // Apply commission rate
+    const comm = Math.round((postDiscount * commissionRate) / 100);
+    let finalAmount = postDiscount - comm;
+    
+    // Adjust based on selected payment term
+    if (paymentTerm === 'period') {
+      finalAmount = Math.round(finalAmount / 4); // Pay quarterly (25%)
+    } else if (paymentTerm === 'debt') {
+      finalAmount = 0; // Premium debt, pay 0 now
+    }
+    
+    return finalAmount;
+  };
+
   return (
     <div className="font-sans min-h-screen bg-slate-50 flex flex-col text-slate-800">
       
@@ -1718,38 +1766,16 @@ export default function App() {
               {currentStep === 0 && activeTab === 'dashboard' && (
                 <div className="space-y-8 animate-fade-in pb-12">
                   
-                  {/* Redesigned Navigation Bar inside the page canvas mimicking top navbar */}
-                  <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+                  {/* Redesigned Navigation Bar inside the page canvas mimicking top navbar with iOS Glassmorphism */}
+                  <div className="bg-gradient-to-r from-white/40 via-sky-50/20 to-orange-50/15 backdrop-blur-xl rounded-2xl border border-white/60 p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_8px_32px_0_rgba(3,55,123,0.04)] shadow-inner">
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-2">
-                        <span className="p-1.5 bg-blue-50 text-[#03377B] rounded-xl font-black text-xs border border-blue-100">Pilot</span>
+                        <span className="p-1.5 bg-gradient-to-r from-blue-500/10 to-[#03377B]/15 text-[#03377B] rounded-xl font-black text-xs border border-white/85 shadow-sm">Pilot</span>
                         <span className="font-extrabold text-slate-800 text-sm tracking-tight">iPTI Premium Portal</span>
-                      </div>
-                      <div className="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-500">
-                        <button 
-                          onClick={() => { setActiveTab('dashboard'); setSelectedCategory(null); }} 
-                          className={`hover:text-[#03377B] transition-colors font-bold ${activeTab === 'dashboard' && selectedCategory === null ? 'text-[#03377B] font-extrabold' : 'text-slate-700'}`}
-                        >
-                          Trang chủ
-                        </button>
-                        <span className="text-slate-200">|</span>
-                        <button 
-                          onClick={() => { setActiveTab('dashboard'); setSelectedCategory('personal'); }} 
-                          className={`hover:text-[#03377B] transition-colors font-bold ${activeTab === 'dashboard' && selectedCategory === 'personal' ? 'text-[#03377B] font-extrabold' : 'text-slate-700'}`}
-                        >
-                          Bảo hiểm Cá nhân
-                        </button>
-                        <span className="text-slate-200">|</span>
-                        <button 
-                          onClick={() => { setActiveTab('dashboard'); setSelectedCategory('corporate'); }} 
-                          className={`hover:text-[#03377B] transition-colors font-bold ${activeTab === 'dashboard' && selectedCategory === 'corporate' ? 'text-[#03377B] font-extrabold' : 'text-slate-700'}`}
-                        >
-                          Bảo hiểm Doanh nghiệp
-                        </button>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                      <span className="text-[10px] bg-white/70 backdrop-blur-md text-slate-500 border border-white/80 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
                         Phân quyền: {user.role}
                       </span>
                     </div>
@@ -1759,42 +1785,51 @@ export default function App() {
                   {selectedCategory === null && (
                     <div className="space-y-8 animate-fade-in">
                       
-                      {/* ── HIGH-LEVEL OVERVIEW FEATURES SECTION (Concise, high-fidelity metrics/cards) ── */}
+                      {/* ── HIGH-LEVEL OVERVIEW FEATURES SECTION (Beautiful iOS Glassmorphic Design) ── */}
                       <div id="features-preview" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Feature 1 */}
-                        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.02)] flex items-start gap-3.5 hover:shadow-md transition-all duration-300">
-                          <div className="p-2.5 bg-blue-50 text-[#03377B] rounded-xl flex-shrink-0">
-                            <ShieldCheck size={18} className="stroke-[2.5]" />
+                        {/* Feature 1: Vận hành tự động hóa */}
+                        <div className="bg-gradient-to-br from-white/70 via-slate-50/45 to-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.03)] hover:shadow-[0_20px_50px_rgba(3,55,123,0.08)] hover:border-white/90 transition-all duration-500 transform hover:-translate-y-1 relative overflow-hidden group flex items-start gap-4 text-left">
+                          {/* Soft pastel light background glow */}
+                          <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-sky-300/15 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-400/25 transition-all duration-500"></div>
+                          
+                          <div className="p-3 bg-gradient-to-br from-blue-500/15 to-sky-400/5 text-[#03377B] rounded-2xl border border-white/80 shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
+                            <RefreshCw size={20} className="stroke-[2.5] animate-spin-slow" />
                           </div>
-                          <div className="space-y-0.5 text-left">
-                            <h3 className="font-extrabold text-slate-800 text-xs sm:text-sm">Vận hành tự động hóa</h3>
-                            <p className="text-slate-400 text-[11px] leading-normal">
+                          <div className="space-y-1 relative z-10">
+                            <h3 className="font-black text-slate-800 text-sm sm:text-base tracking-tight group-hover:text-[#03377B] transition-colors">Vận hành tự động hóa</h3>
+                            <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed font-medium">
                               Cấp đơn trực tuyến, sửa đổi bổ sung và gia hạn bảo hiểm tức thì.
                             </p>
                           </div>
                         </div>
 
-                        {/* Feature 2 */}
-                        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.02)] flex items-start gap-3.5 hover:shadow-md transition-all duration-300">
-                          <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl flex-shrink-0">
-                            <FileCheck size={18} className="stroke-[2.5]" />
+                        {/* Feature 2: Thẩm định thông minh */}
+                        <div className="bg-gradient-to-br from-white/70 via-slate-50/45 to-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.03)] hover:shadow-[0_20px_50px_rgba(16,185,129,0.08)] hover:border-white/90 transition-all duration-500 transform hover:-translate-y-1 relative overflow-hidden group flex items-start gap-4 text-left">
+                          {/* Soft pastel light background glow */}
+                          <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-emerald-300/15 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-400/25 transition-all duration-500"></div>
+                          
+                          <div className="p-3 bg-gradient-to-br from-emerald-500/15 to-teal-400/5 text-emerald-600 rounded-2xl border border-white/80 shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
+                            <FileCheck size={20} className="stroke-[2.5]" />
                           </div>
-                          <div className="space-y-0.5 text-left">
-                            <h3 className="font-extrabold text-slate-800 text-xs sm:text-sm">Thẩm định thông minh</h3>
-                            <p className="text-slate-400 text-[11px] leading-normal">
+                          <div className="space-y-1 relative z-10">
+                            <h3 className="font-black text-slate-800 text-sm sm:text-base tracking-tight group-hover:text-emerald-600 transition-colors">Thẩm định thông minh</h3>
+                            <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed font-medium">
                               Đối soát nhân sự tự động, thẩm định loại trừ y khoa tức thì qua OCR.
                             </p>
                           </div>
                         </div>
 
-                        {/* Feature 3 */}
-                        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.02)] flex items-start gap-3.5 hover:shadow-md transition-all duration-300">
-                          <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl flex-shrink-0">
-                            <Sparkles size={18} className="stroke-[2.5]" />
+                        {/* Feature 3: Bảo lãnh Viện phí 24/7 */}
+                        <div className="bg-gradient-to-br from-white/70 via-slate-50/45 to-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.03)] hover:shadow-[0_20px_50px_rgba(245,158,11,0.08)] hover:border-white/90 transition-all duration-500 transform hover:-translate-y-1 relative overflow-hidden group flex items-start gap-4 text-left">
+                          {/* Soft pastel light background glow */}
+                          <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-amber-300/15 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-400/25 transition-all duration-500"></div>
+                          
+                          <div className="p-3 bg-gradient-to-br from-amber-500/15 to-orange-400/5 text-amber-600 rounded-2xl border border-white/80 shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
+                            <Sparkles size={20} className="stroke-[2.5]" />
                           </div>
-                          <div className="space-y-0.5 text-left">
-                            <h3 className="font-extrabold text-slate-800 text-xs sm:text-sm">Bảo lãnh Viện phí 24/7</h3>
-                            <p className="text-slate-400 text-[11px] leading-normal">
+                          <div className="space-y-1 relative z-10">
+                            <h3 className="font-black text-slate-800 text-sm sm:text-base tracking-tight group-hover:text-amber-600 transition-colors">Bảo lãnh Viện phí 24/7</h3>
+                            <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed font-medium">
                               Liên kết trực tiếp với hơn 300+ bệnh viện và phòng khám uy tín toàn quốc.
                             </p>
                           </div>

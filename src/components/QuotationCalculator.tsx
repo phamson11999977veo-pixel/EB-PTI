@@ -268,6 +268,19 @@ export default function QuotationCalculator({
               </div>
             );
           })}
+          
+          {/* Compliance note for modified benefits */}
+          {tiers.some(t => t.customInpatientBenefit !== undefined || t.customOutpatientBenefit !== undefined || t.customAccidentBenefit !== undefined || t.customMaternityBenefit !== undefined) && (
+            <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200/60 flex items-start gap-3 text-left animate-fade-in mt-4">
+              <ShieldAlert className="text-blue-600 mt-0.5 flex-shrink-0" size={16} />
+              <div className="space-y-1">
+                <h4 className="text-xs font-black text-blue-800 uppercase tracking-tight">⚠️ QUYỀN LỢI ĐÃ ĐƯỢC CHỈNH SỬA (LƯU VẾT PHÁP LÝ v6.3)</h4>
+                <p className="text-blue-700 text-[11px] leading-relaxed font-medium">
+                  Bạn vừa điều chỉnh chi tiết quyền lợi chương trình so với biểu phí chuẩn của PTI. Để có bằng chứng đối soát pháp lý gửi khách hàng (tránh trường hợp khách hàng tranh chấp về mức quyền lợi sau này), <strong>hãy kéo xuống và bấm nút "TẠO VERSION MỚI" ở góc phải màn hình</strong> để lưu vết và quản lý lịch sử phiên bản báo giá của hồ sơ này.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
