@@ -41,7 +41,8 @@ import {
   Mail,
   Send,
   Maximize2,
-  ShieldAlert
+  ShieldAlert,
+  UserPlus
 } from 'lucide-react';
 
 import { 
@@ -61,6 +62,7 @@ import QuotationCalculator from './components/QuotationCalculator';
 import UnderwritingPanel, { getEmpRiskDetails } from './components/UnderwritingPanel';
 import ContractReview from './components/ContractReview';
 import UnifiedIssuanceFlow from './components/UnifiedIssuanceFlow';
+import OpenIdFlow from './components/OpenIdFlow';
 import { 
   Accident3D, 
   TravelIntl3D, 
@@ -186,7 +188,7 @@ export default function App() {
 
   // Active view state (0 = Dashboard, 1 to 8 = Wizard Steps)
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'listing' | 'pending' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'listing' | 'pending' | 'history' | 'open_id'>('dashboard');
   const [selectedProduct, setSelectedProduct] = useState<'accident' | 'travel_intl' | 'travel_dom' | 'health_pti' | 'elitecare' | 'workers_comp' | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'personal' | 'corporate' | null>(null);
   const [portfolioTab, setPortfolioTab] = useState<'all' | 'draft' | 'completed'>('all');
@@ -1700,6 +1702,19 @@ export default function App() {
                   </span>
                   <span className="bg-[#03377B] text-white border border-white/20 text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm">{completedContracts.length}</span>
                 </button>
+
+                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mt-6 mb-2">QUẢN LÝ ĐỊNH DANH</span>
+                <button
+                  type="button"
+                  onClick={() => { setCurrentStep(0); setActiveTab('open_id'); setSelectedProduct(null); setSelectedCategory(null); }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'open_id' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                >
+                  <span className="flex items-center gap-3">
+                    <UserPlus size={15} className={activeTab === 'open_id' ? 'text-white' : 'text-slate-400'} />
+                    <span>Mở ID Khách hàng</span>
+                  </span>
+                  <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm">MỚI</span>
+                </button>
               </div>
             </div>
 
@@ -2663,6 +2678,13 @@ export default function App() {
                       </table>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* ── OPEN ID FLOW ── */}
+              {currentStep === 0 && activeTab === 'open_id' && (
+                <div className="animate-fade-in">
+                  <OpenIdFlow />
                 </div>
               )}
 
