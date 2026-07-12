@@ -47,20 +47,6 @@ export default function ContractReview({
 
   return (
     <div className="space-y-6">
-      
-      {/* Alert if unresolved risk */}
-      {unresolvedRiskCount > 0 && (
-        <div className="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl flex items-start gap-3">
-          <HelpCircle className="text-rose-600 mt-0.5 flex-shrink-0" size={18} />
-          <div>
-            <h4 className="text-xs font-bold text-rose-800 uppercase">Còn hồ sơ chưa được thẩm định sức khỏe</h4>
-            <p className="text-rose-700 text-xs mt-0.5">
-              Phát hiện <strong>{unresolvedRiskCount} nhân viên</strong> có bệnh lý kê khai nhưng chưa nhận được quyết định thẩm định (phê duyệt loại trừ, từ chối, v.v.). 
-              Bạn nên quay lại bước trước để xử lý nhằm tránh rủi ro từ chối cấp đơn từ ban nghiệp vụ PTI.
-            </p>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         

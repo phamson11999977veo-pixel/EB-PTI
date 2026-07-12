@@ -30,6 +30,7 @@ export interface GroupSizeInfo {
   budgetPerHead: number;
   geography: string;
   duration: string;
+  startDate?: string;
 }
 
 export interface InsuranceProgram {

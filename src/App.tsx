@@ -49,7 +49,8 @@ import {
   Heart,
   Shield,
   Coins,
-  Activity
+  Activity,
+  Plus
 } from 'lucide-react';
 
 import { 
@@ -78,7 +79,8 @@ import {
   EliteCare3D, 
   WorkersComp3D,
   PersonalBanner3D,
-  CorporateBanner3D
+  CorporateBanner3D,
+  CorporateInsuranceGlass3D
 } from './components/ThreeDGraphics';
 
 // Static programs list based on rules
@@ -217,6 +219,7 @@ const MOCK_CUSTOMERS: Record<string, {
   phone: string;
   email: string;
   address: string;
+  industry: string;
 }> = {
   'KH-1024': {
     name: 'Công ty Cổ phần Công nghệ VEO',
@@ -225,7 +228,8 @@ const MOCK_CUSTOMERS: Record<string, {
     contactRole: 'Giám đốc Nhân sự',
     phone: '0987654321',
     email: 'hr@companyveo.vn',
-    address: 'Tòa nhà VEO, Cầu Giấy, Hà Nội'
+    address: 'Tòa nhà VEO, Cầu Giấy, Hà Nội',
+    industry: 'Công nghệ thông tin / Phần mềm'
   },
   'KH-2048': {
     name: 'Công ty TNHH Giải pháp TechDev',
@@ -234,7 +238,8 @@ const MOCK_CUSTOMERS: Record<string, {
     contactRole: 'CEO',
     phone: '0987654321',
     email: 'hoang.tran@techdev.vn',
-    address: 'Quận 3, TP. Hồ Chí Minh'
+    address: 'Quận 3, TP. Hồ Chí Minh',
+    industry: 'Công nghệ thông tin / Phần mềm'
   },
   'KH-4096': {
     name: 'Công ty Cổ phần Thép Việt',
@@ -243,7 +248,8 @@ const MOCK_CUSTOMERS: Record<string, {
     contactRole: 'Trưởng phòng HCNS',
     phone: '0905123456',
     email: 'thang.le@thepviet.vn',
-    address: 'KCN Sóng Thần, Bình Dương'
+    address: 'KCN Sóng Thần, Bình Dương',
+    industry: 'Sản xuất / Chế biến'
   },
   'KH-7777': {
     name: 'Công ty Cổ phần Thương mại & Dịch vụ iPTI',
@@ -252,7 +258,8 @@ const MOCK_CUSTOMERS: Record<string, {
     contactRole: 'Trưởng phòng Hành chính',
     phone: '0912345678',
     email: 'huong.nguyen@ipti.vn',
-    address: '81 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội'
+    address: '81 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội',
+    industry: 'Thương mại / Bán lẻ'
   },
   'KH-9999': {
     name: 'Tập đoàn Đầu tư & Phát triển Hoàng Gia',
@@ -261,7 +268,8 @@ const MOCK_CUSTOMERS: Record<string, {
     contactRole: 'Giám đốc HCNS',
     phone: '0977889900',
     email: 'khang.vu@hoanggia.group',
-    address: 'Lê Duẩn, Quận 1, TP. Hồ Chí Minh'
+    address: 'Lê Duẩn, Quận 1, TP. Hồ Chí Minh',
+    industry: 'Xây dựng / Bất động sản'
   }
 };
 
@@ -277,12 +285,15 @@ export default function App() {
 
   // Active view state (0 = Dashboard, 1 to 8 = Wizard Steps)
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'listing' | 'pending' | 'history' | 'open_id'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'listing' | 'pending' | 'history' | 'open_id'>('open_id');
   const [selectedProduct, setSelectedProduct] = useState<'accident' | 'travel_intl' | 'travel_dom' | 'health_pti' | 'elitecare' | 'workers_comp' | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'personal' | 'corporate' | null>(null);
   const [corporateSubMode, setCorporateSubMode] = useState<'chao_phi' | 'cap_don' | null>(null);
   const [isCorporateMenuExpanded, setIsCorporateMenuExpanded] = useState<boolean>(true);
   const [portfolioTab, setPortfolioTab] = useState<'all' | 'draft' | 'completed'>('all');
+  const [capDonFilterTab, setCapDonFilterTab] = useState<'all' | 'pending' | 'processing' | 'completed'>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [chaoPhiSubTab, setChaoPhiSubTab] = useState<'all' | 'draft' | 'pending' | 'sent' | 'completed'>('all');
 
   // Draft management views search, sort, filters and deletion confirmation
   const [draftSearch, setDraftSearch] = useState('');
@@ -320,13 +331,14 @@ export default function App() {
     lossRatio: 0,
     budgetPerHead: 2000000,
     geography: 'Việt Nam',
-    duration: '1 năm (tiêu chuẩn)'
+    duration: '1 năm (tiêu chuẩn)',
+    startDate: new Date().toISOString().split('T')[0]
   });
 
   const [tiers, setTiers] = useState<EmployeeTier[]>([
-    { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'lvl-5' },
-    { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'lvl-3' },
-    { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'lvl-1' }
+    { id: 'tier-1', name: 'Nhóm 1', headcount: 1, selectedProgramId: 'lvl-5' },
+    { id: 'tier-2', name: 'Nhóm 2', headcount: 2, selectedProgramId: 'lvl-3' },
+    { id: 'tier-3', name: 'Nhóm 3', headcount: 7, selectedProgramId: 'lvl-1' }
   ]);
 
   const [employees, setEmployees] = useState<InsuredEmployee[]>([]);
@@ -354,6 +366,7 @@ export default function App() {
   // Quote Actions & Framework Contract State
   const [isSendingQuote, setIsSendingQuote] = useState(false);
   const [showQuoteSentSuccess, setShowQuoteSentSuccess] = useState(false);
+  const [showQuotePendingPopup, setShowQuotePendingPopup] = useState(false);
   const [isDownloadingQuote, setIsDownloadingQuote] = useState(false);
   const [showQuoteDownloadSuccess, setShowQuoteDownloadSuccess] = useState(false);
   const [isFrameworkContractSigned, setIsFrameworkContractSigned] = useState(false);
@@ -363,6 +376,7 @@ export default function App() {
   const [isOtpLinkSending, setIsOtpLinkSending] = useState(false);
   const [isOtpLinkSent, setIsOtpLinkSent] = useState(false);
   const [showFullContractModal, setShowFullContractModal] = useState(false);
+  const [showBenefitsModal, setShowBenefitsModal] = useState(false);
   const [isDownloadingContract, setIsDownloadingContract] = useState(false);
   const [otpInput, setOtpInput] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -392,6 +406,24 @@ export default function App() {
     }
   ]);
   const [quoteApprovalStatus, setQuoteApprovalStatus] = useState<'Auto_Approved' | 'Pending_Approval' | 'Supervisor_Approved' | 'Supervisor_Rejected'>('Auto_Approved');
+
+  // Dynamically calculate tier headcounts based on employees if employees list is populated (GĐ 2)
+  const activeTiers = (currentStep >= 3 && employees && employees.length > 0)
+    ? tiers.map(tier => {
+        const count = employees.filter(e => e.tierId === tier.id && e.underwritingAction !== 'decline').length;
+        return { ...tier, headcount: count };
+      })
+    : tiers;
+
+  const basePremiumG2 = activeTiers.reduce((sum, tier) => {
+    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
+    return sum + (tier.headcount * (prog?.ratePerHead || 0));
+  }, 0);
+
+  const discountAmountG2 = Math.round((basePremiumG2 * discountRate) / 100);
+  const totalCustomerPayG2 = basePremiumG2 - discountAmountG2;
+  const commissionAmountG2 = Math.round((totalCustomerPayG2 * commissionRate) / 100);
+  const netRemitToPtiG2 = totalCustomerPayG2 - commissionAmountG2;
 
   const handleCreateNewVersion = (notes: string) => {
     const basePremium = tiers.reduce((sum, tier) => {
@@ -736,7 +768,11 @@ export default function App() {
     setQuoteApprovalStatus('Pending_Approval');
     
     // 2. Save draft state with quoteApprovalStatus = 'Pending_Approval'
-    if (!contractId) return;
+    let activeId = contractId;
+    if (!activeId) {
+      activeId = 'PTI-CARE-DFT-' + Math.floor(1000 + Math.random() * 9000);
+      setContractId(activeId);
+    }
 
     let draftStepDisplay = 3; // corresponds to currentStep === 2
 
@@ -748,9 +784,9 @@ export default function App() {
     const nowStr = new Date('2026-07-05T23:17:37-07:00').toISOString();
 
     setDraftContracts(prev => {
-      const existingIdx = prev.findIndex(d => d.id === contractId);
+      const existingIdx = prev.findIndex(d => d.id === activeId);
       const draftData = {
-        id: contractId,
+        id: activeId,
         company: companyInfo.name || 'Công ty chưa đặt tên',
         taxCode: companyInfo.taxCode || '',
         date: existingIdx >= 0 ? prev[existingIdx].date : new Date('2026-07-05T23:17:37-07:00').toLocaleDateString('vi-VN'),
@@ -781,18 +817,8 @@ export default function App() {
       return updated;
     });
 
-    // 3. Show notification
-    setToastNotification({
-      show: true,
-      message: "Đã gửi yêu cầu phê duyệt thành công cho Trưởng bộ phận!",
-      type: 'success'
-    });
-
-    // 4. Return to main list
-    setCurrentStep(0);
-    setActiveTab('dashboard');
-    setSelectedProduct(null);
-    setSelectedCategory('corporate');
+    // 3. Show pending popup instead of redirecting to dashboard
+    setShowQuotePendingPopup(true);
     setCorporateSubMode('chao_phi');
   };
 
@@ -943,7 +969,7 @@ export default function App() {
       role: role
     });
     setCurrentStep(0);
-    setActiveTab('dashboard');
+    setActiveTab('open_id');
     setSelectedCategory(null);
     setPortfolioTab('all');
   };
@@ -958,7 +984,7 @@ export default function App() {
       role: role
     });
     setCurrentStep(0);
-    setActiveTab('dashboard');
+    setActiveTab('open_id');
     setSelectedCategory(null);
     setPortfolioTab('all');
   };
@@ -971,7 +997,7 @@ export default function App() {
       role: 'CA'
     });
     setCurrentStep(0);
-    setActiveTab('dashboard');
+    setActiveTab('open_id');
     setSelectedCategory(null);
     setPortfolioTab('all');
   };
@@ -1013,21 +1039,66 @@ export default function App() {
     });
     setIsPaid(false);
     
+    // Reset pricing configuration and state
+    setQuoteApprovalStatus('Auto_Approved');
+    setDiscountRate(5);
+    setCommissionRate(5);
+    setGpkdFileName('');
+    setExcelFileName('');
+    
+    // Reset group size & default tiers
+    setGroupSizeInfo({
+      headcount: 10,
+      femaleRatio: 40,
+      averageAge: 32,
+      budgetPerHead: 2500000,
+      geography: 'Việt Nam',
+      prevInsurance: 'no',
+      lossRatio: 0,
+      duration: '1_year'
+    });
+    setTiers([
+      { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: 1, selectedProgramId: 'lvl-5' },
+      { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: 2, selectedProgramId: 'lvl-3' },
+      { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: 7, selectedProgramId: 'lvl-1' }
+    ]);
+    
     setCurrentStep(1);
     setActiveTab('listing');
+  };
+
+  // Helper to map draft step displays dynamically
+  const getDraftCurrentStep = (draft: any): number => {
+    if (!draft) return 1;
+    const subMode = draft.corporateSubMode || 'cap_don';
+    if (subMode === 'cap_don') {
+      if (draft.step === 8) return 3;
+      if (draft.step === 5) return 2;
+      return 1; // Step 1 for other steps like step === 4
+    } else {
+      // chao_phi
+      if (draft.step === 6 || draft.step === 7 || draft.step === 8) return 3;
+      if (draft.step === 3 || draft.step === 4 || draft.step === 5) return 2;
+      return 1;
+    }
   };
 
   // Manual Save & Exit
   const saveDraftState = (isManualExit = false) => {
     if (!contractId) return;
 
-    // Map 5 steps to 8 display steps
+    // Map steps dynamically based on submode
     let draftStepDisplay = 1;
-    if (currentStep === 1) draftStepDisplay = 1;
-    else if (currentStep === 2) draftStepDisplay = 3;
-    else if (currentStep === 3) draftStepDisplay = 5;
-    else if (currentStep === 4) draftStepDisplay = 6;
-    else if (currentStep === 5) draftStepDisplay = 8;
+    if (corporateSubMode === 'cap_don') {
+      if (currentStep === 1) draftStepDisplay = 4;
+      else if (currentStep === 2) draftStepDisplay = 5;
+      else if (currentStep === 3) draftStepDisplay = 8;
+    } else {
+      // chao_phi
+      if (currentStep === 1) draftStepDisplay = 1;
+      else if (currentStep === 2) draftStepDisplay = 3;
+      else if (currentStep === 3) draftStepDisplay = 6;
+    }
 
     const estAmount = tiers.reduce((sum, tier) => {
       const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
@@ -1044,6 +1115,7 @@ export default function App() {
         taxCode: companyInfo.taxCode || '',
         date: existingIdx >= 0 ? prev[existingIdx].date : new Date('2026-07-05T23:17:37-07:00').toLocaleDateString('vi-VN'),
         step: draftStepDisplay,
+        corporateSubMode,
         headcount: groupSizeInfo.headcount || 10,
         amount: estAmount,
         lastUpdated: nowStr,
@@ -1082,11 +1154,16 @@ export default function App() {
     if (currentStep > 0 && selectedProduct === 'health_pti' && contractId) {
       const timer = setTimeout(() => {
         let draftStepDisplay = 1;
-        if (currentStep === 1) draftStepDisplay = 1;
-        else if (currentStep === 2) draftStepDisplay = 3;
-        else if (currentStep === 3) draftStepDisplay = 5;
-        else if (currentStep === 4) draftStepDisplay = 6;
-        else if (currentStep === 5) draftStepDisplay = 8;
+        if (corporateSubMode === 'cap_don') {
+          if (currentStep === 1) draftStepDisplay = 4;
+          else if (currentStep === 2) draftStepDisplay = 5;
+          else if (currentStep === 3) draftStepDisplay = 8;
+        } else {
+          // chao_phi
+          if (currentStep === 1) draftStepDisplay = 1;
+          else if (currentStep === 2) draftStepDisplay = 3;
+          else if (currentStep === 3) draftStepDisplay = 6;
+        }
 
         const estAmount = tiers.reduce((sum, tier) => {
           const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
@@ -1103,6 +1180,7 @@ export default function App() {
             taxCode: companyInfo.taxCode || '',
             date: existingIdx >= 0 ? prev[existingIdx].date : new Date('2026-07-05T23:17:37-07:00').toLocaleDateString('vi-VN'),
             step: draftStepDisplay,
+            corporateSubMode,
             headcount: groupSizeInfo.headcount || 10,
             amount: estAmount,
             lastUpdated: nowStr,
@@ -1122,8 +1200,9 @@ export default function App() {
           const updated = [...prev];
           if (existingIdx >= 0) {
             const existing = updated[existingIdx];
-            // Compare step, name, taxCode, headcount, and amount to avoid infinite loop renders
+            // Compare step, submode, name, taxCode, headcount, and amount to avoid infinite loop renders
             if (existing.step !== draftStepDisplay || 
+                existing.corporateSubMode !== corporateSubMode ||
                 existing.company !== draftData.company || 
                 existing.taxCode !== draftData.taxCode || 
                 existing.amount !== draftData.amount ||
@@ -1143,7 +1222,7 @@ export default function App() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, companyInfo.name, companyInfo.taxCode, groupSizeInfo.headcount, tiers, employees.length, contractId, selectedProduct, quoteApprovalStatus]);
+  }, [currentStep, companyInfo.name, companyInfo.taxCode, groupSizeInfo.headcount, tiers, employees.length, contractId, selectedProduct, quoteApprovalStatus, corporateSubMode]);
 
   // Resume Draft
   const handleResumeDraft = (draft: any) => {
@@ -1239,8 +1318,14 @@ export default function App() {
       setQuoteApprovalStatus(isOutOfStandard ? 'Pending_Approval' : 'Auto_Approved');
     }
 
-    // Remap step (1-8) to the new 5 steps
-    const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
+    if (draft.corporateSubMode) {
+      setCorporateSubMode(draft.corporateSubMode);
+    } else {
+      setCorporateSubMode('cap_don');
+    }
+
+    // Remap step (1-8) to the current dynamic step structure
+    const mappedStep = getDraftCurrentStep(draft);
     setCurrentStep(mappedStep);
     
     // Set active product and tab
@@ -1248,108 +1333,106 @@ export default function App() {
     setActiveTab('listing');
   };
 
-  // Step Validation & Forward (Streamlined 5-step flow)
+  // Step Validation & Forward (Streamlined 3-step flow)
   const handleNextStep = () => {
-    if (currentStep === 1) {
-      if (!companyInfo.name || !companyInfo.taxCode || !companyInfo.phone || !companyInfo.email) {
-        alert('Vui lòng điền đầy đủ các thông tin bắt buộc (*)');
-        return;
-      }
-      if (groupSizeInfo.headcount < 5) {
-        alert('Số lượng nhân viên tối thiểu để cấp đơn nhóm PTI Care là 5 người');
-        return;
-      }
+    if (corporateSubMode === 'chao_phi') {
+      if (currentStep === 1) {
+        if (!companyInfo.name || !companyInfo.taxCode || !companyInfo.phone || !companyInfo.email) {
+          alert('Vui lòng điền đầy đủ các thông tin bắt buộc (*)');
+          return;
+        }
+        if (groupSizeInfo.headcount < 5) {
+          alert('Số lượng nhân viên tối thiểu để cấp đơn nhóm PTI Care là 5 người');
+          return;
+        }
 
-      // Pre-distribute the headcount into tiers and pre-generate employee list
-      const currentTotal = tiers.reduce((s, t) => s + t.headcount, 0);
-      if (currentTotal !== groupSizeInfo.headcount || employees.length === 0) {
-        const exeCount = Math.round(groupSizeInfo.headcount * 0.1) || 1;
-        const mgrCount = Math.round(groupSizeInfo.headcount * 0.2) || 2;
-        const staffCount = groupSizeInfo.headcount - exeCount - mgrCount;
-        
-        setTiers([
-          { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: exeCount, selectedProgramId: recommendedProgram.id },
-          { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: mgrCount, selectedProgramId: recommendedProgram.id },
-          { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: staffCount, selectedProgramId: recommendedProgram.id }
-        ]);
-
-        // Auto generate demo employees
-        const generated: InsuredEmployee[] = Array.from({ length: groupSizeInfo.headcount }).map((_, idx) => {
-          let tId = 'tier-3';
-          let pos = 'Nhân viên';
-          if (idx === 0) {
-            tId = 'tier-1';
-            pos = 'Giám đốc Điều hành (CEO)';
-          } else if (idx < exeCount) {
-            tId = 'tier-1';
-            pos = 'Thành viên Ban giám đốc';
-          } else if (idx < exeCount + mgrCount) {
-            tId = 'tier-2';
-            pos = 'Trưởng phòng / Quản lý';
-          }
+        // Pre-distribute the headcount into tiers and pre-generate employee list
+        const currentTotal = tiers.reduce((s, t) => s + t.headcount, 0);
+        if (currentTotal !== groupSizeInfo.headcount || employees.length === 0) {
+          const exeCount = Math.round(groupSizeInfo.headcount * 0.1) || 1;
+          const mgrCount = Math.round(groupSizeInfo.headcount * 0.2) || 2;
+          const staffCount = groupSizeInfo.headcount - exeCount - mgrCount;
           
-          const names = ['Nguyễn Hoàng Nam', 'Phạm Minh Trí', 'Trần Thị Thúy', 'Hoàng Minh Tuấn', 'Nguyễn Hương Ly', 'Lê Văn Thắng', 'Đặng Kim Chi', 'Vũ Quốc Khánh', 'Phạm Thị Mai', 'Đỗ Anh Dũng'];
-          const sampleName = names[idx % names.length] + (idx >= names.length ? ` (${idx - names.length + 1})` : '');
-          
-          // Make 2 of the employees have pre-existing health issues
-          let exception: 'none' | 'mild' | 'severe' = 'none';
-          let note = 'Sức khỏe bình thường';
-          if (idx === 1) {
-            exception = 'mild';
-            note = 'Cận thị nặng';
-          } else if (idx === 3) {
-            exception = 'severe';
-            note = 'Tiểu đường, Viêm gan B';
-          }
+          setTiers([
+            { id: 'tier-1', name: 'Ban Điều Hành / Giám đốc', headcount: exeCount, selectedProgramId: recommendedProgram.id },
+            { id: 'tier-2', name: 'Quản lý / Trưởng phòng', headcount: mgrCount, selectedProgramId: recommendedProgram.id },
+            { id: 'tier-3', name: 'Nhân viên phổ thông', headcount: staffCount, selectedProgramId: recommendedProgram.id }
+          ]);
 
-          return {
-            id: `emp-auto-${idx}`,
-            name: sampleName,
-            dob: '15/06/1990',
-            cccd: `00109000${1000 + idx}`,
-            gender: idx % 2 === 0 ? 'Nam' : 'Nữ',
-            email: `emp${idx + 1}@${companyInfo.email.split('@')[1] || 'company.com'}`,
-            tierId: tId,
-            healthStatus: exception === 'none' ? 'Sạch' : exception === 'mild' ? 'Đang xử lý' : 'Có rủi ro',
-            hasPreExisting: exception !== 'none',
-            hasHospitalized12m: exception === 'severe',
-            hasOngoingTreatment: exception === 'severe',
-            treatmentDetails: note,
-            underwritingAction: 'none'
-          };
-        });
-        setEmployees(generated);
+          // Auto generate demo employees
+          const generated: InsuredEmployee[] = Array.from({ length: groupSizeInfo.headcount }).map((_, idx) => {
+            let tId = 'tier-3';
+            let pos = 'Nhân viên';
+            if (idx === 0) {
+              tId = 'tier-1';
+              pos = 'Giám đốc Điều hành (CEO)';
+            } else if (idx < exeCount) {
+              tId = 'tier-1';
+              pos = 'Thành viên Ban giám đốc';
+            } else if (idx < exeCount + mgrCount) {
+              tId = 'tier-2';
+              pos = 'Trưởng phòng / Quản lý';
+            }
+            
+            const names = ['Nguyễn Hoàng Nam', 'Phạm Minh Trí', 'Trần Thị Thúy', 'Hoàng Minh Tuấn', 'Nguyễn Hương Ly', 'Lê Văn Thắng', 'Đặng Kim Chi', 'Vũ Quốc Khánh', 'Phạm Thị Mai', 'Đỗ Anh Dũng'];
+            const sampleName = names[idx % names.length] + (idx >= names.length ? ` (${idx - names.length + 1})` : '');
+            
+            // Make 2 of the employees have pre-existing health issues
+            let exception: 'none' | 'mild' | 'severe' = 'none';
+            let note = 'Sức khỏe bình thường';
+            if (idx === 1) {
+              exception = 'mild';
+              note = 'Cận thị nặng';
+            } else if (idx === 3) {
+              exception = 'severe';
+              note = 'Tiểu đường, Viêm gan B';
+            }
+
+            return {
+              id: `emp-auto-${idx}`,
+              name: sampleName,
+              dob: '15/06/1990',
+              cccd: `00109000${1000 + idx}`,
+              gender: idx % 2 === 0 ? 'Nam' : 'Nữ',
+              email: `emp${idx + 1}@${companyInfo.email.split('@')[1] || 'company.com'}`,
+              tierId: tId,
+              healthStatus: exception === 'none' ? 'Sạch' : exception === 'mild' ? 'Đang xử lý' : 'Có rủi ro',
+              hasPreExisting: exception !== 'none',
+              hasHospitalized12m: exception === 'severe',
+              hasOngoingTreatment: exception === 'severe',
+              treatmentDetails: note,
+              underwritingAction: 'none'
+            };
+          });
+          setEmployees(generated);
+        }
       }
-    }
-
-    if (currentStep === 2) {
-      handleSendQuoteEmail();
-      return;
-    }
-
-    if (currentStep === 3) {
-      if (employees.length === 0) {
-        alert('Vui lòng tải lên danh sách nhân viên để tiếp tục');
+      
+      if (currentStep === 3) {
         return;
       }
-    }
+    } else { // cap_don
+      if (currentStep === 1) {
+        if (employees.length === 0) {
+          alert('Vui lòng nạp nhanh danh sách nhân viên hoặc tải lên file danh sách thực tế để tiếp tục.');
+          return;
+        }
+      }
 
-    if (currentStep === 4) {
-      if (!isFrameworkContractSigned) {
-        alert('Vui lòng thực hiện Ký điện tử Hợp đồng khung bằng OTP trước khi tiến hành Thanh toán!');
+      if (currentStep === 3) {
         return;
       }
-    }
-
-    if (currentStep === 5) {
-      return;
     }
 
     setCurrentStep(prev => prev + 1);
   };
 
   const handlePrevStep = () => {
-    setCurrentStep(prev => prev - 1);
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    } else {
+      setCurrentStep(0);
+    }
   };
 
   // Submit Mock Payment
@@ -1449,6 +1532,514 @@ export default function App() {
     return finalAmount;
   };
 
+  const renderFrameworkContractSigning = () => {
+    return (
+      <>
+        {/* Framework Contract & OTP Signing Card */}
+        <div className="card border border-slate-100 text-left">
+          <div className="card-title">
+            <ShieldCheck className="text-[#03377B]" size={18} />
+            <span>Ký hợp đồng khung Bảo hiểm điện tử bằng OTP</span>
+          </div>
+          <p className="text-xs text-slate-500 mb-4">
+            Hợp đồng khung (Hợp đồng nguyên tắc) quy định các điều khoản chung, quyền lợi bảo lãnh, tỷ lệ bồi thường và biểu phí áp dụng cho Công ty {companyInfo.name || 'đối tác'}.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Contract View Simulator */}
+            <div className="md:col-span-7 bg-slate-50 border border-slate-200 rounded-2xl p-4.5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-3">
+                  <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
+                    <FileText size={15} className="text-[#03377B]" />
+                    PTI_CARE_FRAMEWORK_CONTRACT.PDF
+                  </span>
+                  <span className="text-[10px] bg-slate-200 text-slate-500 font-bold px-2 py-0.5 rounded-sm">BẢN ĐỌC GHI CHỈ ĐỌC</span>
+                </div>
+
+                {/* Beautiful Real Document Formatted Preview */}
+                <div className="bg-white shadow-xs rounded-xl p-5 text-xs text-slate-700 leading-relaxed font-sans space-y-4 text-left border border-slate-200/85 h-80 overflow-y-auto relative select-none">
+                  <div className="text-center space-y-1 mb-5">
+                    <p className="font-extrabold text-slate-800 tracking-wider text-[11px]">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                    <p className="font-bold text-slate-500 text-[9px] uppercase">Độc lập - Tự do - Hạnh phúc</p>
+                    <div className="w-16 h-[1px] bg-slate-300 mx-auto mt-2"></div>
+                  </div>
+                  
+                  <p className="font-black text-slate-900 text-center text-xs uppercase my-3 tracking-tight leading-snug">
+                    HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM<br />
+                    <span className="text-[#03377B] text-[10px] font-extrabold">CHƯƠNG TRÌNH PTI CARE DOANH NGHIỆP THẾ HỆ MỚI</span>
+                  </p>
+                  
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 text-[10px] text-slate-500 space-y-1">
+                    <p><strong>Số hợp đồng:</strong> HDNT/PTI-CARE/{companyInfo.taxCode || '12345678'}</p>
+                    <p><strong>Ngày lập dự thảo:</strong> {new Date().toLocaleDateString('vi-VN')}</p>
+                  </div>
+
+                  <p className="text-[11px] italic">Hôm nay, ngày {new Date().toLocaleDateString('vi-VN')}, chúng tôi gồm các bên dưới đây đồng ý ký kết hợp đồng này:</p>
+                  
+                  <div className="space-y-1 pt-1">
+                    <p className="font-extrabold text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[10px]">BÊN A: TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM BƯU ĐIỆN (PTI)</p>
+                    <div className="pl-3.5 space-y-0.5 text-slate-600 text-[11px]">
+                      <p>• <strong>Địa chỉ:</strong> Tầng 8, Tòa nhà Harec, Số 4A Láng Hạ, Ba Đình, Hà Nội</p>
+                      <p>• <strong>Người đại diện:</strong> Nguyễn Văn An - Chức vụ: Giám đốc Ban Bảo hiểm Con người</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 pt-1">
+                    <p className="font-extrabold text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[10px]">BÊN B: {companyInfo.name || 'CÔNG TY ĐỐI TÁC KHÁCH HÀNG'}</p>
+                    <div className="pl-3.5 space-y-0.5 text-slate-600 text-[11px]">
+                      <p>• <strong>Mã số thuế:</strong> {companyInfo.taxCode || 'N/A'}</p>
+                      <p>• <strong>Đại diện:</strong> {companyInfo.contactName || 'N/A'} - Chức vụ: {companyInfo.contactRole || 'N/A'}</p>
+                      <p>• <strong>Số điện thoại:</strong> {companyInfo.phone || 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 text-[11px]">
+                    <p className="font-extrabold text-slate-900 uppercase text-[10px] border-b border-slate-100 pb-1">ĐIỀU 1: PHẠM VI BẢO HIỂM & QUYỀN LỢI</p>
+                    <p className="text-slate-600 mt-1">Bên A đồng ý cấp bảo hiểm sức khỏe PTI Care cho toàn bộ cán bộ nhân viên của Bên B theo danh sách đính kèm tại Bước 3.</p>
+                  </div>
+
+                  <div className="pt-1 text-[11px]">
+                    <p className="font-extrabold text-slate-900 uppercase text-[10px] border-b border-slate-100 pb-1">ĐIỀU 2: PHÍ BẢO HIỂM & THANH TOÁN</p>
+                    <p className="text-slate-600 mt-1">Bên B có trách nhiệm thanh toán đầy đủ phí bảo hiểm cho Bên A theo thời hạn quy định để kích hoạt tài khoản bảo hiểm điện tử.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* View & Download Buttons */}
+              <div className="flex gap-2.5 mt-3.5">
+                <button
+                  type="button"
+                  onClick={() => setShowFullContractModal(true)}
+                  className="flex-1 py-2 px-4 bg-white hover:bg-slate-50 text-[#03377B] border border-slate-200/80 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 hover:border-[#03377B]/50"
+                >
+                  <Maximize2 size={13} className="text-[#03377B]" />
+                  <span>Xem toàn văn hợp đồng</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadContractPdf}
+                  disabled={isDownloadingContract}
+                  className="flex-1 py-2 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 hover:border-slate-300"
+                >
+                  {isDownloadingContract ? (
+                    <>
+                      <RefreshCw className="animate-spin text-slate-500" size={13} />
+                      <span>Đang tải...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download size={13} className="text-slate-500" />
+                      <span>Tải PDF bản gốc</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Digital OTP Signing Controls */}
+            <div className="md:col-span-5 flex flex-col justify-between">
+              
+              {isFrameworkContractSigned ? (
+                /* Completed Green Signed State */
+                <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-5 space-y-4 shadow-md border border-emerald-500/10 animate-fade-in text-left flex flex-col justify-between h-full">
+                  <div className="space-y-3.5">
+                    <div className="flex items-center gap-3 border-b border-white/20 pb-3.5">
+                      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white text-base font-black shrink-0 shadow-inner">
+                        ✓
+                      </div>
+                      <div>
+                        <h4 className="font-black text-xs uppercase tracking-wider text-emerald-100">KÝ ĐIỆN TỬ HOÀN TẤT</h4>
+                        <p className="text-[10px] text-emerald-50/90 font-medium">Đã xác thực OTP & khóa mã hóa hợp đồng</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-[11px]">
+                      <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
+                        <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Thời gian xác nhận ký:</span>
+                        <span className="font-mono font-bold text-white block">06/07/2026 10:24:15 UTC+7</span>
+                      </div>
+
+                      <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
+                        <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Địa chỉ IP / Thiết bị:</span>
+                        <span className="font-bold text-white block truncate">113.161.42.xx (Chrome / macOS Sonoma)</span>
+                      </div>
+
+                      <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
+                        <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Số chứng thư số điện tử:</span>
+                        <span className="font-mono font-bold text-white block text-[10px] tracking-tight">CA-PTI-2026-992837482-SHA256</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5 pt-4 border-t border-white/15">
+                    <div className="text-[10px] text-emerald-100 leading-normal bg-black/15 p-2.5 rounded-lg border border-emerald-500/10">
+                      🔒 Văn bản điện tử đã được mã hóa bảo mật, chống sửa đổi. Khách hàng đã chấp thuận các điều khoản PTI Care.
+                    </div>
+
+                    <div className="bg-emerald-800/40 border border-emerald-500/25 rounded-xl p-2.5 text-center">
+                      <span className="text-[9px] text-white font-extrabold block uppercase tracking-wider">✓ Sẵn sàng phát hành thẻ</span>
+                    </div>
+                  </div>
+                </div>
+              ) : user?.role === 'CA' ? (
+                /* 3-Step Timeline View for Corporate Agent (CA) */
+                <div className="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between h-full space-y-4">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-xs font-black text-[#03377B] uppercase tracking-wider block">TIẾN TRÌNH DUYỆT & KÝ SỐ</span>
+                      <p className="text-[10px] text-slate-500 leading-normal">Giám sát trạng thái rà soát hợp đồng của Khách hàng theo thời gian thực.</p>
+                    </div>
+
+                    <div className="space-y-3.5 pt-1">
+                      {/* Step 1: Draft Sent */}
+                      <div className="flex gap-2.5">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                            isReviewMailSent 
+                              ? 'bg-emerald-500 text-white' 
+                              : 'bg-amber-100 text-amber-700 ring-2 ring-amber-300'
+                          }`}>
+                            {isReviewMailSent ? '✓' : '1'}
+                          </div>
+                          <div className={`w-[1.5px] h-9 my-0.5 ${isReviewMailSent ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-black text-slate-700">1. Gửi bản nháp duyệt</span>
+                            {isReviewMailSent ? (
+                              <span className="text-[8px] bg-emerald-500/10 text-emerald-700 px-1 py-0.2 rounded font-extrabold uppercase">ĐÃ GỬI</span>
+                            ) : (
+                              <span className="text-[8px] bg-amber-500/15 text-amber-700 px-1 py-0.2 rounded font-extrabold uppercase animate-pulse">CẦN LÀM</span>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-slate-400">Gửi mail nháp kèm quyền lợi cho khách hàng kiểm tra trước.</p>
+                          
+                          {!isReviewMailSent && (
+                            <button
+                              type="button"
+                              onClick={handleSendReviewEmail}
+                              disabled={isReviewMailSending}
+                              className="mt-1.5 py-1 px-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-100 text-slate-950 disabled:text-slate-400 font-extrabold text-[9px] rounded-lg transition flex items-center gap-1 shadow-xs active:scale-95"
+                            >
+                              {isReviewMailSending ? (
+                                <>
+                                  <RefreshCw className="animate-spin text-slate-950" size={10} />
+                                  <span>Đang gửi...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Send size={9} className="stroke-[2.5]" />
+                                  <span>GỬI MAIL DUYỆT TRƯỚC</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Step 2: Signing Link Sent */}
+                      <div className="flex gap-2.5">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                            isOtpLinkSent 
+                              ? 'bg-emerald-500 text-white' 
+                              : isReviewMailSent 
+                                ? 'bg-blue-100 text-[#03377B] ring-2 ring-blue-300' 
+                                : 'bg-slate-100 text-slate-400'
+                          }`}>
+                            {isOtpLinkSent ? '✓' : '2'}
+                          </div>
+                          <div className={`w-[1.5px] h-9 my-0.5 ${isOtpLinkSent ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-black text-slate-700">2. Gửi liên kết ký số OTP</span>
+                            {isOtpLinkSent ? (
+                              <span className="text-[8px] bg-emerald-500/10 text-emerald-700 px-1 py-0.2 rounded font-extrabold uppercase">ĐÃ GỬI</span>
+                            ) : isReviewMailSent ? (
+                              <span className="text-[8px] bg-blue-100 text-blue-700 px-1 py-0.2 rounded font-extrabold uppercase">SẴN SÀNG</span>
+                            ) : (
+                              <span className="text-[8px] bg-slate-100 text-slate-400 px-1 py-0.2 rounded font-bold">CHỜ B1</span>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-slate-400">Gửi link SMS & Email bảo mật chứa mã OTP cho khách ký số.</p>
+                          
+                          {isReviewMailSent && !isOtpLinkSent && (
+                            <button
+                              type="button"
+                              onClick={handleSendOtpLink}
+                              disabled={isOtpLinkSending}
+                              className="mt-1.5 py-1 px-2 bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-100 text-white disabled:text-slate-400 font-extrabold text-[9px] rounded-lg transition flex items-center gap-1 shadow-xs active:scale-95"
+                            >
+                              {isOtpLinkSending ? (
+                                <>
+                                  <RefreshCw className="animate-spin text-white" size={10} />
+                                  <span>Đang gửi link...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Send size={9} />
+                                  <span>GỬI LIÊN KẾT KÝ SỐ</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Step 3: Customer Signature */}
+                      <div className="flex gap-2.5">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                            isFrameworkContractSigned 
+                              ? 'bg-emerald-500 text-white' 
+                              : isOtpLinkSent 
+                                ? 'bg-orange-100 text-orange-700 ring-2 ring-orange-300' 
+                                : 'bg-slate-100 text-slate-400'
+                          }`}>
+                            {isFrameworkContractSigned ? '✓' : '3'}
+                          </div>
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-black text-slate-700">3. Khách hàng ký số</span>
+                            {isOtpLinkSent ? (
+                              <span className="text-[8px] bg-orange-100 text-orange-700 px-1 py-0.2 rounded font-extrabold uppercase animate-pulse">ĐANG KÝ</span>
+                            ) : (
+                              <span className="text-[8px] bg-slate-100 text-slate-400 px-1 py-0.2 rounded font-bold">CHỜ B2</span>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-slate-400">Khách tự nhập OTP nhận được để kích hoạt chứng thư số.</p>
+                          
+                          {isOtpLinkSent && (
+                            <div className="mt-2 space-y-2">
+                              <button
+                                type="button"
+                                onClick={handleRemindSign}
+                                className="w-full py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg transition flex items-center justify-center gap-1 shadow-xs"
+                              >
+                                <Send size={10} className="text-slate-500" />
+                                <span>GỬI NHẮC KÝ LẠI (REMIND)</span>
+                              </button>
+
+                              {/* Beautiful simulation box for testing in the workspace */}
+                              <div className="bg-amber-50 border border-dashed border-amber-200 rounded-lg p-2 text-left">
+                                <span className="text-[8px] text-amber-700 font-extrabold block uppercase tracking-wider mb-0.5">⚡ GIẢ LẬP KHÁCH HÀNG KÝ</span>
+                                <p className="text-[8px] text-slate-500 mb-1 leading-relaxed">Ký thay Khách hàng để trải nghiệm tiếp quy trình hoàn tất.</p>
+                                <button
+                                  type="button"
+                                  onClick={handleMockCustomerSign}
+                                  disabled={isSigningContract}
+                                  className="w-full py-1 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-100 text-slate-950 font-black text-[9px] rounded-md transition flex items-center justify-center gap-1"
+                                >
+                                  {isSigningContract ? (
+                                    <RefreshCw className="animate-spin text-slate-950" size={10} />
+                                  ) : (
+                                    <span>Xác thực OTP (Mô phỏng Khách ký)</span>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-200 text-left">
+                    <div className="text-[10px] text-amber-600 font-extrabold flex items-start gap-1.5 leading-normal bg-amber-50/75 p-2 rounded-xl border border-amber-100">
+                      <span>⚠️</span>
+                      <span>CA không thể xem hoặc nhập mã OTP thay khách hàng. Khách hàng phải tự thao tác trên thiết bị cá nhân để đảm bảo tính pháp lý.</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Standard Direct OTP Signing for general users/clients */
+                <div className="bg-blue-50/20 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between space-y-4 text-left h-full">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black text-[#03377B] uppercase tracking-wider block">XÁC THỰC CHỮ KÝ SỐ OTP</span>
+                    <p className="text-[11px] text-slate-500">Mã xác thực OTP ký số hợp đồng sẽ được gửi qua SMS đến số điện thoại của người đại diện Bên B.</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1 text-left">
+                      <span className="text-[10px] font-bold text-slate-500 block">Số điện thoại ký kết</span>
+                      <span className="text-xs font-bold text-slate-800 block bg-white px-3 py-2 rounded-xl border border-slate-200">{companyInfo.phone || '0988 234 567'}</span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-slate-500">Nhập mã xác thực OTP (6 chữ số)</span>
+                        {isOtpSent && (
+                          <span className="text-[9px] text-emerald-600 font-bold">✓ Đã gửi OTP</span>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          maxLength={6}
+                          placeholder="VD: 123456"
+                          value={otpInput}
+                          onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                          disabled={!isOtpSent || isFrameworkContractSigned}
+                          className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-center tracking-widest outline-none focus:border-[#03377B] disabled:bg-slate-100 disabled:text-slate-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={isFrameworkContractSigned || otpCountdown > 0}
+                          className="bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-200 text-white disabled:text-slate-400 px-3 py-2 text-[11px] font-bold rounded-xl transition flex-shrink-0"
+                        >
+                          {otpCountdown > 0 ? `Gửi lại (${otpCountdown}s)` : isOtpSent ? 'Gửi lại mã' : 'Nhận mã OTP'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSignContract}
+                    disabled={!isOtpSent || isSigningContract || otpInput.length !== 6}
+                    className="w-full py-2.5 bg-gradient-to-r from-[#03377B] to-sky-600 hover:from-blue-800 hover:to-sky-700 disabled:from-slate-200 disabled:to-slate-200 text-white disabled:text-slate-400 font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-95"
+                  >
+                    {isSigningContract ? (
+                      <>
+                        <RefreshCw className="animate-spin text-white" size={14} />
+                        <span>Đang ký điện tử...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>KÝ ĐIỆN TỬ NGAY BẰNG OTP</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Complete Detailed Contract Preview Modal */}
+        {showFullContractModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl flex flex-col h-[85vh] border border-slate-100 text-left overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-150 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <FileText className="text-[#03377B]" size={20} />
+                  <div>
+                    <h3 className="font-black text-slate-800 text-sm">HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM</h3>
+                    <p className="text-[10px] text-slate-400">PTI_CARE_FRAMEWORK_CONTRACT.PDF (DỰ THẢO CHÍNH THỨC)</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFullContractModal(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-200/50 rounded-xl transition"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 font-sans text-xs text-slate-700 leading-relaxed space-y-4">
+                <div className="text-center space-y-1 mb-6">
+                  <p className="font-black text-slate-900 tracking-wider text-xs">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                  <p className="font-extrabold text-slate-500 text-[10px]">Độc lập - Tự do - Hạnh phúc</p>
+                  <div className="w-20 h-[1.5px] bg-slate-300 mx-auto mt-2"></div>
+                </div>
+
+                <h2 className="font-black text-slate-900 text-center text-sm uppercase my-6 tracking-tight">
+                  HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM<br />
+                  <span className="text-[#03377B] text-xs font-black">CHƯƠNG TRÌNH SỨC KHỎE DOANH NGHIỆP PTI CARE THẾ HỆ MỚI</span>
+                </h2>
+
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-1 max-w-md mx-auto mb-6">
+                  <p><strong>Số hợp đồng:</strong> HDNT/PTI-CARE/{companyInfo.taxCode || '12345678'}</p>
+                  <p><strong>Ngày lập dự thảo:</strong> {new Date().toLocaleDateString('vi-VN')}</p>
+                  <p><strong>Hình thức giao kết:</strong> Giao kết điện tử bằng OTP có xác thực CA</p>
+                </div>
+
+                <p className="italic">Hôm nay, ngày {new Date().toLocaleDateString('vi-VN')}, tại Văn phòng Công ty Cổ phần Bảo hiểm Bưu điện (PTI) và hệ thống Giao dịch Bảo hiểm điện tử, hai bên gồm có:</p>
+
+                <div className="space-y-2 pt-2">
+                  <p className="font-black text-slate-900 border-l-4 border-[#03377B] pl-2 uppercase">BÊN A: TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM BƯU ĐIỆN (PTI)</p>
+                  <div className="pl-5 space-y-1 text-slate-600">
+                    <p>• <strong>Địa chỉ:</strong> Tầng 8, Tòa nhà Harec, Số 4A Láng Hạ, Ba Đình, Hà Nội</p>
+                    <p>• <strong>Người đại diện:</strong> Nguyễn Văn An - Chức vụ: Giám đốc Ban Bảo hiểm Con người</p>
+                    <p>• <strong>Quyết định ủy quyền số:</strong> 1802/QD-PTI ban hành bởi Tổng Giám đốc PTI</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <p className="font-black text-slate-900 border-l-4 border-[#03377B] pl-2 uppercase">BÊN B: {companyInfo.name || 'CÔNG TY ĐỐI TÁC KHÁCH HÀNG'}</p>
+                  <div className="pl-5 space-y-1 text-slate-600">
+                    <p>• <strong>Địa chỉ trụ sở:</strong> {companyInfo.address || 'Chưa cập nhật'}</p>
+                    <p>• <strong>Mã số thuế:</strong> {companyInfo.taxCode || 'N/A'}</p>
+                    <p>• <strong>Người đại diện pháp luật:</strong> {companyInfo.contactName || 'N/A'} - Chức vụ: {companyInfo.contactRole || 'N/A'}</p>
+                    <p>• <strong>Điện thoại ký kết:</strong> {companyInfo.phone || 'N/A'}</p>
+                    <p>• <strong>Email nhận hóa đơn:</strong> {companyInfo.email || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 space-y-2">
+                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 1: PHẠM VI BẢO HIỂM & QUYỀN LỢI</p>
+                  <p className="text-slate-600">1.1. Bên A đồng ý cấp bảo hiểm sức khỏe PTI Care cho cán bộ nhân viên của Bên B theo danh sách và chương trình bảo hiểm chi tiết đã được hai bên đồng thuận xác nhận.</p>
+                  <p className="text-slate-600">1.2. Quyền lợi bảo hiểm bao gồm: Điều trị nội trú do ốm đau bệnh tật, điều trị ngoại trú mở rộng, tai nạn cá nhân 24/7 và quyền lợi chăm sóc răng miệng theo đúng báo giá đã được CA phê duyệt.</p>
+                </div>
+
+                <div className="pt-3 space-y-2">
+                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 2: BẢO LÃNH VIỆN PHÍ & GIẢI QUYẾT BỒI THƯỜNG</p>
+                  <p className="text-slate-600">2.1. Người được bảo hiểm được hưởng quyền lợi bảo lãnh viện phí trực tiếp tại hơn 200 bệnh viện/phòng khám liên kết của PTI trên toàn quốc khi xuất trình giấy tờ tùy thân và e-card điện tử.</p>
+                  <p className="text-slate-600">2.2. Đối với cơ sở y tế ngoài hệ thống bảo lãnh, người được bảo hiểm nộp hồ sơ yêu cầu bồi thường trực tuyến qua ứng dụng iPTI, thời gian giải quyết tối đa 5 ngày làm việc.</p>
+                </div>
+
+                <div className="pt-3 space-y-2">
+                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 3: HIỆU LỰC & CHỮ KÝ SỐ PHÁP LÝ</p>
+                  <p className="text-slate-600">3.1. Hợp đồng này chính thức có hiệu lực kể từ thời điểm Đại diện hợp pháp của hai bên ký điện tử thành công qua hệ thống chữ ký số dùng một lần OTP được cấp bởi tổ chức chứng thực CA hợp pháp.</p>
+                  <p className="text-slate-600">3.2. Chữ ký số OTP có giá trị pháp lý đầy đủ theo quy định của Luật Giao dịch điện tử hiện hành.</p>
+                </div>
+
+                <div className="pt-8 border-t border-slate-200 flex justify-between text-[10px] text-slate-400">
+                  <span>Đại diện Bên A</span>
+                  <span>Đại diện Bên B</span>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-slate-150 flex items-center justify-between bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setShowFullContractModal(false)}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-250 text-slate-700 text-xs font-bold rounded-xl transition"
+                >
+                  Đóng cửa sổ
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadContractPdf}
+                  disabled={isDownloadingContract}
+                  className="px-5 py-2.5 bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-200 text-white disabled:text-slate-400 text-xs font-black rounded-xl shadow transition flex items-center gap-1.5"
+                >
+                  {isDownloadingContract ? (
+                    <>
+                      <RefreshCw className="animate-spin text-white" size={14} />
+                      <span>Đang tải xuống...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download size={14} />
+                      <span>TẢI FILE PDF CHÍNH THỨC</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="font-sans min-h-screen bg-slate-50 flex flex-col text-slate-800">
       
@@ -1490,13 +2081,10 @@ export default function App() {
             <button
               onClick={() => {
                 setShowQuoteSentSuccess(false);
-                setCurrentStep(0);
-                setActiveTab('dashboard');
-                setSelectedCategory('corporate');
-                setCorporateSubMode('chao_phi');
+                setCurrentStep(3); // Go to Step 3 (Hợp đồng khung)
                 setToastNotification({
                   show: true,
-                  message: "Báo giá đã được gửi thành công cho khách hàng và lưu trạng thái!",
+                  message: "Báo giá gửi thành công! Chuyển đến bước thiết lập Hợp đồng khung.",
                   type: 'success'
                 });
               }}
@@ -1536,23 +2124,100 @@ export default function App() {
               ✓ Đối tác đã nhận được tài liệu đính kèm bảng quyền lợi & bảng phí tải chi tiết.
             </p>
 
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={handleDownloadQuotePdf}
+                disabled={isDownloadingQuote}
+                className="w-full py-2.5 bg-[#03377B]/5 hover:bg-[#03377B]/10 text-[#03377B] border border-[#03377B]/20 text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
+              >
+                {isDownloadingQuote ? (
+                  <>
+                    <RefreshCw className="animate-spin text-[#03377B]" size={14} />
+                    <span>Đang tải xuống PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={14} />
+                    <span>Tải bản chào phí (PDF)</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQuoteSentSuccess(false);
+                  setCurrentStep(3); // Go to Step 3 (Hợp đồng khung)
+                  setToastNotification({
+                    show: true,
+                    message: "Báo giá gửi thành công! Chuyển đến bước thiết lập Hợp đồng khung.",
+                    type: 'success'
+                  });
+                }}
+                className="w-full py-2.5 bg-[#03377B] hover:bg-blue-800 text-white font-extrabold text-xs rounded-xl shadow-md transition uppercase tracking-wider"
+              >
+                Tiếp tục xem Hợp đồng khung ➜
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showQuotePendingPopup && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative border border-slate-100 text-center space-y-4">
+            <button
+              onClick={() => {
+                setShowQuotePendingPopup(false);
+                setCurrentStep(3); // Go to Step 3 (Hợp đồng khung)
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition text-sm font-black p-1"
+            >
+              ✕
+            </button>
+            <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-600 mb-2 animate-bounce">
+              <Clock size={32} />
+            </div>
+
+            <h3 className="text-lg font-black text-slate-850">Đã gửi yêu cầu Chờ duyệt!</h3>
+            <p className="text-slate-500 text-xs leading-relaxed max-w-sm mx-auto">
+              Bản chào phí nhanh vượt khung quy chuẩn tự động đã được chuyển lên Trưởng nhóm/Ban Thẩm định phê duyệt.
+            </p>
+
+            <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100 text-left text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Trạng thái:</span>
+                <span className="font-bold text-amber-600">Chờ duyệt (Pending_Approval)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Thời gian duyệt dự kiến:</span>
+                <span className="font-semibold text-slate-800">Trong vòng 3 ngày làm việc</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Khách hàng:</span>
+                <span className="font-semibold text-slate-800">{companyInfo.name || 'Công ty Cổ phần VEO'}</span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-amber-600 font-semibold italic">
+              ✓ Quý khách vẫn có thể tiếp tục tiến hành xem và thiết lập dự thảo Hợp đồng khung.
+            </p>
+
             <button
               type="button"
               onClick={() => {
-                setShowQuoteSentSuccess(false);
-                setCurrentStep(0);
-                setActiveTab('dashboard');
-                setSelectedCategory('corporate');
-                setCorporateSubMode('chao_phi');
+                setShowQuotePendingPopup(false);
+                setCurrentStep(3); // Go to Step 3 of Chào phí: Hợp đồng khung
                 setToastNotification({
                   show: true,
-                  message: "Báo giá đã được gửi thành công cho khách hàng và lưu trạng thái!",
-                  type: 'success'
+                  message: "Chuyển đến bước thiết lập Hợp đồng khung trong thời gian chờ duyệt.",
+                  type: 'info'
                 });
               }}
-              className="w-full py-2.5 bg-[#03377B] hover:bg-blue-800 text-white font-extrabold text-xs rounded-xl shadow-md transition"
+              className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs rounded-xl shadow-md transition uppercase tracking-wider"
             >
-              HOÀN TẤT &amp; ĐÓNG
+              Tiếp tục xem Hợp đồng khung ➜
             </button>
           </div>
         </div>
@@ -1995,122 +2660,63 @@ export default function App() {
 
               {/* Sidebar Nav */}
               <div className="p-4 space-y-1">
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mb-2">QUẢN LÝ NGHIỆP VỤ</span>
+                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mb-3">QUẢN LÝ NGHIỆP VỤ</span>
+                
+                {/* 1. Mở ID khách hàng */}
                 <button
                   type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('dashboard'); setSelectedProduct(null); setSelectedCategory(null); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'dashboard' && selectedProduct === null && selectedCategory === null ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <Home size={15} className={activeTab === 'dashboard' && selectedProduct === null && selectedCategory === null ? 'text-white' : 'text-slate-400'} />
-                  <span>Tổng quan</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('dashboard'); setSelectedProduct(null); setSelectedCategory('personal'); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'personal' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <Users size={15} className={activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'personal' ? 'text-white' : 'text-slate-400'} />
-                  <span className="truncate">Bảo hiểm Khách hàng cá nhân</span>
-                </button>
-
-                <div className="space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCorporateMenuExpanded(!isCorporateMenuExpanded);
-                      setCurrentStep(0);
-                      setActiveTab('dashboard');
-                      setSelectedProduct(null);
-                      setSelectedCategory('corporate');
-                      setCorporateSubMode(null);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'dashboard' && selectedProduct === null && selectedCategory === 'corporate' ? 'bg-white/10 text-white border border-white/5 shadow-xs' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    <span className="flex items-center gap-3">
-                      <Building size={15} className={selectedCategory === 'corporate' ? 'text-white' : 'text-slate-400'} />
-                      <span className="truncate">Khách hàng doanh nghiệp</span>
-                    </span>
-                    <ChevronRight size={13} className={`text-slate-400 transition-transform duration-200 ${isCorporateMenuExpanded ? 'rotate-90 text-white' : ''}`} />
-                  </button>
-
-                  {isCorporateMenuExpanded && (
-                    <div className="pl-3 ml-3.5 border-l border-white/10 space-y-1 mt-1 mb-2 animate-slide-in">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCurrentStep(0);
-                          setActiveTab('dashboard');
-                          setSelectedProduct(null);
-                          setSelectedCategory('corporate');
-                          setCorporateSubMode('chao_phi');
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[11px] font-bold transition-all text-left ${selectedCategory === 'corporate' && corporateSubMode === 'chao_phi' ? 'bg-white/15 text-white shadow-xs border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className={`w-1.5 h-1.5 rounded-full ${selectedCategory === 'corporate' && corporateSubMode === 'chao_phi' ? 'bg-amber-400' : 'bg-slate-500'}`} />
-                          <span>Chào phí (GĐ 1)</span>
-                        </span>
-                        <span className="text-[8px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.5 rounded shadow-xs">BÁO GIÁ</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCurrentStep(0);
-                          setActiveTab('dashboard');
-                          setSelectedProduct(null);
-                          setSelectedCategory('corporate');
-                          setCorporateSubMode('cap_don');
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[11px] font-bold transition-all text-left ${selectedCategory === 'corporate' && corporateSubMode === 'cap_don' ? 'bg-white/15 text-white shadow-xs border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className={`w-1.5 h-1.5 rounded-full ${selectedCategory === 'corporate' && corporateSubMode === 'cap_don' ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                          <span>Cấp đơn (GĐ 2)</span>
-                        </span>
-                        <span className="text-[8px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded shadow-xs">CẤP ĐƠN</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mt-6 mb-2">DANH MỤC HỒ SƠ</span>
-                <button
-                  type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('pending'); setSelectedProduct(null); }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'pending' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <span className="flex items-center gap-3">
-                    <FileText size={15} className={activeTab === 'pending' ? 'text-white' : 'text-slate-400'} />
-                    <span>Hồ sơ nháp đang xử lý</span>
-                  </span>
-                  <span className="bg-amber-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm">{draftContracts.filter(d => !getRelativeTime(d.lastUpdated).isArchived).length}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('history'); setSelectedProduct(null); }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'history' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                >
-                  <span className="flex items-center gap-3">
-                    <CheckCircle2 size={15} className={activeTab === 'history' ? 'text-white' : 'text-slate-400'} />
-                    <span>Hợp đồng đã cấp thành công</span>
-                  </span>
-                  <span className="bg-[#03377B] text-white border border-white/20 text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm">{completedContracts.length}</span>
-                </button>
-
-                <span className="text-[9px] font-black text-white/40 uppercase tracking-widest px-3 block mt-6 mb-2">QUẢN LÝ ĐỊNH DANH</span>
-                <button
-                  type="button"
-                  onClick={() => { setCurrentStep(0); setActiveTab('open_id'); setSelectedProduct(null); setSelectedCategory(null); }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'open_id' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                  onClick={() => { 
+                    setCurrentStep(0); 
+                    setActiveTab('open_id'); 
+                    setSelectedProduct(null); 
+                    setSelectedCategory(null); 
+                    setCorporateSubMode(null);
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${activeTab === 'open_id' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
                 >
                   <span className="flex items-center gap-3">
                     <UserPlus size={15} className={activeTab === 'open_id' ? 'text-white' : 'text-slate-400'} />
                     <span>Mở ID Khách hàng</span>
                   </span>
-                  <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm">MỚI</span>
+                  <span className="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black shadow-sm animate-pulse">MỚI</span>
+                </button>
+
+                {/* 2. Chào phí */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStep(0);
+                    setActiveTab('dashboard');
+                    setSelectedProduct(null);
+                    setSelectedCategory('corporate');
+                    setCorporateSubMode('chao_phi');
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${corporateSubMode === 'chao_phi' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Coins size={15} className={corporateSubMode === 'chao_phi' ? 'text-white' : 'text-slate-400'} />
+                    <span>Chào Phí</span>
+                  </span>
+                  <span className="bg-amber-500 text-slate-950 text-[8px] px-1.5 py-0.5 rounded font-black shadow-xs">GĐ 1</span>
+                </button>
+
+                {/* 3. Cấp đơn */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStep(0);
+                    setActiveTab('dashboard');
+                    setSelectedProduct(null);
+                    setSelectedCategory('corporate');
+                    setCorporateSubMode('cap_don');
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${corporateSubMode === 'cap_don' ? 'bg-white/15 backdrop-blur-md text-white shadow-lg border border-white/10' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                >
+                  <span className="flex items-center gap-3">
+                    <ShieldCheck size={15} className={corporateSubMode === 'cap_don' ? 'text-white' : 'text-slate-400'} />
+                    <span>Cấp Đơn</span>
+                  </span>
+                  <span className="bg-sky-400 text-slate-950 text-[8px] px-1.5 py-0.5 rounded font-black shadow-xs">GĐ 2</span>
                 </button>
               </div>
             </div>
@@ -2135,15 +2741,15 @@ export default function App() {
             <div className="bg-white border-b border-slate-200 py-3.5 px-6 flex items-center justify-between flex-shrink-0 shadow-xs">
               <div className="flex items-center gap-3">
                 <span className="text-lg font-extrabold text-slate-900">
-                  {currentStep === 0 ? 'Tổng quan' : 
-                   selectedProduct === 'accident' ? '🦺 Cấp bảo hiểm Tai nạn Con người' :
-                   selectedProduct === 'travel_intl' ? '✈️ Cấp bảo hiểm Du lịch Quốc tế' :
-                   selectedProduct === 'travel_dom' ? '🗺️ Cấp bảo hiểm Du lịch Trong nước' :
-                   selectedProduct === 'elitecare' ? '💎 Cấp bảo hiểm Sức khỏe Cao cấp EliteCare' :
-                   selectedProduct === 'workers_comp' ? '🏗️ Cấp bảo hiểm Bồi thường Người lao động' :
-                   '🏥 Cấp bảo hiểm sức khỏe PTI Care (EB)'}
+                  {currentStep === 0 ? (
+                    activeTab === 'open_id' ? '🔑 Mở ID Khách hàng' :
+                    corporateSubMode === 'chao_phi' ? '🏥 Chào phí bảo hiểm sức khỏe PTI Care (EB)' :
+                    corporateSubMode === 'cap_don' ? '🏥 Cấp bảo hiểm sức khỏe PTI Care (EB)' :
+                    '🏠 Tổng quan'
+                  ) : 
+                   (corporateSubMode === 'chao_phi' ? '🏥 Chào phí bảo hiểm sức khỏe PTI Care (EB)' : '🏥 Cấp bảo hiểm sức khỏe PTI Care (EB)')}
                 </span>
-                {currentStep > 0 && (
+                {currentStep > 0 && selectedProduct !== 'health_pti' && (
                   <span className="text-xs bg-slate-100 border border-slate-200 text-slate-500 font-bold px-2.5 py-0.5 rounded-full">
                     {selectedProduct === 'accident' ? 'Quy tắc 264/265/QĐ-PTI' :
                      selectedProduct === 'travel_intl' ? 'Quy tắc Du lịch Quốc tế/QĐ-PTI' :
@@ -2157,9 +2763,6 @@ export default function App() {
 
               {/* Mobile Logout trigger */}
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 hidden sm:inline">Phiên bản 4.1.2</span>
-                <span className="p-1 text-slate-400 hover:text-[#03377B] cursor-pointer"><Bell size={18} /></span>
-                <span className="p-1 text-slate-400 hover:text-[#03377B] cursor-pointer"><Settings size={18} /></span>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -2179,19 +2782,15 @@ export default function App() {
                 <div className="space-y-8 animate-fade-in pb-12">
                   
                   {/* Redesigned Navigation Bar inside the page canvas mimicking top navbar with iOS Glassmorphism */}
-                  <div className="bg-gradient-to-r from-white/40 via-sky-50/20 to-orange-50/15 backdrop-blur-xl rounded-2xl border border-white/60 p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_8px_32px_0_rgba(3,55,123,0.04)] shadow-inner">
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <span className="p-1.5 bg-gradient-to-r from-blue-500/10 to-[#03377B]/15 text-[#03377B] rounded-xl font-black text-xs border border-white/85 shadow-sm">Pilot</span>
-                        <span className="font-extrabold text-slate-800 text-sm tracking-tight">iPTI Premium Portal</span>
+                  {corporateSubMode !== 'chao_phi' && (
+                    <div className="bg-gradient-to-r from-white/40 via-sky-50/20 to-orange-50/15 backdrop-blur-xl rounded-2xl border border-white/60 p-4 flex flex-col md:flex-row items-center justify-end gap-4 shadow-[0_8px_32px_0_rgba(3,55,123,0.04)] shadow-inner">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] bg-white/70 backdrop-blur-md text-slate-500 border border-white/80 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
+                          Phân quyền: {user.role}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] bg-white/70 backdrop-blur-md text-slate-500 border border-white/80 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
-                        Phân quyền: {user.role}
-                      </span>
-                    </div>
-                  </div>
+                  )}
 
                   {/* CASE 1: INITIAL CATEGORY CHOICE OVERVIEW */}
                   {selectedCategory === null && (
@@ -2645,396 +3244,97 @@ export default function App() {
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-8 animate-fade-in">
-                        
-                        {/* Back button and title */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <button
-                            type="button"
-                            onClick={() => setCorporateSubMode(null)}
-                            className="flex items-center gap-2 text-slate-500 hover:text-[#03377B] font-extrabold text-xs transition-colors py-1.5 px-3 bg-white border border-slate-100 rounded-xl shadow-sm self-start hover:-translate-y-0.5 active:scale-95 duration-150"
-                          >
-                            <ArrowLeft size={14} />
-                            <span>Quay lại chọn Giai đoạn</span>
-                          </button>
-                        
-                        <div className="text-left sm:text-right">
-                          <div className="flex items-center sm:justify-end gap-2">
-                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider ${
-                              corporateSubMode === 'chao_phi' 
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                            }`}>
-                              {corporateSubMode === 'chao_phi' ? 'GIAI ĐOẠN 1: CHÀO PHÍ' : 'GIAI ĐOẠN 2: CẤP ĐƠN'}
-                            </span>
-                          </div>
-                          <h2 className="text-lg font-black text-slate-800 tracking-tight font-sans mt-1">
-                            {corporateSubMode === 'chao_phi' ? 'Luồng "Chào phí" - Báo giá & Chốt sơ bộ' : 'Luồng "Cấp đơn" - Phát hành chính thức'}
-                          </h2>
-                        </div>
-                      </div>
-
-                      {/* Flagship PTI Care banner block with quick "Tạo hồ sơ mới" trigger */}
-                      <div className={`relative rounded-[2.5rem] p-7 sm:p-8 text-white overflow-hidden shadow-2xl border border-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-500 ${
-                        corporateSubMode === 'chao_phi' 
-                          ? 'bg-gradient-to-br from-[#022D66] via-[#03377B] to-[#011430]' 
-                          : 'bg-gradient-to-br from-[#012F20] via-[#033F2E] to-[#011B14]'
-                      }`}>
-                        {/* Ambient colorful backdrop lights */}
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
-                        <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                        <div className="lg:col-span-7 space-y-5 text-left relative z-10">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[9px] bg-white/15 border border-white/10 text-sky-200 font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                              Flagship EB Product
-                            </span>
-                            <span className="text-[9px] bg-amber-500 text-slate-950 font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                              Quy tắc 270 / QĐ-PTI
-                            </span>
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight leading-tight">
-                              Bảo hiểm Sức khỏe PTI Care (EB)
-                            </h3>
-                            <p className="text-blue-100/80 text-xs font-medium leading-relaxed">
-                              {corporateSubMode === 'chao_phi' 
-                                ? 'Luồng Chào phí sơ bộ: Nhập thông tin quy mô, ngành nghề kinh doanh, tra cứu MST tự động và sử dụng trợ lý AI đề xuất gói quyền lợi & bảng phí nháp nhanh chỉ trong 30 giây.'
-                                : 'Luồng Cấp đơn chính thức: Đính kèm danh sách nhân sự thực tế (.xlsx), rà soát loại trừ bệnh có sẵn, thực hiện ký số hợp đồng khung điện tử e-contract và thanh toán phát hành thẻ bồi thường số.'}
-                            </p>
-                          </div>
-                          
-                          <div className="pt-2 flex flex-wrap gap-4 items-center">
-                            {corporateSubMode === 'chao_phi' ? (
-                              <button
-                                type="button"
-                                onClick={() => { setSelectedProduct('health_pti'); handleStartNewListing(); }}
-                                className="py-3 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 flex items-center gap-2 active:scale-95"
-                              >
-                                <span>Tạo hồ sơ Chào phí mới</span>
-                                <ArrowRight size={14} className="stroke-[3]" />
-                              </button>
-                            ) : (
-                              <div className="text-xs text-emerald-200 font-bold bg-white/5 py-2 px-4 rounded-xl border border-white/10">
-                                💡 Chọn một Báo giá sơ bộ bên dưới để tiến hành Cấp đơn chính thức (GĐ 2)
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Beautiful iOS Style Glass Card Wrapper for Graphic illustration */}
-                        <div className="lg:col-span-5 relative flex justify-center items-center h-44 sm:h-48 rounded-3xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] p-4 group">
-                          {/* Inner soft glows */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-sky-400/10 via-transparent to-amber-400/5 pointer-events-none"></div>
-                          
-                          {/* 3D Glassmorphic HealthPti3D Graphic */}
-                          <div className="w-full max-w-[200px] h-full flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500">
-                            <HealthPti3D />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ── SECTION: CHAO PHI PENDING APPROVAL FOR ISSUE (ONLY IN CAP_DON MODE) ── */}
-                      {corporateSubMode === 'cap_don' && (
-                        <div className="bg-gradient-to-r from-amber-50/50 to-orange-50/30 rounded-3xl p-6 border border-amber-100 space-y-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                              <h3 className="text-amber-900 font-extrabold text-sm tracking-tight flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                <span>Danh sách Báo giá sơ bộ chờ Cấp đơn (Giai đoạn 1 đã duyệt)</span>
-                              </h3>
-                              <p className="text-amber-700/70 text-[11px] font-medium mt-0.5">Danh sách các hồ sơ đã hoàn thành Giai đoạn 1 (Chào phí), khách hàng đã đồng ý biểu phí và sẵn sàng phát hành.</p>
+                      <div className="space-y-8 animate-fade-in text-left">
+                        {corporateSubMode === 'chao_phi' && (
+                          <div className="flex flex-col md:flex-row items-center justify-between p-6 sm:p-8 bg-gradient-to-br from-[#03377B] via-[#03377B]/95 to-blue-900 border border-blue-800/30 rounded-3xl gap-6 shadow-[0_8px_32px_0_rgba(3,55,123,0.12)] text-left relative overflow-hidden">
+                            {/* Decorative ambient light */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+                            
+                            <div className="space-y-1.5 relative z-10">
+                              <h3 className="text-white font-extrabold text-base sm:text-lg tracking-tight">Thiết lập Chào phí cho doanh nghiệp/ Phi doanh nghiệp</h3>
+                              <p className="text-blue-100/90 text-xs font-semibold max-w-2xl leading-relaxed">
+                                Tạo hồ sơ nhanh chóng chỉ với 3 bước.
+                              </p>
                             </div>
-                            <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-800 font-bold px-2.5 py-1 rounded-lg self-start">
-                              {draftContracts.filter(d => {
-                                const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                return step <= 2;
-                              }).length} hồ sơ chờ xử lý
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => { setSelectedProduct('health_pti'); handleStartNewListing(); }}
+                              className="py-3.5 px-6 bg-white hover:bg-blue-50 text-[#03377B] font-black text-xs rounded-2xl transition-all shadow-lg hover:-translate-y-0.5 flex items-center gap-2.5 active:scale-95 shrink-0 self-start md:self-center relative z-10"
+                            >
+                              <Plus size={15} className="stroke-[3]" />
+                              <span>Tạo hồ sơ Chào phí mới</span>
+                              <ArrowRight size={15} className="stroke-[3]" />
+                            </button>
                           </div>
+                        )}
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {draftContracts.filter(d => {
-                              const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                              return step <= 2;
-                            }).map((draft) => (
-                              <div key={draft.id} className="bg-white border border-slate-100 hover:border-emerald-200 p-4 rounded-2xl shadow-sm hover:shadow transition flex flex-col justify-between space-y-4">
-                                <div className="space-y-1.5 text-left">
-                                  <div className="flex justify-between items-start">
-                                    <span className="font-mono font-extrabold text-xs text-slate-800 block truncate max-w-[120px]">{draft.id}</span>
-                                    <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded uppercase">Báo giá OK</span>
-                                  </div>
-                                  <h4 className="font-black text-slate-800 text-[11px] leading-tight line-clamp-1">{draft.company}</h4>
-                                  <div className="text-[10px] text-slate-400 flex flex-col space-y-0.5 font-medium">
-                                    <span>Quy mô: <strong>{draft.headcount} nhân sự</strong></span>
-                                    <span>Ngày tạo: {draft.date}</span>
-                                  </div>
-                                </div>
 
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleResumeDraft(draft);
-                                    // Override currentStep to force Step 3 (GĐ 2) since we are in Issuance mode
-                                    setCurrentStep(3);
-                                  }}
-                                  className="w-full py-2 bg-[#03377B] hover:bg-emerald-600 text-white font-black text-[10px] rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
-                                >
-                                  <span>Tiến hành Cấp đơn ngay ➔</span>
-                                </button>
-                              </div>
-                            ))}
 
-                            {draftContracts.filter(d => {
-                              const step = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                              return step <= 2;
-                            }).length === 0 && (
-                              <div className="col-span-full py-6 text-center text-slate-400 font-bold text-xs bg-white/40 border border-dashed border-slate-200 rounded-2xl">
-                                📭 Hiện tại không có báo giá sơ bộ nào đang chờ cấp đơn.
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* ── STATUS TRACKING SECTION (MỤC THEO DÕI TRẠNG THÁI BẢN CHÀO PHÍ) ── */}
+                      {/* ── MỚI: BẢNG GỘP HỒ SƠ CHÀO PHÍ & COMPACT STATUS TRACKING (GĐ 1) ── */}
                       {corporateSubMode === 'chao_phi' && (
                         <div className="space-y-6">
-                          <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-6 text-left space-y-4 shadow-xs">
-                            <div className="flex items-center gap-2">
-                              <FileText className="text-[#03377B]" size={20} />
-                              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                                Theo dõi Trạng thái Bản chào phí (GĐ 1)
-                              </h3>
+                          
+                          {/* ── 1. COMPACT STATUS TRACKING SECTION ── */}
+                          <div className="bg-white rounded-2xl p-4 sm:p-5 text-left border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-[#03377B]" size={16} />
+                                <h3 className="text-xs font-black text-[#03377B] uppercase tracking-wider">
+                                  Trạng thái Bản chào phí
+                                </h3>
+                              </div>
+                              <span className="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded">
+                                Click vào thẻ để lọc danh sách nhanh
+                              </span>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <div className="grid grid-cols-3 gap-3.5">
                               {/* Card 1: Đang chờ duyệt */}
-                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
-                                <div className="p-2 bg-amber-50 rounded-xl text-amber-600 border border-amber-100 mt-0.5">
-                                  <Clock size={18} />
-                                </div>
-                                <div className="space-y-1">
-                                  <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest block">Đang chờ duyệt</span>
-                                  <span className="text-xl font-black text-slate-800 block">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
-                                    }).length} hồ sơ
-                                  </span>
-                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Bản chào vượt chuẩn hoặc chiết khấu cao đang chờ duyệt STP/MCV.</p>
-                                </div>
-                              </div>
-
-                              {/* Card 2: Đã gửi cho khách hàng */}
-                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
-                                <div className="p-2 bg-sky-50 rounded-xl text-sky-600 border border-sky-100 mt-0.5">
-                                  <Send size={18} />
-                                </div>
-                                <div className="space-y-1">
-                                  <span className="text-[10px] font-black text-sky-700 uppercase tracking-widest block">Đã gửi cho khách hàng</span>
-                                  <span className="text-xl font-black text-slate-800 block">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
-                                    }).length} hồ sơ
-                                  </span>
-                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Đã xuất PDF &amp; gửi email chào phí cho người đại diện DN.</p>
-                                </div>
-                              </div>
-
-                              {/* Card 3: Hoàn tất */}
-                              <div className="bg-white p-4 rounded-2xl border border-slate-150 flex items-start gap-3 shadow-xs">
-                                <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600 border border-emerald-100 mt-0.5">
-                                  <CheckCircle2 size={18} />
-                                </div>
-                                <div className="space-y-1">
-                                  <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest block">Hoàn tất</span>
-                                  <span className="text-xl font-black text-slate-800 block">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && (
-                                        d.quoteApprovalStatus === 'Supervisor_Approved' ||
-                                        d.quoteApprovalStatus === 'Auto_Approved' ||
-                                        (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
-                                      );
-                                    }).length} hồ sơ
-                                  </span>
-                                  <p className="text-[11px] text-slate-400 leading-tight font-medium">Khách hàng đồng ý, biểu phí được chốt thành công.</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* ── 3 PHÂN PHÂN LOẠI DANH SÁCH CHI TIẾT THEO YÊU CẦU ── */}
-                          <div className="grid grid-cols-1 gap-6">
-                            {/* 1. DANH SÁCH HỒ SƠ ĐANG CHỜ DUYỆT */}
-                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
-                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                              <div 
+                                onClick={() => setChaoPhiSubTab('pending')}
+                                className={`cursor-pointer p-3 rounded-2xl border transition-all flex flex-col justify-between ${chaoPhiSubTab === 'pending' ? 'bg-amber-500/10 border-amber-500/40 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-slate-100/50'}`}
+                              >
                                 <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
-                                    Danh sách hồ sơ đang chờ duyệt (GĐ 1)
-                                  </h4>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                  <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-tight">Chờ duyệt</span>
                                 </div>
-                                <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                <span className="text-base font-black text-slate-800 mt-1 block">
                                   {draftContracts.filter(d => {
-                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    const mapped = getDraftCurrentStep(d);
                                     return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
                                   }).length} hồ sơ
                                 </span>
                               </div>
-                              
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs min-w-[700px]">
-                                  <thead>
-                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
-                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày tạo</th>
-                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
-                                      <th className="pb-2 px-2">Sản phẩm</th>
-                                      <th className="pb-2 px-2 text-center">Trạng thái duyệt</th>
-                                      <th className="pb-2 px-2 text-right">Phí dự kiến</th>
-                                      <th className="pb-2 px-2 text-right">Thao tác</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-100/50">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
-                                    }).length === 0 ? (
-                                      <tr>
-                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
-                                          Không có hồ sơ nào đang chờ duyệt.
-                                        </td>
-                                      </tr>
-                                    ) : (
-                                      draftContracts.filter(d => {
-                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                        return mapped <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
-                                      }).map((draft) => (
-                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
-                                          <td className="py-3 px-2">
-                                            <span className="font-mono font-extrabold text-amber-600 block">{draft.id}</span>
-                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
-                                          </td>
-                                          <td className="py-3 px-2">
-                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
-                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
-                                          </td>
-                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
-                                          <td className="py-3 px-2 text-center">
-                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white animate-pulse">
-                                              Chờ Trưởng phòng duyệt (STP)
-                                            </span>
-                                          </td>
-                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
-                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
-                                          </td>
-                                          <td className="py-3 px-2 text-right">
-                                            <span className="text-[11px] text-slate-400 font-extrabold italic">Không có thao tác</span>
-                                          </td>
-                                        </tr>
-                                      ))
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
 
-                            {/* 2. DANH SÁCH HỒ SƠ ĐÃ GỬI CHO KHÁCH HÀNG */}
-                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
-                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                              {/* Card 2: Đã gửi khách */}
+                              <div 
+                                onClick={() => setChaoPhiSubTab('sent')}
+                                className={`cursor-pointer p-3 rounded-2xl border transition-all flex flex-col justify-between ${chaoPhiSubTab === 'sent' ? 'bg-blue-500/10 border-blue-500/40 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-slate-100/50'}`}
+                              >
                                 <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
-                                    Danh sách hồ sơ đã gửi cho khách hàng (GĐ 1)
-                                  </h4>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                  <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-tight">Đã gửi</span>
                                 </div>
-                                <span className="text-[10px] bg-sky-50 border border-sky-100 text-sky-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                <span className="text-base font-black text-slate-800 mt-1 block">
                                   {draftContracts.filter(d => {
-                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    const mapped = getDraftCurrentStep(d);
                                     return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
                                   }).length} hồ sơ
                                 </span>
                               </div>
 
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs min-w-[700px]">
-                                  <thead>
-                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
-                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày gửi</th>
-                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
-                                      <th className="pb-2 px-2">Sản phẩm</th>
-                                      <th className="pb-2 px-2 text-center">Trạng thái gửi</th>
-                                      <th className="pb-2 px-2 text-right">Phí chào</th>
-                                      <th className="pb-2 px-2 text-right">Thao tác</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-100/50">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
-                                    }).length === 0 ? (
-                                      <tr>
-                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
-                                          Không có hồ sơ nào đã gửi cho khách hàng.
-                                        </td>
-                                      </tr>
-                                    ) : (
-                                      draftContracts.filter(d => {
-                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                        return mapped <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
-                                      }).map((draft) => (
-                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
-                                          <td className="py-3 px-2">
-                                            <span className="font-mono font-extrabold text-sky-600 block">{draft.id}</span>
-                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
-                                          </td>
-                                          <td className="py-3 px-2">
-                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
-                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
-                                          </td>
-                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
-                                          <td className="py-3 px-2 text-center">
-                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-sky-500 text-white">
-                                              Đã gửi khách hàng
-                                            </span>
-                                          </td>
-                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
-                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
-                                          </td>
-                                          <td className="py-3 px-2 text-right">
-                                            <button
-                                              type="button"
-                                              onClick={() => setToastNotification({
-                                                show: true,
-                                                message: `🔔 Đã gửi nhắc lại thành công cho khách hàng đại diện của ${draft.company}!`,
-                                                type: 'success'
-                                              })}
-                                              className="px-3 py-1 bg-sky-100 hover:bg-sky-200 text-sky-700 hover:scale-105 active:scale-95 font-extrabold rounded-lg text-[10px] transition-all inline-flex items-center gap-1 shadow-xs"
-                                            >
-                                              <span>Gửi nhắc lại khách hàng</span>
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-
-                            {/* 3. DANH SÁCH HỒ SƠ HOÀN TẤT */}
-                            <div className="bg-white rounded-3xl p-6 shadow-[0_12px_40px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-4 text-left">
-                              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                              {/* Card 3: Hoàn tất */}
+                              <div 
+                                onClick={() => setChaoPhiSubTab('completed')}
+                                className={`cursor-pointer p-3 rounded-2xl border transition-all flex flex-col justify-between ${chaoPhiSubTab === 'completed' ? 'bg-emerald-500/10 border-emerald-500/40 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-slate-100/50'}`}
+                              >
                                 <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                  <h4 className="text-slate-900 font-black text-sm tracking-tight uppercase">
-                                    Danh sách hồ sơ hoàn tất (GĐ 1)
-                                  </h4>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                  <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-tight">Hoàn tất</span>
                                 </div>
-                                <span className="text-[10px] bg-emerald-50 border border-emerald-150 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg">
+                                <span className="text-base font-black text-slate-800 mt-1 block">
                                   {draftContracts.filter(d => {
-                                    const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
+                                    const mapped = getDraftCurrentStep(d);
                                     return mapped <= 2 && (
                                       d.quoteApprovalStatus === 'Supervisor_Approved' ||
                                       d.quoteApprovalStatus === 'Auto_Approved' ||
@@ -3043,328 +3343,480 @@ export default function App() {
                                   }).length} hồ sơ
                                 </span>
                               </div>
+                            </div>
+                          </div>
 
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs min-w-[700px]">
-                                  <thead>
-                                    <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
-                                      <th className="pb-2 px-2">Mã hồ sơ / Ngày chốt</th>
-                                      <th className="pb-2 px-2">Doanh nghiệp đối tác</th>
-                                      <th className="pb-2 px-2">Sản phẩm</th>
-                                      <th className="pb-2 px-2 text-center">Trạng thái chốt</th>
-                                      <th className="pb-2 px-2 text-right">Phí bảo hiểm chốt</th>
-                                      <th className="pb-2 px-2 text-right">Thao tác</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-100/50">
-                                    {draftContracts.filter(d => {
-                                      const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mapped <= 2 && (
+                          {/* ── 2. UNIFIED MERGED LIST TABLE SECTION ── */}
+                          <div className="bg-white rounded-3xl p-5 shadow-[0_8px_32px_rgba(15,23,42,0.02)] border border-slate-100 flex flex-col space-y-5">
+                            
+                            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 pb-1">
+                              <div className="space-y-1 text-left">
+                                <h3 className="text-[#03377B] font-extrabold text-base tracking-tight flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full animate-pulse bg-amber-500"></span>
+                                  <span>Quản lý &amp; Phát hành Hồ sơ Chào phí</span>
+                                </h3>
+                              </div>
+
+                              {/* SMALL HORIZONTAL MENU/TABS (dạng tab menu ngang nhỏ) */}
+                              <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 self-start overflow-x-auto max-w-full">
+                                <button
+                                  type="button"
+                                  onClick={() => setChaoPhiSubTab('all')}
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap ${chaoPhiSubTab === 'all' ? 'bg-white text-[#03377B] shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                  Tất cả ({
+                                    draftContracts.filter(d => {
+                                      const mappedStep = getDraftCurrentStep(d);
+                                      return mappedStep <= 2;
+                                    }).length
+                                  })
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setChaoPhiSubTab('draft')}
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap ${chaoPhiSubTab === 'draft' ? 'bg-white text-slate-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                  Nháp ({
+                                    draftContracts.filter(d => {
+                                      const mappedStep = getDraftCurrentStep(d);
+                                      if (mappedStep > 2) return false;
+                                      const isPending = d.quoteApprovalStatus === 'Pending_Approval';
+                                      const isSent = d.quoteApprovalStatus === 'Sent_To_Customer';
+                                      const isCompleted = d.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                                          d.quoteApprovalStatus === 'Auto_Approved' ||
+                                                          (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20));
+                                      return !isPending && !isSent && !isCompleted;
+                                    }).length
+                                  })
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setChaoPhiSubTab('pending')}
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap ${chaoPhiSubTab === 'pending' ? 'bg-white text-amber-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                  Chờ duyệt ({
+                                    draftContracts.filter(d => {
+                                      const mappedStep = getDraftCurrentStep(d);
+                                      return mappedStep <= 2 && d.quoteApprovalStatus === 'Pending_Approval';
+                                    }).length
+                                  })
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setChaoPhiSubTab('sent')}
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap ${chaoPhiSubTab === 'sent' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                  Đã gửi khách ({
+                                    draftContracts.filter(d => {
+                                      const mappedStep = getDraftCurrentStep(d);
+                                      return mappedStep <= 2 && d.quoteApprovalStatus === 'Sent_To_Customer';
+                                    }).length
+                                  })
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setChaoPhiSubTab('completed')}
+                                  className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap ${chaoPhiSubTab === 'completed' ? 'bg-white text-emerald-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                  Đã hoàn tất ({
+                                    draftContracts.filter(d => {
+                                      const mappedStep = getDraftCurrentStep(d);
+                                      return mappedStep <= 2 && (
                                         d.quoteApprovalStatus === 'Supervisor_Approved' ||
                                         d.quoteApprovalStatus === 'Auto_Approved' ||
                                         (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
                                       );
-                                    }).length === 0 ? (
-                                      <tr>
-                                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">
-                                          Không có hồ sơ nào đã hoàn tất chào phí.
-                                        </td>
-                                      </tr>
-                                    ) : (
-                                      draftContracts.filter(d => {
-                                        const mapped = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                        return mapped <= 2 && (
-                                          d.quoteApprovalStatus === 'Supervisor_Approved' ||
-                                          d.quoteApprovalStatus === 'Auto_Approved' ||
-                                          (!d.quoteApprovalStatus && (!d.discountRate || d.discountRate <= 20))
-                                        );
-                                      }).map((draft) => (
-                                        <tr key={draft.id} className="hover:bg-slate-50/40 transition-colors">
-                                          <td className="py-3 px-2">
-                                            <span className="font-mono font-extrabold text-emerald-600 block">{draft.id}</span>
-                                            <span className="text-[10px] text-slate-400 block">{draft.date}</span>
-                                          </td>
-                                          <td className="py-3 px-2">
-                                            <span className="font-extrabold text-slate-800 block">{draft.company}</span>
-                                            <span className="text-[10px] text-slate-400 block">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
-                                          </td>
-                                          <td className="py-3 px-2 font-semibold text-slate-600">Sức khỏe PTI Care</td>
-                                          <td className="py-3 px-2 text-center">
-                                            <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500 text-white">
-                                              Đã duyệt / Hoàn tất
-                                            </span>
-                                          </td>
-                                          <td className="py-3 px-2 text-right font-bold text-slate-700">
-                                            {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
-                                          </td>
-                                          <td className="py-3 px-2 text-right">
-                                            <button
-                                              type="button"
-                                              onClick={() => {
-                                                handleResumeDraft(draft);
-                                                setCurrentStep(3); // Start Step 3 (Giai đoạn 2: Cấp Đơn)
-                                              }}
-                                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white hover:scale-105 active:scale-95 font-extrabold rounded-lg text-[10px] transition-all inline-flex items-center gap-1 shadow-xs"
-                                            >
-                                              <span>Cấp đơn</span>
-                                            </button>
-                                          </td>
-                                        </tr>
-                                      ))
-                                    )}
-                                  </tbody>
-                                </table>
+                                    }).length
+                                  })
+                                </button>
                               </div>
                             </div>
+
+                            {/* Portfolio Content List / Table */}
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs min-w-[700px]">
+                                <thead>
+                                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                                    <th className="pb-3 px-2">Mã hồ sơ / Ngày</th>
+                                    <th className="pb-3 px-2">Doanh nghiệp đối tác</th>
+                                    <th className="pb-3 px-2">Sản phẩm &amp; Biểu phí</th>
+                                    <th className="pb-3 px-2 text-center">Trạng thái duyệt/gửi</th>
+                                    <th className="pb-3 px-2 text-right">Thao tác</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100/50">
+                                  {draftContracts
+                                    .filter(draft => {
+                                      const mappedStep = getDraftCurrentStep(draft);
+                                      if (mappedStep > 2) return false;
+                                      
+                                      if (chaoPhiSubTab === 'draft') {
+                                        const isPending = draft.quoteApprovalStatus === 'Pending_Approval';
+                                        const isSent = draft.quoteApprovalStatus === 'Sent_To_Customer';
+                                        const isCompleted = draft.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                                            draft.quoteApprovalStatus === 'Auto_Approved' ||
+                                                            (!draft.quoteApprovalStatus && (!draft.discountRate || draft.discountRate <= 20));
+                                        return !isPending && !isSent && !isCompleted;
+                                      }
+                                      if (chaoPhiSubTab === 'pending') {
+                                        return draft.quoteApprovalStatus === 'Pending_Approval';
+                                      }
+                                      if (chaoPhiSubTab === 'sent') {
+                                        return draft.quoteApprovalStatus === 'Sent_To_Customer';
+                                      }
+                                      if (chaoPhiSubTab === 'completed') {
+                                        return draft.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                               draft.quoteApprovalStatus === 'Auto_Approved' ||
+                                               (!draft.quoteApprovalStatus && (!draft.discountRate || draft.discountRate <= 20));
+                                      }
+                                      return true; // all
+                                    })
+                                    .map((draft) => {
+                                      const mappedStep = getDraftCurrentStep(draft);
+                                      
+                                      const isPending = draft.quoteApprovalStatus === 'Pending_Approval';
+                                      const isSent = draft.quoteApprovalStatus === 'Sent_To_Customer';
+                                      const isCompleted = draft.quoteApprovalStatus === 'Supervisor_Approved' ||
+                                                          draft.quoteApprovalStatus === 'Auto_Approved' ||
+                                                          (!draft.quoteApprovalStatus && (!draft.discountRate || draft.discountRate <= 20));
+                                      
+                                      return (
+                                        <tr key={draft.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
+                                          <td className="py-4 px-2">
+                                            <span className="font-mono font-extrabold block text-[#03377B] tracking-tight">{draft.id}</span>
+                                            <span className="text-[10px] text-slate-400 font-medium block mt-0.5">{draft.date}</span>
+                                          </td>
+                                          <td className="py-4 px-2">
+                                            <span className="font-extrabold text-slate-800 block text-[12px]">{draft.company}</span>
+                                            <span className="text-[10px] text-slate-400 font-medium block mt-0.5">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
+                                          </td>
+                                          <td className="py-4 px-2">
+                                            <span className="font-semibold text-slate-600 block text-[11px]">Sức khỏe PTI Care (EB)</span>
+                                            <span className="text-[11px] font-bold text-slate-800 block mt-0.5">
+                                              {draft.amount ? formatVnd(draft.amount) : 'Tính toán tự động'}
+                                            </span>
+                                          </td>
+                                          <td className="py-4 px-2 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-1">
+                                              {isPending ? (
+                                                <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white animate-pulse">
+                                                  Chờ duyệt (STP)
+                                                </span>
+                                              ) : isSent ? (
+                                                <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-600 text-white">
+                                                  Đã gửi khách hàng
+                                                </span>
+                                              ) : isCompleted ? (
+                                                <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white shadow-sm">
+                                                  Đã duyệt / Hoàn tất
+                                                </span>
+                                              ) : (
+                                                <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-500 border border-slate-200">
+                                                  Nháp (Bước {mappedStep}/2)
+                                                </span>
+                                              )}
+                                            </div>
+                                          </td>
+                                          <td className="py-4 px-2 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                              {isCompleted ? (
+                                                <span className="text-slate-400 font-bold pr-4">—</span>
+                                              ) : (
+                                                <>
+                                                  {isPending && (
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => handleApproveDraftBySupervisor(draft)}
+                                                      className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md whitespace-nowrap"
+                                                    >
+                                                      Duyệt nhanh
+                                                    </button>
+                                                  )}
+
+                                                  {draft.quoteApprovalStatus === 'Supervisor_Approved' && (
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => handleSendDraftToCustomer(draft)}
+                                                      className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md whitespace-nowrap"
+                                                    >
+                                                      Gửi khách hàng
+                                                    </button>
+                                                  )}
+
+                                                  {isSent && (
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => setToastNotification({
+                                                        show: true,
+                                                        message: `🔔 Đã gửi nhắc lại thành công cho khách hàng đại diện của ${draft.company}!`,
+                                                        type: 'success'
+                                                      })}
+                                                      className="px-2.5 py-1.5 bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 hover:from-blue-100 hover:to-sky-100 text-[#03377B] active:scale-95 font-black rounded-xl text-[10px] transition-all shadow-sm whitespace-nowrap"
+                                                    >
+                                                      Gửi nhắc lại
+                                                    </button>
+                                                  )}
+
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleResumeDraft(draft)}
+                                                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black rounded-xl text-[10px] transition-all border border-slate-200 whitespace-nowrap"
+                                                  >
+                                                    Làm tiếp
+                                                  </button>
+                                                </>
+                                              )}
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  
+                                  {draftContracts.filter(draft => {
+                                    const mappedStep = getDraftCurrentStep(draft);
+                                    if (mappedStep > 2) return false;
+                                    if (chaoPhiSubTab === 'pending') return draft.quoteApprovalStatus === 'Pending_Approval';
+                                    if (chaoPhiSubTab === 'sent') return draft.quoteApprovalStatus === 'Sent_To_Customer';
+                                    if (chaoPhiSubTab === 'completed') return draft.quoteApprovalStatus === 'Supervisor_Approved' || draft.quoteApprovalStatus === 'Auto_Approved' || (!draft.quoteApprovalStatus && (!draft.discountRate || draft.discountRate <= 20));
+                                    return true;
+                                  }).length === 0 && (
+                                    <tr>
+                                      <td colSpan={5} className="py-8 text-center text-slate-400 font-bold italic text-[11px]">
+                                        Không tìm thấy hồ sơ nào trong danh mục này.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
+
                         </div>
                       )}
 
-                      {/* ── BẢNG THEO DÕI DANH MỤC HỒ SƠ (Apple Glassmorphic Style Portfolio Table) ── */}
-                      <div className="bg-white rounded-3xl p-6 shadow-[0_20px_50px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-6">
-                        
-                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
-                          <div className="space-y-1 text-left">
-                            <h3 className="text-slate-900 font-extrabold text-base tracking-tight flex items-center gap-2">
-                              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${corporateSubMode === 'chao_phi' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-                              <span>
-                                {corporateSubMode === 'chao_phi' 
-                                  ? 'Danh mục Hồ sơ Chào phí & Báo giá (GĐ 1)' 
-                                  : 'Danh mục Hợp đồng & Đơn bảo hiểm phát hành (GĐ 2)'}
-                              </span>
-                            </h3>
-                            <p className="text-slate-400 text-[11px] font-medium">
-                              {corporateSubMode === 'chao_phi' 
-                                ? 'Danh sách các hồ sơ chào phí nhanh và lập phương án nháp đang xử lý.' 
-                                : 'Danh sách các hồ sơ đang trong tiến trình ký hợp đồng khung, thanh toán và các hợp đồng đã cấp.'}
-                            </p>
-                          </div>
+                      {/* ── BẢNG DANH SÁCH THÔNG MINH CHO CẤP ĐƠN (GĐ 1 & GĐ 2) ── */}
+                      {corporateSubMode === 'cap_don' && (() => {
+                        // Gather draft contracts waiting for Cấp đơn:
+                        // These are completed and signed quotes from Chào phí (corporateSubMode === 'chao_phi' and is completed)
+                        const pendingIssueDrafts = draftContracts.filter(d => {
+                          const isChaoPhiCompleted = d.corporateSubMode === 'chao_phi' && (
+                            d.quoteApprovalStatus === 'Supervisor_Approved' || 
+                            d.quoteApprovalStatus === 'Auto_Approved' || 
+                            d.step >= 6
+                          );
+                          return isChaoPhiCompleted;
+                        });
 
-                          {/* Filter Tabs */}
-                          <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 self-start">
-                            <button
-                              type="button"
-                              onClick={() => setPortfolioTab('all')}
-                              className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'all' ? 'bg-white text-[#03377B] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                              Tất cả ({
-                                corporateSubMode === 'chao_phi' 
-                                  ? draftContracts.filter(d => {
-                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mappedStep <= 2;
-                                    }).length
-                                  : draftContracts.filter(d => {
-                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mappedStep >= 3;
-                                    }).length + completedContracts.length
-                              })
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setPortfolioTab('draft')}
-                              className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'draft' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                              Hồ sơ nháp ({
-                                corporateSubMode === 'chao_phi'
-                                  ? draftContracts.filter(d => {
-                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mappedStep <= 2;
-                                    }).length
-                                  : draftContracts.filter(d => {
-                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mappedStep >= 3;
-                                    }).length
-                              })
-                            </button>
-                            {corporateSubMode === 'cap_don' && (
-                              <button
-                                type="button"
-                                onClick={() => setPortfolioTab('completed')}
-                                className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${portfolioTab === 'completed' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                              >
-                                Đã cấp ({completedContracts.length})
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        // Gather draft contracts already in Cấp đơn progress (corporateSubMode === 'cap_don')
+                        const processingIssueDrafts = draftContracts.filter(d => {
+                          return d.corporateSubMode === 'cap_don';
+                        });
 
-                        {/* Portfolio Content List / Table */}
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs min-w-[650px]">
-                            <thead>
-                              <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                                <th className="pb-3 px-2">Mã hồ sơ / Ngày tạo</th>
-                                <th className="pb-3 px-2">Doanh nghiệp đối tác</th>
-                                <th className="pb-3 px-2">Sản phẩm</th>
-                                <th className="pb-3 px-2 text-center">Trạng thái / Tiến độ</th>
-                                <th className="pb-3 px-2 text-right">Phí bảo hiểm</th>
-                                <th className="pb-3 px-2 text-right">Thao tác</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100/50">
-                              
-                              {/* RENDER DRAFT CONTRACTS (Filtered by corporateSubMode) */}
-                              {(portfolioTab === 'all' || portfolioTab === 'draft') && draftContracts
-                                .filter(draft => {
-                                  const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
-                                  if (corporateSubMode === 'chao_phi') {
-                                    return mappedStep <= 2;
-                                  } else {
-                                    return mappedStep >= 3;
-                                  }
-                                })
-                                .map((draft) => {
-                                  const mappedStep = draft.step === 8 ? 5 : (draft.step === 7 || draft.step === 4 || draft.step === 3) ? 4 : draft.step === 6 ? 3 : draft.step === 5 ? 2 : 1;
-                                  return (
-                                    <tr key={draft.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
-                                      <td className="py-4 px-2">
-                                        <span className="font-mono font-extrabold block text-amber-600 tracking-tight">{draft.id}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">{draft.date}</span>
-                                      </td>
-                                      <td className="py-4 px-2">
-                                        <span className="font-extrabold text-slate-800 block">{draft.company}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">MST: {draft.taxCode} · {draft.headcount} nhân sự</span>
-                                      </td>
-                                      <td className="py-4 px-2">
-                                        <span className="font-semibold text-slate-600">Sức khỏe PTI Care (EB)</span>
-                                      </td>
-                                      <td className="py-4 px-2 text-center">
-                                        {mappedStep <= 2 ? (
-                                          <div className="flex flex-col items-center justify-center gap-1">
-                                            <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 border border-amber-500/20 animate-none">
-                                              Chào phí: Bước {mappedStep}/2 (Nháp)
-                                            </span>
-                                            {draft.quoteApprovalStatus === 'Pending_Approval' && (
-                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white animate-pulse">
-                                                Chờ Trưởng bộ phận duyệt (STP)
-                                              </span>
-                                            )}
-                                            {draft.quoteApprovalStatus === 'Supervisor_Approved' && (
-                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white">
-                                                Trưởng bộ phận đã duyệt
-                                              </span>
-                                            )}
-                                            {draft.quoteApprovalStatus === 'Supervisor_Rejected' && (
-                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white">
-                                                Bị từ chối duyệt
-                                              </span>
-                                            )}
-                                            {draft.quoteApprovalStatus === 'Sent_To_Customer' && (
-                                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-600 text-white">
-                                                Đã gửi cho khách hàng
-                                              </span>
-                                            )}
-                                          </div>
-                                        ) : (
-                                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 animate-none">
-                                            Cấp đơn: Bước {mappedStep - 2}/3 (Đang phát hành)
+                        // Filter based on selected tab
+                        let displayedItems: any[] = [];
+                        if (capDonFilterTab === 'all') {
+                          displayedItems = [
+                            ...pendingIssueDrafts.map(d => ({ ...d, listType: 'pending' })),
+                            ...processingIssueDrafts.map(d => ({ ...d, listType: 'processing' })),
+                            ...completedContracts.map(c => ({ ...c, listType: 'completed' }))
+                          ];
+                        } else if (capDonFilterTab === 'pending') {
+                          displayedItems = pendingIssueDrafts.map(d => ({ ...d, listType: 'pending' }));
+                        } else if (capDonFilterTab === 'processing') {
+                          displayedItems = processingIssueDrafts.map(d => ({ ...d, listType: 'processing' }));
+                        } else if (capDonFilterTab === 'completed') {
+                          displayedItems = completedContracts.map(c => ({ ...c, listType: 'completed' }));
+                        }
+
+                        // Apply search filter
+                        const filteredItems = displayedItems.filter(item => {
+                          const term = searchQuery.toLowerCase();
+                          return (item.id || '').toLowerCase().includes(term) || 
+                                 (item.company || '').toLowerCase().includes(term) ||
+                                 (item.taxCode || '').toLowerCase().includes(term);
+                        });
+
+                        return (
+                          <div className="bg-white rounded-3xl p-6 shadow-[0_20px_50px_rgba(15,23,42,0.03)] border border-slate-100 flex flex-col space-y-6 text-left">
+                            <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 border-b border-slate-100 pb-4">
+                              <div className="space-y-1">
+                                <h3 className="text-slate-900 font-extrabold text-base tracking-tight flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full animate-pulse bg-[#03377B]"></span>
+                                  <span>Bảng theo dõi &amp; Cấp đơn thông minh</span>
+                                </h3>
+                                <p className="text-slate-400 text-[11px] font-semibold">
+                                  Danh sách đơn hàng hoàn tất chào phí sẵn sàng cấp đơn và các hồ sơ cấp đơn dở dang.
+                                </p>
+                              </div>
+
+                              {/* Search Input */}
+                              <div className="relative self-start w-full sm:w-64">
+                                <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+                                  <Search size={14} />
+                                </span>
+                                <input
+                                  type="text"
+                                  placeholder="Tìm kiếm đối tác, mã hồ sơ..."
+                                  value={searchQuery}
+                                  onChange={(e) => setSearchQuery(e.target.value)}
+                                  className="w-full bg-slate-50 border border-slate-200/80 rounded-xl pl-9 pr-4 py-1.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
+                                />
+                              </div>
+
+                              {/* Filter Tabs */}
+                              <div className="flex bg-slate-100/80 p-1 rounded-xl border border-slate-200/50 self-start overflow-x-auto max-w-full">
+                                <button
+                                  type="button"
+                                  onClick={() => setCapDonFilterTab('all')}
+                                  className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 ${capDonFilterTab === 'all' ? 'bg-white text-[#03377B] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                  Tất cả ({pendingIssueDrafts.length + processingIssueDrafts.length + completedContracts.length})
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCapDonFilterTab('pending')}
+                                  className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 ${capDonFilterTab === 'pending' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                  Đơn chờ cấp ({pendingIssueDrafts.length})
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCapDonFilterTab('processing')}
+                                  className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 ${capDonFilterTab === 'processing' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                  Đơn nháp ({processingIssueDrafts.length})
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCapDonFilterTab('completed')}
+                                  className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 ${capDonFilterTab === 'completed' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                  Đã phát hành ({completedContracts.length})
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Portfolio Content List / Table */}
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs min-w-[700px]">
+                                <thead>
+                                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                                    <th className="pb-3 px-2">Mã hồ sơ / Ngày tạo</th>
+                                    <th className="pb-3 px-2">Doanh nghiệp đối tác</th>
+                                    <th className="pb-3 px-2">Sản phẩm</th>
+                                    <th className="pb-3 px-2 text-center">Trạng thái phát hành</th>
+                                    <th className="pb-3 px-2 text-right">Phí dự kiến / Phí cấp đơn</th>
+                                    <th className="pb-3 px-2 text-right">Thao tác</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100/50">
+                                  {filteredItems.map((item) => {
+                                    const isPending = item.listType === 'pending';
+                                    const isProcessing = item.listType === 'processing';
+                                    const mappedStep = getDraftCurrentStep(item);
+
+                                    return (
+                                      <tr key={item.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
+                                        {/* Code / Date */}
+                                        <td className="py-4 px-2">
+                                          <span className={`font-mono font-extrabold block tracking-tight ${isPending ? 'text-amber-600' : isProcessing ? 'text-blue-600' : 'text-emerald-600'}`}>
+                                            {item.id}
                                           </span>
-                                        )}
-                                      </td>
-                                      <td className="py-4 px-2 text-right">
-                                        <span className="text-slate-400 font-semibold">—</span>
-                                      </td>
-                                      <td className="py-4 px-2 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                          {/* If pending approval, let anyone (or supervisor simulation) approve it directly in the table */}
-                                          {mappedStep <= 2 && draft.quoteApprovalStatus === 'Pending_Approval' && (
+                                          <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">{item.date}</span>
+                                        </td>
+
+                                        {/* Company Name */}
+                                        <td className="py-4 px-2">
+                                          <span className="font-extrabold text-slate-800 block">{item.company}</span>
+                                          <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
+                                            MST: {item.taxCode} · {item.headcount} nhân sự
+                                          </span>
+                                        </td>
+
+                                        {/* Product */}
+                                        <td className="py-4 px-2">
+                                          <span className="font-semibold text-slate-600">Sức khỏe PTI Care (EB)</span>
+                                        </td>
+
+                                        {/* State Badge */}
+                                        <td className="py-4 px-2 text-center">
+                                          {isPending ? (
+                                            <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                                              Đơn chờ cấp (Chào phí đã kí)
+                                            </span>
+                                          ) : isProcessing ? (
+                                            <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-700 border border-blue-500/20">
+                                              Đơn nháp (Đang cấp - Bước {mappedStep}/3)
+                                            </span>
+                                          ) : (
+                                            <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                                              Đã phát hành hợp đồng
+                                            </span>
+                                          )}
+                                        </td>
+
+                                        {/* Premium Value */}
+                                        <td className="py-4 px-2 text-right">
+                                          <span className="font-black text-slate-900 tracking-tight">
+                                            {item.amount || item.premium ? formatVnd(item.amount || item.premium) : 'Tính real-time'}
+                                          </span>
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="py-4 px-2 text-right">
+                                          {isPending ? (
                                             <button
                                               type="button"
-                                              onClick={() => handleApproveDraftBySupervisor(draft)}
-                                              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md"
+                                              onClick={() => {
+                                                handleResumeDraft(item);
+                                                setCorporateSubMode('cap_don');
+                                                setCurrentStep(1); // Force Step 1 of Cấp đơn (Danh sách nhân viên)
+                                              }}
+                                              className="px-3.5 py-1.5 bg-[#03377B] hover:bg-emerald-600 hover:scale-105 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md shadow-blue-900/10"
                                             >
-                                              Duyệt nhanh
+                                              Cấp đơn ngay
                                             </button>
-                                          )}
-
-                                          {/* If approved, show "Gửi cho khách hàng" */}
-                                          {mappedStep <= 2 && draft.quoteApprovalStatus === 'Supervisor_Approved' && (
+                                          ) : isProcessing ? (
                                             <button
                                               type="button"
-                                              onClick={() => handleSendDraftToCustomer(draft)}
-                                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md"
+                                              onClick={() => {
+                                                handleResumeDraft(item);
+                                                setCorporateSubMode('cap_don');
+                                                const targetSt = getDraftCurrentStep(item);
+                                                setCurrentStep(targetSt); // Resume from precisely where they left off
+                                              }}
+                                              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 hover:scale-105 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md shadow-blue-900/10"
                                             >
-                                              Gửi cho khách hàng
+                                              Làm tiếp
+                                            </button>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => alert(`Đang tiến hành xuất bản thẻ điện tử e-card & giấy chứng nhận bảo hiểm cho Hợp đồng ${item.id}...`)}
+                                              className="text-[10px] text-[#03377B] hover:text-[#00285d] hover:underline flex items-center justify-end gap-1 font-bold ml-auto transition-colors"
+                                            >
+                                              <Printer size={12} className="text-[#03377B]" />
+                                              <span>Thẻ e-card</span>
                                             </button>
                                           )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
 
-                                          <button
-                                            type="button"
-                                            onClick={() => handleResumeDraft(draft)}
-                                            className="px-3.5 py-1.5 bg-[#03377B] hover:bg-[#00285d] hover:scale-105 active:scale-95 text-white font-black rounded-xl text-[10px] transition-all shadow-md shadow-blue-900/10"
-                                          >
-                                            {mappedStep <= 2 ? 'Làm tiếp' : 'Làm tiếp'}
-                                          </button>
-                                        </div>
+                                  {filteredItems.length === 0 && (
+                                    <tr>
+                                      <td colSpan={6} className="py-12 text-center text-slate-400 font-bold text-xs bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                        📭 Không tìm thấy kết quả hồ sơ tương ứng.
                                       </td>
                                     </tr>
-                                  );
-                                })}
-
-                              {/* RENDER COMPLETED CONTRACTS (ONLY IN CAP_DON MODE) */}
-                              {corporateSubMode === 'cap_don' && (portfolioTab === 'all' || portfolioTab === 'completed') && completedContracts.map((cnt) => (
-                                <tr key={cnt.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
-                                  <td className="py-4 px-2">
-                                    <span className="font-mono font-extrabold block text-emerald-600 tracking-tight">{cnt.id}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium block mt-0.5">{cnt.date}</span>
-                                  </td>
-                                  <td className="py-4 px-2">
-                                    <span className="font-extrabold text-slate-800 block">{cnt.company}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium block mt-0.5">MST: {cnt.taxCode} · {cnt.headcount} nhân sự</span>
-                                  </td>
-                                  <td className="py-4 px-2">
-                                    <span className="font-semibold text-slate-600">Sức khỏe PTI Care (EB)</span>
-                                  </td>
-                                  <td className="py-4 px-2 text-center">
-                                    <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
-                                      Đã phát hành đơn
-                                    </span>
-                                  </td>
-                                  <td className="py-4 px-2 text-right">
-                                    <span className="font-black text-slate-900 tracking-tight">{formatVnd(cnt.premium)}</span>
-                                  </td>
-                                  <td className="py-4 px-2 text-right">
-                                    <button
-                                      type="button"
-                                      onClick={() => alert(`Đang tiến hành xuất bản thẻ điện tử e-card & giấy chứng nhận bảo hiểm cho Hợp đồng ${cnt.id}...`)}
-                                      className="text-[10px] text-[#03377B] hover:text-[#00285d] hover:underline flex items-center justify-end gap-1 font-bold ml-auto transition-colors"
-                                    >
-                                      <Printer size={12} className="text-[#03377B]" />
-                                      <span>Thẻ e-card</span>
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-
-                              {/* Empty State */}
-                              {((corporateSubMode === 'chao_phi' && draftContracts.filter(d => {
-                                  const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                  return mappedStep <= 2;
-                                }).length === 0) ||
-                                (corporateSubMode === 'cap_don' && (portfolioTab === 'draft' ? 
-                                  draftContracts.filter(d => {
-                                    const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                    return mappedStep >= 3;
-                                  }).length === 0 :
-                                  portfolioTab === 'completed' ? 
-                                    completedContracts.length === 0 :
-                                    draftContracts.filter(d => {
-                                      const mappedStep = d.step === 8 ? 5 : (d.step === 7 || d.step === 4 || d.step === 3) ? 4 : d.step === 6 ? 3 : d.step === 5 ? 2 : 1;
-                                      return mappedStep >= 3;
-                                    }).length + completedContracts.length === 0
-                                ))) && (
-                                <tr>
-                                  <td colSpan={6} className="py-8 text-center text-slate-400 font-semibold">
-                                    Không tìm thấy hồ sơ nào trong mục này.
-                                  </td>
-                                </tr>
-                              )}
-
-                            </tbody>
-                          </table>
-                        </div>
-
-                      </div>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                     </div>
                   ))}
@@ -3782,93 +4234,82 @@ export default function App() {
               {currentStep > 0 && (!selectedProduct || selectedProduct === 'health_pti') && (
                 <div className="space-y-6 animate-slide-in">
                   
-                  {/* Cohesive Glassmorphic Banner for health_pti */}
-                  <div className="relative rounded-[2rem] p-6 text-white overflow-hidden shadow-2xl border border-white/25 bg-gradient-to-br from-[#03377B] via-[#022D66] to-[#011B3D] grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    {/* Apple iOS backlight glow */}
-                    <div className="absolute -top-12 right-0 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-12 left-1/4 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl"></div>
-                    
-                    {/* Left column details */}
-                    <div className="md:col-span-8 flex items-center gap-5 relative z-10">
-                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg flex-shrink-0">
-                        <span className="text-2xl">🏥</span>
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[10px] bg-white/15 border border-white/10 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                            Quy tắc 270/QĐ-PTI-BHCN
-                          </span>
-                          <span className="text-[10px] bg-amber-500/20 border border-amber-500/30 text-amber-300 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                            iPTI Premium
-                          </span>
+                  {/* Progress Step Bar: Redesigned high-fidelity compact Stepper */}
+                  <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs relative overflow-hidden text-left mb-6">
+                    <div className="max-w-4xl mx-auto">
+                      <div className="relative flex items-center justify-between">
+                        
+                        {/* Background line tracks */}
+                        <div className="absolute left-[16%] right-[16%] top-[20px] h-[2px] bg-slate-100 -translate-y-1/2 z-0 rounded-full overflow-hidden">
+                          {/* Active highlight line */}
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-600 to-[#03377B] transition-all duration-500 rounded-full"
+                            style={{ 
+                              width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%'
+                            }}
+                          ></div>
                         </div>
-                        <h2 className="text-xl sm:text-2xl font-black mt-2 tracking-tight">Bảo hiểm Sức khỏe PTI Care (EB)</h2>
-                        <p className="text-blue-100/80 text-xs mt-1.5 max-w-xl leading-relaxed">
-                          Chương trình bảo vệ sức khỏe toàn diện dành cho Doanh nghiệp, tự động phân hạng quyền lợi và thẩm định bệnh lý có sẵn 24/7.
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Right column: 3D Illustration in an Apple Glass card */}
-                    <div className="md:col-span-4 relative z-10 flex justify-center md:justify-end">
-                      <div className="w-full max-w-[200px] bg-white/5 backdrop-blur-md p-1 rounded-2xl border border-white/10 shadow-xl transform hover:scale-105 transition-transform duration-300">
-                        <HealthPti3D />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Step Bar */}
-                  <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                      
-                      <div className="flex items-center gap-3">
-                        <span className="bg-[#03377B] text-white w-9 h-9 flex items-center justify-center font-black rounded-xl text-sm shadow">
-                          {currentStep <= 2 ? currentStep : currentStep - 2}
-                        </span>
-                        <div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">BẢO HIỂM DOANH NGHIỆP PTI CARE</span>
-                          <span className="text-sm font-black text-slate-800">
-                            {currentStep === 1 && 'Bước 1: Khảo sát và Upload Đăng ký Kinh doanh'}
-                            {currentStep === 2 && 'Bước 2: Bảng chào phí nhanh'}
-                            {currentStep === 3 && 'Bước 1: Khai báo Sức khỏe &amp; Danh sách Nhân sự'}
-                            {currentStep === 4 && 'Bước 2: Thiết lập Hợp đồng khung &amp; Hóa đơn'}
-                            {currentStep === 5 && 'Bước 3: Thanh toán phí &amp; Auto phát hành e-card'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Phase Badge */}
-                      <div className="flex items-center gap-3">
-                        {currentStep <= 2 ? (
-                          <div className="bg-[#03377B]/10 border border-[#03377B]/20 text-[#03377B] px-3.5 py-1.5 rounded-xl text-left">
-                            <span className="text-[8px] font-extrabold uppercase tracking-widest block text-[#03377B]/60">GIAI ĐOẠN 1</span>
-                            <span className="text-[11px] font-black block">Báo giá &amp; Chốt sơ bộ (Chào phí)</span>
-                          </div>
-                        ) : (
-                          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-1.5 rounded-xl text-left">
-                            <span className="text-[8px] font-extrabold uppercase tracking-widest block text-emerald-600">GIAI ĐOẠN 2</span>
-                            <span className="text-[11px] font-black block">Phát hành chính thức (Cấp đơn)</span>
-                          </div>
-                        )}
-
-                        {/* Step progress dots */}
-                        <div className="flex items-center gap-1.5">
-                          {currentStep <= 2 ? (
-                            Array.from({ length: 2 }).map((_, idx) => (
-                              <div 
-                                key={idx} 
-                                className={`h-2 rounded-full transition-all duration-300 ${idx + 1 === currentStep ? 'w-8 bg-[#03377B]' : idx + 1 < currentStep ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-200'}`}
-                              ></div>
-                            ))
+                        {/* Step Node 1 */}
+                        <div className="flex flex-col items-center relative z-10 text-center w-1/3">
+                          {currentStep === 1 ? (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#03377B] to-blue-600 flex items-center justify-center shadow-md text-white transition-all duration-300 ring-4 ring-blue-500/10 scale-105">
+                              {corporateSubMode === 'chao_phi' ? <Building size={16} className="stroke-[2.5]" /> : <Users size={16} className="stroke-[2.5]" />}
+                            </div>
+                          ) : currentStep > 1 ? (
+                            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-xs text-white transition-all duration-300">
+                              <CheckCircle2 size={16} className="stroke-[2.5]" />
+                            </div>
                           ) : (
-                            Array.from({ length: 3 }).map((_, idx) => (
-                              <div 
-                                key={idx} 
-                                className={`h-2 rounded-full transition-all duration-300 ${idx + 3 === currentStep ? 'w-8 bg-emerald-600' : idx + 3 < currentStep ? 'w-3 bg-emerald-500' : 'w-3 bg-slate-200'}`}
-                              ></div>
-                            ))
+                            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 transition-all duration-300">
+                              {corporateSubMode === 'chao_phi' ? <Building size={16} className="stroke-[2]" /> : <Users size={16} className="stroke-[2]" />}
+                            </div>
                           )}
+                          <span className={`text-xs font-bold mt-2 transition-all duration-300 ${currentStep === 1 ? 'text-[#03377B]' : 'text-slate-500'}`}>
+                            {corporateSubMode === 'chao_phi' ? 'BƯỚC 1: Thông tin doanh nghiệp' : 'BƯỚC 1: Danh sách nhân viên'}
+                          </span>
                         </div>
+
+                        {/* Step Node 2 */}
+                        <div className="flex flex-col items-center relative z-10 text-center w-1/3">
+                          {currentStep === 2 ? (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#03377B] to-blue-600 flex items-center justify-center shadow-md text-white transition-all duration-300 ring-4 ring-blue-500/10 scale-105">
+                              {corporateSubMode === 'chao_phi' ? <Coins size={16} className="stroke-[2.5]" /> : <FileText size={16} className="stroke-[2.5]" />}
+                            </div>
+                          ) : currentStep > 2 ? (
+                            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-xs text-white transition-all duration-300">
+                              <CheckCircle2 size={16} className="stroke-[2.5]" />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 transition-all duration-300">
+                              {corporateSubMode === 'chao_phi' ? <Coins size={16} className="stroke-[2]" /> : <FileText size={16} className="stroke-[2]" />}
+                            </div>
+                          )}
+                          <span className={`text-xs font-bold mt-2 transition-all duration-300 ${currentStep === 2 ? 'text-[#03377B]' : 'text-slate-500'}`}>
+                            {corporateSubMode === 'chao_phi' ? 'BƯỚC 2: Chào phí nhanh' : 'BƯỚC 2: Xác nhận thông tin'}
+                          </span>
+                        </div>
+
+                        {/* Step Node 3 */}
+                        <div className="flex flex-col items-center relative z-10 text-center w-1/3">
+                          {currentStep === 3 ? (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#03377B] to-blue-600 flex items-center justify-center shadow-md text-white transition-all duration-300 ring-4 ring-blue-500/10 scale-105">
+                              {corporateSubMode === 'chao_phi' ? <FileCheck size={16} className="stroke-[2.5]" /> : <CreditCard size={16} className="stroke-[2.5]" />}
+                            </div>
+                          ) : currentStep > 3 ? (
+                            <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-xs text-white transition-all duration-300">
+                              <CheckCircle2 size={16} className="stroke-[2.5]" />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 transition-all duration-300">
+                              {corporateSubMode === 'chao_phi' ? <FileCheck size={16} className="stroke-[2]" /> : <CreditCard size={16} className="stroke-[2]" />}
+                            </div>
+                          )}
+                          <span className={`text-xs font-bold mt-2 transition-all duration-300 ${currentStep === 3 ? 'text-[#03377B]' : 'text-slate-400'}`}>
+                            {corporateSubMode === 'chao_phi' ? 'BƯỚC 3: Hợp đồng khung' : 'BƯỚC 3: Thanh toán'}
+                          </span>
+                        </div>
+
                       </div>
                     </div>
                   </div>
@@ -3876,7 +4317,7 @@ export default function App() {
                   {/* ──────────────────────────────────────────────────
                        STEP 1: KHẢO SÁT & HỒ SƠ PHÁP LÝ (GIAI ĐOẠN 1)
                      ────────────────────────────────────────────────── */}
-                  {currentStep === 1 && (
+                  {currentStep === 1 && corporateSubMode === 'chao_phi' && (
                     <div className="space-y-6">
                       
                       {/* 1. Thông tin doanh nghiệp */}
@@ -3886,10 +4327,9 @@ export default function App() {
                             <Building className="text-[#03377B]" size={18} />
                             <span>1. Thông tin Doanh nghiệp &amp; Người liên hệ</span>
                           </span>
-                          <span className="text-xs font-semibold text-slate-400">Giai đoạn 1: Chào phí</span>
                         </div>
                         <p className="text-xs text-slate-500 mb-6">
-                          Nhập <strong>ID khách hàng</strong> để hệ thống tự động đẩy dữ liệu doanh nghiệp và người liên hệ từ cơ sở dữ liệu CRM/PTI Care. Sau đó bổ sung thêm quy mô, ngành nghề và kênh khai thác.
+                          Nhập <strong>ID khách hàng</strong> để hệ thống tự động đẩy dữ liệu doanh nghiệp, ngành nghề kinh doanh và thông tin liên hệ từ cơ sở dữ liệu CRM/PTI Care.
                         </p>
 
                         {/* ID KHÁCH HÀNG LOOKUP SECTION */}
@@ -3984,41 +4424,15 @@ export default function App() {
                         </div>
 
                         {/* SPLIT LAYOUT: AUTO-FILLED vs USER-FILLED */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left pt-2">
+                        <div className="grid grid-cols-1 gap-8 text-left pt-2">
                           
                           {/* COLUMN 1: AUTOMATED DATA FROM ID (READ-ONLY WITH MAN OVERRIDE) */}
-                          <div className="lg:col-span-7 bg-slate-50/50 border border-slate-150 rounded-2xl p-5 space-y-4">
+                          <div className="bg-slate-50/50 border border-slate-150 rounded-2xl p-6 space-y-4">
                             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                               <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
                                 <span className="text-amber-500">📥</span>
                                 <span>Thông tin hệ thống tự đẩy (CRM)</span>
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const name = prompt("Sửa Tên công ty:", companyInfo.name);
-                                  const taxCode = prompt("Sửa Mã số thuế:", companyInfo.taxCode);
-                                  const contactName = prompt("Sửa Người liên hệ:", companyInfo.contactName);
-                                  const contactRole = prompt("Sửa Chức vụ:", companyInfo.contactRole);
-                                  const phone = prompt("Sửa Sđt:", companyInfo.phone);
-                                  const email = prompt("Sửa Email:", companyInfo.email);
-                                  const address = prompt("Sửa Địa chỉ:", companyInfo.address);
-                                  
-                                  setCompanyInfo({
-                                    ...companyInfo,
-                                    name: name !== null ? name : companyInfo.name,
-                                    taxCode: taxCode !== null ? taxCode : companyInfo.taxCode,
-                                    contactName: contactName !== null ? contactName : companyInfo.contactName,
-                                    contactRole: contactRole !== null ? contactRole : companyInfo.contactRole,
-                                    phone: phone !== null ? phone : companyInfo.phone,
-                                    email: email !== null ? email : companyInfo.email,
-                                    address: address !== null ? address : companyInfo.address,
-                                  });
-                                }}
-                                className="text-[10px] font-black text-[#03377B] hover:underline"
-                              >
-                                ✍️ Sửa thủ công
-                              </button>
                             </div>
 
                             <div className="space-y-3">
@@ -4076,62 +4490,14 @@ export default function App() {
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </div>
 
-                          {/* COLUMN 2: ADDITIONAL INFORMATION REQUIRED (USER MANUAL FILL) */}
-                          <div className="lg:col-span-5 bg-white border border-slate-150 rounded-2xl p-5 space-y-5">
-                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest block border-b border-slate-100 pb-3 flex items-center gap-1.5">
-                              <span className="text-blue-500">✍️</span>
-                              <span>Thông tin bổ sung cần điền</span>
-                            </span>
-
-                            <div className="space-y-4">
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Quy mô doanh nghiệp *</label>
-                                <select
-                                  value={companyInfo.size}
-                                  onChange={(e) => setCompanyInfo({ ...companyInfo, size: e.target.value })}
-                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
-                                >
-                                  <option value="">-- Chọn quy mô --</option>
-                                  <option value="Nhỏ (dưới 50 NV)">Nhỏ (dưới 50 NV)</option>
-                                  <option value="Vừa (50 – 200 NV)">Vừa (50 – 200 NV)</option>
-                                  <option value="Lớn (200 – 1000 NV)">Lớn (200 – 1000 NV)</option>
-                                  <option value="Tập đoàn (trên 1000 NV)">Tập đoàn (trên 1000 NV)</option>
-                                </select>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Ngành nghề kinh doanh chính *</label>
-                                <select
-                                  value={companyInfo.industry}
-                                  onChange={(e) => setCompanyInfo({ ...companyInfo, industry: e.target.value })}
-                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
-                                >
-                                  <option value="">-- Chọn ngành nghề --</option>
-                                  <option value="Công nghệ thông tin / Phần mềm">Công nghệ thông tin / Phần mềm</option>
-                                  <option value="Sản xuất / Chế biến">Sản xuất / Chế biến</option>
-                                  <option value="Tài chính / Ngân hàng / Bảo hiểm">Tài chính / Ngân hàng / Bảo hiểm</option>
-                                  <option value="Thương mại / Bán lẻ">Thương mại / Bán lẻ</option>
-                                  <option value="Xây dựng / Bất động sản">Xây dựng / Bất động sản</option>
-                                  <option value="Y tế / Dược phẩm">Y tế / Dược phẩm</option>
-                                </select>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide block">Kênh khai thác tiếp cận *</label>
-                                <select
-                                  value={companyInfo.channel}
-                                  onChange={(e) => setCompanyInfo({ ...companyInfo, channel: e.target.value })}
-                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white font-bold text-slate-800 transition"
-                                >
-                                  <option value="Zalo">Zalo liên hệ trực tiếp</option>
-                                  <option value="Email">Email Marketing</option>
-                                  <option value="Hotline">Hotline / Tổng đài PTI</option>
-                                  <option value="Tự tìm kiếm">Cán bộ CA tự khai thác tìm kiếm</option>
-                                  <option value="Đại lý giới thiệu">Qua đại lý liên kết giới thiệu</option>
-                                </select>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Ngành nghề kinh doanh chính (Tự động cập nhật CRM)</span>
+                                  <div className="text-xs font-semibold text-[#03377B] bg-blue-50/50 border border-blue-100 px-3 py-2 rounded-xl min-h-[34px] flex items-center">
+                                    {companyInfo.industry || <em className="text-slate-400 font-normal">Chưa có thông tin</em>}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -4139,513 +4505,310 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* 2. Đăng ký Giấy phép kinh doanh ngay */}
-                      <div className="card border border-slate-100">
-                        <div className="card-title">
-                          <FileText className="text-[#03377B]" size={18} />
-                          <span>2. Upload Giấy phép Đăng ký Kinh doanh (GPKD)</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-4">Cung cấp bản chụp hoặc bản quét Giấy phép ĐKKD để làm cơ sở pháp lý và đẩy nhanh tiến trình chốt sơ bộ.</p>
-                        
-                        <div className="border-2 border-dashed border-slate-200 bg-slate-50/50 hover:border-[#03377B] rounded-2xl p-6 text-center transition cursor-pointer relative group flex flex-col items-center justify-center">
-                          {gpkdFileName ? (
-                            <div className="space-y-2 animate-fade-in text-center">
-                              <span className="text-3xl">📄</span>
-                              <p className="text-xs font-bold text-slate-800">{gpkdFileName}</p>
-                              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                                ✓ Đã đính kèm GPKD thành công
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="space-y-2 text-center">
-                              <span className="text-3xl block text-slate-300 group-hover:scale-110 transition-transform">📁</span>
-                              <p className="text-xs font-semibold text-slate-500">Kéo thả file ĐKKD (.pdf, .jpg, .png) hoặc Click vào đây</p>
-                            </div>
-                          )}
-                          
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setGpkdFileName('GPKD_' + (companyInfo.taxCode || '0102934827') + '.pdf');
-                            }}
-                            className="mt-4 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#03377B] text-xs font-bold rounded-lg border border-blue-200 transition"
-                          >
-                            {gpkdFileName ? 'Thay đổi file' : '⚡ Tự động nạp bản scan GPKD mẫu'}
-                          </button>
-                        </div>
-                      </div>
-
+                      {/* No GPKD required as per user request */}
                     </div>
                   )}
-                                {/* ──────────────────────────────────────────────────
+
+                  {/* ──────────────────────────────────────────────────
                        STEP 2: BẢNG CHÀO GIÁ TỨC THỜI (GIAI ĐOẠN 1)
                      ────────────────────────────────────────────────── */}
-                  {currentStep === 2 && (
+                  {currentStep === 2 && corporateSubMode === 'chao_phi' && (
                     <div className="space-y-6">
                       
-                      {/* Quy mô, ngân sách và lịch sử bồi thường */}
+                      {/* Quy mô, ngân sách và lịch sử bồi thường -> Redesigned clean setup */}
                       <div className="card border border-slate-100 text-left">
-                        <div className="card-title">
+                        <div className="card-title mb-6">
                           <Users className="text-[#03377B]" size={18} />
-                          <span>Quy mô nhân sự &amp; Cơ cấu Ngân sách dự kiến</span>
+                          <span>Thông tin bảo hiểm</span>
                         </div>
-                        <p className="text-xs text-slate-500 mb-6">Xác định tổng số lượng nhân sự tham gia bảo hiểm, thiết lập độ tuổi, giới tính và khoảng ngân sách đầu người để PTI Care đề xuất gói bảo hiểm tối ưu.</p>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           
-                          {/* Left Column: Headcount & Budget */}
-                          <div className="md:col-span-2 space-y-6">
-                            
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center">
-                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tổng số lượng nhân viên (Min 5) *</label>
-                                <span className="text-lg font-black text-[#03377B] font-mono">{groupSizeInfo.headcount} người</span>
-                              </div>
-                              <div className="flex gap-2">
-                                <div className="relative flex-1">
-                                  <input
-                                    type="number"
-                                    min="5"
-                                    max="500"
-                                    value={groupSizeInfo.headcount}
-                                    onChange={(e) => {
-                                      const val = parseInt(e.target.value);
-                                      setGroupSizeInfo({ ...groupSizeInfo, headcount: isNaN(val) ? 0 : val });
-                                    }}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-black text-slate-800"
-                                    placeholder="VD: 15"
-                                  />
-                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">nhân viên</span>
-                                </div>
-                                <div className="flex gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: Math.max(5, groupSizeInfo.headcount - 1) })}
-                                    className="px-4 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
-                                  >
-                                    -
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: groupSizeInfo.headcount + 1 })}
-                                    className="px-4 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              </div>
-                              {groupSizeInfo.headcount < 5 && (
-                                <p className="text-[10px] text-rose-500 font-bold">⚠️ Bảo hiểm sức khỏe nhóm PTI Care yêu cầu tối thiểu 5 nhân viên.</p>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide">Tỷ lệ nhân sự Nữ giới (%)</label>
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={groupSizeInfo.femaleRatio}
-                                    onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, femaleRatio: parseInt(e.target.value) || 0 })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-semibold"
-                                  />
-                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide">Độ tuổi trung bình</label>
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    min="18"
-                                    max="65"
-                                    value={groupSizeInfo.averageAge}
-                                    onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, averageAge: parseInt(e.target.value) || 0 })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-semibold"
-                                  />
-                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">tuổi</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide">Ngân sách dự kiến/đầu người (VNĐ/năm) *</label>
+                          {/* 1. Tổng số lượng nhân viên */}
+                          <div className="space-y-3">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                              <span>Tổng số lượng nhân viên (Min 5) *</span>
+                            </label>
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
                                 <input
                                   type="number"
-                                  step="500000"
-                                  value={groupSizeInfo.budgetPerHead || ''}
-                                  onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, budgetPerHead: parseInt(e.target.value) || 0 })}
-                                  placeholder="VD: 2500000"
-                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-bold text-slate-900"
+                                  min="5"
+                                  max="500"
+                                  value={groupSizeInfo.headcount}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    setGroupSizeInfo({ ...groupSizeInfo, headcount: isNaN(val) ? 0 : val });
+                                  }}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-black text-slate-800"
+                                  placeholder="VD: 15"
                                 />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">người</span>
                               </div>
-
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 tracking-wide">Phạm vi địa lý bảo lãnh</label>
-                                <select
-                                  value={groupSizeInfo.geography}
-                                  onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, geography: e.target.value })}
-                                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition"
+                              <div className="flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: Math.max(5, groupSizeInfo.headcount - 1) })}
+                                  className="px-3 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
                                 >
-                                  <option value="Việt Nam">Nội địa Việt Nam (Bảo lãnh viện phí liên kết)</option>
-                                  <option value="Toàn cầu">Toàn cầu mở rộng (Áp dụng VIP)</option>
-                                </select>
+                                  -
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setGroupSizeInfo({ ...groupSizeInfo, headcount: groupSizeInfo.headcount + 1 })}
+                                  className="px-3 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 text-xs font-black text-slate-700 transition"
+                                >
+                                  +
+                                </button>
                               </div>
                             </div>
-
-                          </div>
-
-                          {/* Right Column: Previous Insurance & Loss Ratio */}
-                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4">
-                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest block">Lịch sử bảo hiểm nhóm</span>
-                            
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-bold text-slate-700 tracking-wide">Đã mua bảo hiểm sức khỏe trước đây?</label>
-                              <select
-                                value={groupSizeInfo.prevInsurance}
-                                onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, prevInsurance: e.target.value as 'yes' | 'no' })}
-                                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#03377B] transition"
-                              >
-                                <option value="no">Chưa có (Mua mới hoàn toàn)</option>
-                                <option value="yes">Đã từng mua bảo hiểm nhóm</option>
-                              </select>
-                            </div>
-
-                            {groupSizeInfo.prevInsurance === 'yes' && (
-                              <div className="space-y-1.5 animate-fade-in">
-                                <label className="text-xs font-bold text-[#03377B] tracking-wide">Tỷ lệ bồi thường năm trước (%)</label>
-                                <input
-                                  type="number"
-                                  value={groupSizeInfo.lossRatio}
-                                  onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, lossRatio: parseInt(e.target.value) || 0 })}
-                                  placeholder="VD: 65"
-                                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#03377B] transition font-semibold"
-                                />
-                                <span className="text-[9px] text-slate-400 block leading-tight">Dưới 80%: Đạt chuẩn và nhận ưu đãi giảm phí</span>
-                              </div>
+                            {groupSizeInfo.headcount < 5 && (
+                              <p className="text-[10px] text-rose-500 font-bold">⚠️ Yêu cầu tối thiểu 5 nhân viên.</p>
                             )}
-
-                            <div className="space-y-1.5 pt-1.5">
-                              <label className="text-xs font-bold text-slate-700 tracking-wide">Thời hạn đơn bảo hiểm</label>
-                              <select
-                                value={groupSizeInfo.duration}
-                                onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, duration: e.target.value })}
-                                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[#03377B] transition"
-                              >
-                                <option value="1 năm (tiêu chuẩn)">1 năm (Tiêu chuẩn 12 tháng)</option>
-                                <option value="6 tháng">Ngắn hạn 6 tháng</option>
-                                <option value="Khác">Phát hành trùng ngày tài chính</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Display of programs side-by-side with common conditions */}
-                      <div className="card border border-blue-500/10 text-left space-y-6 bg-slate-50/30 p-1 rounded-[2.5rem]">
-                        
-                        {/* 1. Quyền lợi chung */}
-                        <div className="relative overflow-hidden bg-gradient-to-br from-blue-50/70 to-white/95 border border-blue-500/15 rounded-[2.5rem] p-6 shadow-xl space-y-5 backdrop-blur-md">
-                          {/* Ambient background blur elements for Glass style */}
-                          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-blue-400/10 blur-3xl pointer-events-none"></div>
-                          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none"></div>
-                          
-                          <div className="flex items-center gap-2.5 border-b border-blue-500/10 pb-3 relative z-10">
-                            <div className="p-2 bg-gradient-to-tr from-[#03377B] to-blue-600 text-white rounded-xl shadow-md shadow-blue-500/10">
-                              <ShieldCheck size={18} />
-                            </div>
-                            <span className="text-xs font-black text-[#03377B] uppercase tracking-widest">
-                              Quy chuẩn Quyền lợi chung (Áp dụng đồng đều cho cả 5 Level)
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs relative z-10">
-                            {/* Card 1: Tai nan */}
-                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#03377B] border border-blue-500/15 shadow-inner">
-                                  <Activity size={15} />
-                                </div>
-                                <span className="font-extrabold text-[#03377B] text-[12px]">Bảo hiểm Tai nạn 24/24</span>
-                              </div>
-                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
-                                <p>• <strong className="text-slate-800">Nhân viên:</strong> Bồi thường sinh mạng lên đến <span className="text-[#03377B] font-extrabold">30 tháng lương</span> + Hỗ trợ lương 6 tháng + 140M y tế.</p>
-                                <p>• <strong className="text-slate-800">Người thân:</strong> 100M VNĐ sinh mạng + 80M VNĐ y tế.</p>
-                              </div>
-                            </div>
-
-                            {/* Card 2: Benh hiem ngheo */}
-                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-600 border border-rose-500/15 shadow-inner">
-                                  <Heart size={15} />
-                                </div>
-                                <span className="font-extrabold text-[#03377B] text-[12px]">Bệnh hiểm nghèo / Ốm đau</span>
-                              </div>
-                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
-                                <p>• Tử vong / Thương tật toàn bộ vĩnh viễn do ốm đau, bệnh tật thông thường: <strong className="text-rose-600 font-extrabold">Đồng mức 200 triệu VNĐ</strong>.</p>
-                              </div>
-                            </div>
-
-                            {/* Card 3: Vaccine */}
-                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/15 shadow-inner">
-                                  <Sparkles size={15} />
-                                </div>
-                                <span className="font-extrabold text-[#03377B] text-[12px]">Phản ứng sau tiêm Vaccine</span>
-                              </div>
-                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
-                                <p>• Được bảo vệ tối đa cho các chi phí y tế và sinh mạng phát sinh (nằm trong hạn mức nội trú/ngoại trú tương ứng).</p>
-                              </div>
-                            </div>
-
-                            {/* Card 4: Dong chi tra */}
-                            <div className="bg-white/70 hover:bg-white/95 border border-white/80 hover:border-blue-500/25 rounded-2xl p-4.5 space-y-2.5 shadow-[0_8px_32px_rgba(3,55,123,0.02)] transition-all duration-300">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/15 shadow-inner">
-                                  <Coins size={15} />
-                                </div>
-                                <span className="font-extrabold text-[#03377B] text-[12px]">Quy định Đồng chi trả (30%)</span>
-                              </div>
-                              <div className="text-slate-600 space-y-1.5 text-[11px] leading-relaxed">
-                                <p>• <strong className="text-slate-800">Nội trú:</strong> Đồng chi trả 30% khi điều trị tại các tuyến cao cấp, quốc tế (Vinmec, Việt Pháp, Hồng Ngọc...).</p>
-                                <p>• <strong className="text-slate-800">Ngoại trú:</strong> Đồng chi trả 30% khám ngoại trú, nha khoa và VLTL.</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 2. Điểm khác biệt giữa các Level */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="p-2 bg-gradient-to-tr from-[#03377B] to-blue-600 text-white rounded-xl shadow-md shadow-blue-500/10">
-                              <Award size={18} />
-                            </div>
-                            <span className="text-xs font-black text-[#03377B] uppercase tracking-widest">
-                              Điểm khác biệt &amp; Quyền lợi Sức khỏe theo từng Level
-                            </span>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            {PROGRAMS.map((prog) => {
-                              // Custom iOS Glass Vector Icon styles for each Level
-                              let LevelIcon = Shield;
-                              let iconBg = 'from-blue-500/15 to-blue-600/5';
-                              let iconBorder = 'border-blue-500/25';
-                              let iconColor = 'text-blue-700';
-                              let accentColor = 'bg-blue-500/5 border-blue-500/15 text-blue-700';
-                              let glowBg = 'shadow-[0_12px_30px_rgba(59,130,246,0.03)]';
-
-                              if (prog.id === 'lvl-2') {
-                                LevelIcon = Heart;
-                                iconBg = 'from-sky-500/15 to-sky-600/5';
-                                iconBorder = 'border-sky-500/25';
-                                iconColor = 'text-sky-700';
-                                accentColor = 'bg-sky-500/5 border-sky-500/15 text-sky-700';
-                                glowBg = 'shadow-[0_12px_30px_rgba(14,165,233,0.03)]';
-                              } else if (prog.id === 'lvl-3') {
-                                LevelIcon = Award;
-                                iconBg = 'from-indigo-500/15 to-indigo-600/5';
-                                iconBorder = 'border-indigo-500/25';
-                                iconColor = 'text-indigo-700';
-                                accentColor = 'bg-indigo-500/5 border-indigo-500/15 text-indigo-700';
-                                glowBg = 'shadow-[0_12px_30px_rgba(99,102,241,0.03)]';
-                              } else if (prog.id === 'lvl-4') {
-                                LevelIcon = Gem;
-                                iconBg = 'from-[#03377B]/15 to-blue-600/5';
-                                iconBorder = 'border-blue-800/25';
-                                iconColor = 'text-[#03377B]';
-                                accentColor = 'bg-blue-800/5 border-blue-800/15 text-blue-900';
-                                glowBg = 'shadow-[0_12px_30px_rgba(3,55,123,0.04)]';
-                              } else if (prog.id === 'lvl-5') {
-                                LevelIcon = Crown;
-                                iconBg = 'from-amber-500/15 to-yellow-600/5';
-                                iconBorder = 'border-amber-500/25';
-                                iconColor = 'text-amber-600';
-                                accentColor = 'bg-amber-500/5 border-amber-500/15 text-amber-800';
-                                glowBg = 'shadow-[0_12px_30px_rgba(245,158,11,0.04)]';
-                              }
-
-                              return (
-                                <div 
-                                  key={prog.id} 
-                                  className={`rounded-[2rem] border border-blue-500/10 bg-gradient-to-b from-white to-slate-50/40 p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#03377B]/30 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden backdrop-blur-md ${glowBg}`}
-                                >
-                                  {/* Glassmorphism gradient background glow */}
-                                  <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent pointer-events-none"></div>
-                                  
-                                  <div className="space-y-4.5 relative z-10">
-                                    {/* Glass vector badge icon */}
-                                    <div className="flex items-center justify-between">
-                                      <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${iconBg} ${iconBorder} border flex items-center justify-center ${iconColor} shadow-inner`}>
-                                        <LevelIcon size={18} className="stroke-[2.2]" />
-                                      </div>
-                                      <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[9px] font-extrabold uppercase tracking-widest border ${accentColor}`}>
-                                        {prog.id === 'lvl-5' ? '👑 VIP' : `LEVEL ${prog.id.split('-')[1]}`}
-                                      </span>
-                                    </div>
-
-                                    <div>
-                                      <h4 className="text-xs font-black text-slate-800 tracking-tight">{prog.name}</h4>
-                                      <span className="text-[9px] text-slate-400 font-bold block mt-0.5">{prog.tierLabel}</span>
-                                    </div>
-
-                                    <div className="border-t border-slate-100/80 pt-3.5 space-y-3 text-[11px] leading-tight">
-                                      <div>
-                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Tổng Nội trú / Năm</span>
-                                        <span className="font-extrabold text-[#03377B] text-xs bg-[#03377B]/5 px-2 py-0.5 rounded-md inline-block">{prog.inpatientBenefit}</span>
-                                      </div>
-                                      <div>
-                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Bệnh hiểm nghèo</span>
-                                        <span className="font-extrabold text-amber-600 bg-amber-500/5 px-2 py-0.5 rounded-md inline-block">
-                                          {prog.id === 'lvl-1' && '75 Triệu đ'}
-                                          {prog.id === 'lvl-2' && '100 Triệu đ'}
-                                          {prog.id === 'lvl-3' && '150 Triệu đ'}
-                                          {prog.id === 'lvl-4' && '300 Triệu đ'}
-                                          {prog.id === 'lvl-5' && '600 Triệu đ'}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="text-slate-400 block text-[9px] uppercase font-extrabold tracking-wider mb-1">Tổng Ngoại trú / Năm</span>
-                                        <span className="font-extrabold text-emerald-600 bg-emerald-500/5 px-2 py-0.5 rounded-md inline-block">{prog.outpatientBenefit}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="border-t border-slate-100/80 pt-4 mt-4 text-center relative z-10">
-                                    <span className="text-[9px] text-slate-400 font-bold block">Đơn giá cơ bản / người</span>
-                                    <span className="text-sm font-black text-[#03377B] block mt-1 tracking-tight">
-                                      {formatVnd(prog.ratePerHead)}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                      </div>
-
-                      {/* Interactive Allocation & Pricing Customizer */}
-                      <QuotationCalculator
-                        tiers={tiers}
-                        programs={PROGRAMS}
-                        onChangeTiers={setTiers}
-                        discountRate={discountRate}
-                        onChangeDiscountRate={setDiscountRate}
-                        commissionRate={commissionRate}
-                        onChangeCommissionRate={setCommissionRate}
-                        role={user.role}
-                        headcount={groupSizeInfo.headcount}
-                        quoteVersions={quoteVersions}
-                        onCreateNewVersion={handleCreateNewVersion}
-                        onRestoreVersion={handleRestoreVersion}
-                        quoteApprovalStatus={quoteApprovalStatus}
-                        onChangeApprovalStatus={setQuoteApprovalStatus}
-                      />
-
-                      {/* Instant Quotation Action Buttons */}
-                      {quoteApprovalStatus === 'Pending_Approval' ? (
-                        <div className="bg-amber-50/70 border border-amber-200/80 rounded-3xl p-6 text-left space-y-3 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <ShieldAlert className="text-amber-600 mt-0.5 shrink-0" size={18} />
-                            <div>
-                              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block">YÊU CẦU DUYỆT VƯỢT CHUẨN (STP/MCV)</span>
-                              <h4 className="text-sm font-black text-amber-900 mt-1">Đang chờ phê duyệt từ Trưởng nhóm nghiệp vụ</h4>
-                              <p className="text-xs text-amber-800 leading-relaxed">
-                                Báo giá này có chiết khấu vượt chuẩn 20% hoặc có tùy chỉnh quyền lợi riêng. Hệ thống đã tự động route vào hàng đợi duyệt của Trưởng nhóm. Vui lòng bấm <strong>Phê duyệt (Approve)</strong> tại bảng giả lập phía trên trước khi tiếp tục gửi cho khách hàng.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ) : quoteApprovalStatus === 'Supervisor_Rejected' ? (
-                        <div className="bg-rose-50/70 border border-rose-200/80 rounded-3xl p-6 text-left space-y-3 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <ShieldAlert className="text-rose-600 mt-0.5 shrink-0" size={18} />
-                            <div>
-                              <span className="text-[10px] font-extrabold text-rose-700 uppercase tracking-wider block">BẢN CHÀO BỊ TỪ CHỐI</span>
-                              <h4 className="text-sm font-black text-rose-900 mt-1">Trưởng nhóm đã từ chối bản chào vượt chuẩn này</h4>
-                              <p className="text-xs text-rose-800 leading-relaxed">
-                                Vui lòng giảm tỷ lệ chiết khấu xuống &le; 20% và đưa các quyền lợi chương trình về chuẩn cũ, hoặc khôi phục một phiên bản cũ hợp lệ từ mục <strong>Lịch sử các phiên bản Báo giá</strong>.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 text-left space-y-4">
-                          <div>
-                            <span className="text-[10px] font-extrabold text-[#03377B] uppercase tracking-wider block">CHỐT SƠ BỘ — BÁO GIÁ NHANH</span>
-                            <h4 className="text-sm font-black text-slate-800 mt-1">Xuất bản chào gửi Khách hàng duyệt trước</h4>
-                            <p className="text-xs text-slate-500">Chưa ràng buộc pháp lý. Hỗ trợ xuất bản chào đẹp gửi đối tác.</p>
-                          </div>
-
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-3 border-t border-slate-200">
-                            <button
-                              type="button"
-                              onClick={handleDownloadQuotePdf}
-                              disabled={isDownloadingQuote}
-                              className="px-5 py-2.5 bg-white hover:bg-slate-100 text-[#03377B] border border-slate-300 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                          {/* 2. Thời hạn bảo hiểm */}
+                          <div className="space-y-3">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Thời hạn bảo hiểm *</label>
+                            <select
+                              value={groupSizeInfo.duration}
+                              onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, duration: e.target.value })}
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-bold text-slate-800 h-[38px]"
                             >
-                              {isDownloadingQuote ? (
-                                <>
-                                  <RefreshCw className="animate-spin text-[#03377B]" size={14} />
-                                  <span>Đang xuất PDF...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Download size={14} />
-                                  <span>TẢI BẢN CHÀO PHÍ (PDF)</span>
-                                </>
-                              )}
-                            </button>
+                              <option value="1 năm (tiêu chuẩn)">1 năm (Tiêu chuẩn 12 tháng)</option>
+                              <option value="9 tháng">Ngắn hạn 9 tháng</option>
+                              <option value="6 tháng">Ngắn hạn 6 tháng</option>
+                            </select>
+                          </div>
+
+                          {/* 3. Ngày bắt đầu hiệu lực */}
+                          <div className="space-y-3">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Ngày bắt đầu hiệu lực *</label>
+                            <input
+                              type="date"
+                              value={groupSizeInfo.startDate || new Date().toISOString().split('T')[0]}
+                              onChange={(e) => setGroupSizeInfo({ ...groupSizeInfo, startDate: e.target.value })}
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs outline-none focus:border-[#03377B] focus:bg-white transition font-bold text-slate-800 h-[38px]"
+                            />
+                          </div>
+
+                        </div>
+                      </div>
+
+                      {/* Compact Benefits & Programs Summary */}
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">QUYỀN LỢI &amp; PHÂN HẠNG</span>
+                          <h4 className="text-sm font-black text-[#03377B]">Quy chuẩn quyền lợi chung &amp; 5 Phân hạng sản phẩm PTI Care</h4>
+                          <p className="text-xs text-slate-500">Áp dụng đồng đều quyền lợi tai nạn, bệnh hiểm nghèo và đồng chi trả 30% cho 5 cấp bậc bảo vệ từ Level 1 đến Level 5.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowBenefitsModal(true)}
+                          className="px-5 py-2.5 bg-white border border-slate-200 hover:border-[#03377B] hover:text-[#03377B] text-slate-700 font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 flex items-center gap-2"
+                        >
+                          <ShieldCheck size={14} className="text-[#03377B]" />
+                          <span>Xem chi tiết quyền lợi &amp; Level</span>
+                        </button>
+                      </div>
+
+                      {/* Benefits & Tiers Modal Popup */}
+                      {showBenefitsModal && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+                          <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl flex flex-col h-[85vh] border border-slate-100 text-left overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-150 flex items-center justify-between bg-slate-50">
+                              <div className="flex items-center gap-2">
+                                <ShieldCheck className="text-[#03377B]" size={20} />
+                                <div>
+                                  <h3 className="font-black text-slate-800 text-sm">QUY CHUẨN QUYỀN LỢI &amp; PHÂN HẠNG SẢN PHẨM PTI CARE</h3>
+                                  <p className="text-[10px] text-slate-400">Chi tiết quy chuẩn quyền lợi chung &amp; 5 Level bảo vệ</p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setShowBenefitsModal(false)}
+                                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-200/50 rounded-xl transition"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/30">
+                              
+                              {/* 1. Quyền lợi chung */}
+                              <div className="bg-white rounded-2xl p-5 border border-slate-150 space-y-4">
+                                <h4 className="text-xs font-black text-[#03377B] uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                                  <span>1. Quy chuẩn Quyền lợi chung (Áp dụng đồng đều cả 5 Level)</span>
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/65 space-y-2">
+                                    <span className="font-extrabold text-[#03377B] text-[12px] block">🏥 Tai nạn 24/24</span>
+                                    <p className="text-slate-600 text-[11px] leading-relaxed">Bồi thường sinh mạng đến 30 tháng lương, hỗ trợ lương 6 tháng + 140M y tế cho nhân viên. Người thân hỗ trợ sinh mạng 100M + 80M y tế.</p>
+                                  </div>
+                                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/65 space-y-2">
+                                    <span className="font-extrabold text-[#03377B] text-[12px] block">❤️ Bệnh hiểm nghèo</span>
+                                    <p className="text-slate-600 text-[11px] leading-relaxed">Tử vong/thương tật vĩnh viễn do ốm đau thông thường bồi thường đồng mức 200 triệu VNĐ.</p>
+                                  </div>
+                                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/65 space-y-2">
+                                    <span className="font-extrabold text-[#03377B] text-[12px] block">💉 Vaccine</span>
+                                    <p className="text-slate-600 text-[11px] leading-relaxed">Bảo vệ tối đa cho các phản ứng phụ sau tiêm vaccine theo hạn mức điều trị thực tế.</p>
+                                  </div>
+                                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/65 space-y-2">
+                                    <span className="font-extrabold text-[#03377B] text-[12px] block">🤝 Đồng chi trả (30%)</span>
+                                    <p className="text-slate-600 text-[11px] leading-relaxed">Đồng chi trả 30% khi điều trị tại các tuyến cao cấp, quốc tế (Vinmec, FV, FV, Hồng Ngọc...) và khi khám ngoại trú, nha khoa.</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* 2. Điểm khác biệt giữa các Level */}
+                              <div className="bg-white rounded-2xl p-5 border border-slate-150 space-y-4">
+                                <h4 className="text-xs font-black text-[#03377B] uppercase tracking-wider border-b border-slate-100 pb-2">
+                                  2. Quyền lợi Sức khỏe chi tiết theo từng Level bảo vệ
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                  {PROGRAMS.map((prog) => {
+                                    let LevelIcon = Shield;
+                                    let iconColor = 'text-sky-500';
+                                    let accentColor = 'bg-sky-500/10 text-sky-700 border-sky-300/30';
+                                    if (prog.id === 'lvl-2') {
+                                      LevelIcon = Heart;
+                                      iconColor = 'text-blue-500';
+                                      accentColor = 'bg-blue-500/10 text-blue-700 border-blue-400/25';
+                                    } else if (prog.id === 'lvl-3') {
+                                      LevelIcon = ShieldCheck;
+                                      iconColor = 'text-[#03377B]';
+                                      accentColor = 'bg-[#03377B]/10 text-[#03377B] border-[#03377B]/20';
+                                    } else if (prog.id === 'lvl-4') {
+                                      LevelIcon = Gem;
+                                      iconColor = 'text-blue-700';
+                                      accentColor = 'bg-blue-700/10 text-blue-950 border-blue-600/20';
+                                    } else if (prog.id === 'lvl-5') {
+                                      LevelIcon = Crown;
+                                      iconColor = 'text-amber-600';
+                                      accentColor = 'bg-amber-500/10 text-amber-800 border-amber-500/20';
+                                    }
+
+                                    return (
+                                      <div key={prog.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-between text-left">
+                                        <div className="space-y-3">
+                                          <div className="flex justify-between items-center">
+                                            <LevelIcon size={18} className={iconColor} />
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${accentColor}`}>
+                                              {prog.id === 'lvl-5' ? '👑 VIP' : `LEVEL ${prog.id.split('-')[1]}`}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-slate-800 font-extrabold text-xs block">{prog.tierLabel}</span>
+                                            <span className="text-slate-400 text-[10px] block mt-0.5">{prog.name}</span>
+                                          </div>
+                                          <div className="space-y-1 text-[10px] text-slate-600">
+                                            <p><strong className="text-slate-700">Nội trú:</strong> {prog.inpatientBenefit}</p>
+                                            <p><strong className="text-slate-700">Ngoại trú:</strong> {prog.outpatientBenefit}</p>
+                                            <p><strong className="text-slate-700">Nha khoa:</strong> {prog.dentalBenefit}</p>
+                                            <p className="truncate"><strong className="text-slate-700">Bệnh HN:</strong> {prog.maternityBenefit}</p>
+                                          </div>
+                                        </div>
+                                        <div className="mt-4 pt-2 border-t border-slate-200/50">
+                                          <span className="text-[10px] text-slate-400 font-semibold block">Phí chuẩn / người:</span>
+                                          <span className="text-xs font-black text-[#03377B]">{prog.ratePerHead.toLocaleString('vi-VN')} đ/năm</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
-                    </div>
-                  )}
-                  {currentStep === 3 && (
-                    <div className="space-y-6">
-                      
-                      {/* 1. EXCEL LIST UPLOAD ZONE */}
-                      <div className="card border border-slate-150 text-left">
-                        <div className="flex items-center justify-between gap-4 border-b border-slate-150 pb-4 mb-4">
-                          <div className="flex items-center gap-2">
-                            <Upload className="text-[#03377B]" size={18} />
-                            <span className="text-sm font-extrabold text-slate-800">Cung cấp Danh sách nhân viên &amp; GPKD thực tế</span>
+
+                      {/* TÓM TẮT THÔNG TIN DOANH NGHIỆP NGẮN GỌN */}
+                      <div className="bg-white border border-slate-100 shadow-[0_15px_50px_rgba(3,55,123,0.04)] rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all duration-300 hover:shadow-[0_25px_60px_rgba(3,55,123,0.06)] space-y-6 text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                          <div className="flex items-center gap-3.5">
+                            <div className="p-3 bg-blue-50/80 text-[#03377B] rounded-2xl border border-blue-100/40">
+                              <Building size={20} className="stroke-[2.5]" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-[#03377B] uppercase tracking-wider">
+                                Tóm tắt thông tin doanh nghiệp mua bảo hiểm
+                              </h4>
+                              <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Xác nhận thông tin doanh nghiệp thụ hưởng</p>
+                            </div>
                           </div>
-                          <span className="bg-[#03377B]/10 text-[#03377B] text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            GIAI ĐOẠN 2 — CẤP ĐƠN CHÍNH THỨC
+                          <span className="text-[10px] font-black text-[#03377B] bg-blue-50/60 border border-blue-100/30 px-3.5 py-1 rounded-full self-start sm:self-center uppercase tracking-wider shadow-xs">
+                            Mã hồ sơ: {contractId}
                           </span>
                         </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs pt-2">
+                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-1">
+                            <span className="text-slate-400 font-bold block uppercase tracking-wider text-[9px]">Tên doanh nghiệp:</span>
+                            <span className="font-extrabold text-slate-800 text-xs block leading-relaxed">{companyInfo.name || 'N/A'}</span>
+                          </div>
+                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-1">
+                            <span className="text-slate-400 font-bold block uppercase tracking-wider text-[9px]">Mã số thuế:</span>
+                            <span className="font-extrabold text-slate-700 text-xs block leading-relaxed">{companyInfo.taxCode || 'N/A'}</span>
+                          </div>
+                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-1">
+                            <span className="text-slate-400 font-bold block uppercase tracking-wider text-[9px]">Số lượng nhân sự dự kiến:</span>
+                            <span className="font-extrabold text-emerald-600 text-xs block leading-relaxed flex items-center gap-1.5">
+                              <Users size={14} />
+                              {groupSizeInfo.headcount || 10} nhân viên
+                            </span>
+                          </div>
+                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 space-y-1">
+                            <span className="text-slate-400 font-bold block uppercase tracking-wider text-[9px]">Liên hệ đại diện:</span>
+                            <span className="font-extrabold text-slate-800 text-xs block leading-relaxed">{companyInfo.contactName || 'N/A'} ({companyInfo.phone || 'N/A'})</span>
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* 1. EXCEL LIST UPLOAD & GPKD ZONE */}
+                      <div className="bg-white border border-slate-100 shadow-[0_15px_50px_rgba(3,55,123,0.04)] rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all duration-300 hover:shadow-[0_25px_60px_rgba(3,55,123,0.06)] space-y-6 text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                          <div className="flex items-center gap-3.5">
+                            <div className="p-3 bg-blue-50/80 text-[#03377B] rounded-2xl border border-blue-100/40">
+                              <Upload size={20} className="stroke-[2.5]" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-[#03377B] uppercase tracking-wider">
+                                Tải giấy phép KD &amp; Danh sách nhân viên
+                              </h4>
+                              <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Yêu cầu hồ sơ pháp lý &amp; danh sách nhân sự (Thẩm định tự động 100%)</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                           
                           {/* Left: GPKD status */}
-                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                          <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 flex flex-col justify-between space-y-4">
                             <div>
-                              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">1. Giấy phép Đăng ký kinh doanh (GPKD)</h4>
-                              <p className="text-[11px] text-slate-400 mt-1">Sử dụng để đối soát tính pháp lý doanh nghiệp.</p>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">1. Giấy phép Đăng ký kinh doanh (GPKD)</h4>
+                                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Yêu cầu tải lên để xác minh tư cách pháp nhân.</p>
+                                </div>
+                                <span className="text-[8px] bg-rose-500/10 text-rose-600 font-black px-2 py-0.5 rounded uppercase tracking-wider">Bắt buộc</span>
+                              </div>
                             </div>
                             
-                            <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                            <div className="bg-white border border-slate-200/60 rounded-xl p-3 flex items-center justify-between shadow-xs mt-2">
+                              <div className="flex items-center gap-2.5">
                                 <span className="text-xl">📄</span>
                                 <div className="text-left">
-                                  <p className="text-xs font-bold text-slate-800">{gpkdFileName || `GPKD_${companyInfo.taxCode || '99999999'}.pdf`}</p>
-                                  <span className="text-[9px] text-emerald-600 font-semibold block">✓ Đã đính kèm từ Bước 1</span>
+                                  <p className="text-xs font-black text-slate-800">{gpkdFileName || `GPKD_${companyInfo.taxCode || '99999999'}.pdf`}</p>
+                                  <span className="text-[9px] text-emerald-600 font-extrabold block">✓ Đã đính kèm hợp lệ</span>
                                 </div>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setGpkdFileName('GPKD_Doi_Tac_' + (companyInfo.taxCode || '12345678') + '.pdf');
+                                  const fname = prompt('Nhập tên file Giấy phép kinh doanh:', gpkdFileName || `GPKD_${companyInfo.taxCode || '99999999'}.pdf`);
+                                  if (fname) setGpkdFileName(fname);
                                 }}
-                                className="text-[10px] text-[#03377B] hover:underline font-bold"
+                                className="text-[10px] text-[#03377B] hover:underline font-black"
                               >
                                 Thay đổi
                               </button>
@@ -4653,34 +4816,101 @@ export default function App() {
                           </div>
 
                           {/* Right: Excel upload and template download */}
-                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                          <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 flex flex-col justify-between space-y-4">
                             <div>
-                              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">2. Danh sách nhân sự thực tế (.xlsx)</h4>
-                              <p className="text-[11px] text-slate-400 mt-1">Dùng để phân bổ quyền lợi và kê khai tình trạng sức khỏe của nhân viên.</p>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="text-xs font-extrabold text-[#03377B] uppercase tracking-wider">2. Danh sách nhân sự thực tế (.xlsx)</h4>
+                                  <p className="text-[11px] text-slate-400 mt-1 font-medium">Tải danh sách để phân bổ quyền lợi bảo hiểm (Thẩm định tự động 100%).</p>
+                                </div>
+                                <span className="text-[9px] bg-emerald-500/10 text-emerald-600 font-extrabold px-1.5 py-0.5 rounded uppercase">Thẩm định 100%</span>
+                              </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-2">
-                              <button
-                                type="button"
-                                onClick={() => alert('Đang tải xuống file mẫu danh sách nhân sự chuẩn PTI Care...')}
-                                className="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[10px] font-bold py-2 rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
-                              >
-                                <Download size={12} className="text-[#03377B]" />
-                                <span>Tải Excel mẫu</span>
-                              </button>
+                            {excelFileName ? (
+                              <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between shadow-xs">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-2xl">📊</span>
+                                  <div className="text-left">
+                                    <p className="text-xs font-bold text-emerald-800">{excelFileName}</p>
+                                    <span className="text-[9px] text-emerald-600 font-extrabold block">✓ Đã nạp thành công {employees.length} nhân viên</span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setExcelFileName('');
+                                    setEmployees([]);
+                                  }}
+                                  className="text-[10px] text-rose-600 hover:underline font-black"
+                                >
+                                  Xóa danh sách
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => alert('Đang tải xuống file mẫu danh sách nhân sự chuẩn PTI Care...')}
+                                  className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[10px] font-black py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs hover:-translate-y-0.5 active:scale-95"
+                                >
+                                  <Download size={12} className="text-[#03377B]" />
+                                  <span>Tải Excel mẫu</span>
+                                </button>
 
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setExcelFileName('Danh_Sach_Nhan_Vien_Thuc_Te_iPTI.xlsx');
-                                  // Re-trigger auto load if clicked
-                                  handleNextStep(); // Trigger setup of tiers & employees if not done
-                                }}
-                                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-[10px] font-black py-2 rounded-xl transition flex items-center justify-center gap-1 shadow"
-                              >
-                                <span>⚡ Nạp nhanh danh sách mẫu</span>
-                              </button>
-                            </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setExcelFileName('Danh_Sach_Nhan_Vien_Thuc_Te_iPTI.xlsx');
+                                    // Pre-populate the demo employees list if empty
+                                    if (employees.length === 0) {
+                                      const exeCount = Math.round(groupSizeInfo.headcount * 0.1) || 1;
+                                      const mgrCount = Math.round(groupSizeInfo.headcount * 0.2) || 2;
+                                      const staffCount = groupSizeInfo.headcount - exeCount - mgrCount;
+                                      
+                                      const generated: InsuredEmployee[] = Array.from({ length: groupSizeInfo.headcount }).map((_, idx) => {
+                                        let tId = 'tier-3';
+                                        let pos = 'Nhân viên';
+                                        if (idx === 0) {
+                                          tId = 'tier-1';
+                                          pos = 'Giám đốc Điều hành (CEO)';
+                                        } else if (idx < exeCount) {
+                                          tId = 'tier-1';
+                                          pos = 'Thành viên Ban giám đốc';
+                                        } else if (idx < exeCount + mgrCount) {
+                                          tId = 'tier-2';
+                                          pos = 'Trưởng phòng / Quản lý';
+                                        }
+                                        
+                                        const names = ['Nguyễn Hoàng Nam', 'Phạm Minh Trí', 'Trần Thị Thúy', 'Hoàng Minh Tuấn', 'Nguyễn Hương Ly', 'Lê Văn Thắng', 'Đặng Kim Chi', 'Vũ Quốc Khánh', 'Phạm Thị Mai', 'Đỗ Anh Dũng'];
+                                        const sampleName = names[idx % names.length] + (idx >= names.length ? ` (${idx - names.length + 1})` : '');
+                                        
+                                        return {
+                                          id: `emp-auto-${idx}`,
+                                          name: sampleName,
+                                          dob: '15/06/1990',
+                                          cccd: `00109000${1000 + idx}`,
+                                          gender: idx % 2 === 0 ? 'Nam' : 'Nữ',
+                                          email: `emp${idx + 1}@${companyInfo.email.split('@')[1] || 'company.com'}`,
+                                          tierId: tId,
+                                          healthStatus: 'Sạch', // Auto Underwriting 100%
+                                          hasPreExisting: false,
+                                          hasHospitalized12m: false,
+                                          hasOngoingTreatment: false,
+                                          treatmentDetails: 'Sức khỏe bình thường',
+                                          underwritingAction: 'approve' // Auto approved!
+                                        };
+                                      });
+                                      setEmployees(generated);
+                                    }
+                                    alert('Đã nạp nhanh thành công mẫu danh sách nhân sự (Thẩm định phê duyệt 100% tự động)!');
+                                  }}
+                                  className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-[10px] font-black py-2.5 rounded-xl transition flex items-center justify-center gap-1 shadow-md hover:-translate-y-0.5 active:scale-95"
+                                >
+                                  <span>⚡ Nạp nhanh danh sách &amp; mẫu</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
 
                         </div>
@@ -4697,9 +4927,9 @@ export default function App() {
                     </div>
                   )}
                   {/* ──────────────────────────────────────────────────
-                       STEP 4: THIẾT LẬP HỢP ĐỒNG KHUNG & HÓA ĐƠN
+                       STEP 2: XÁC NHẬN THÔNG TIN & HÓA ĐƠN
                      ────────────────────────────────────────────────── */}
-                  {currentStep === 4 && (
+                  {currentStep === 2 && corporateSubMode === 'cap_don' && (
                     <div className="space-y-6 animate-fade-in">
                       
                       {/* Invoicing configuration */}
@@ -4761,7 +4991,7 @@ export default function App() {
                                     type="text" 
                                     value={invoiceInfo.buyerName}
                                     onChange={(e) => setInvoiceInfo({ ...invoiceInfo, buyerName: e.target.value })}
-                                    className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg"
+                                    className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg font-bold"
                                   />
                                 </div>
                                 <div className="space-y-1.5">
@@ -4770,7 +5000,7 @@ export default function App() {
                                     type="text" 
                                     value={invoiceInfo.taxCode}
                                     onChange={(e) => setInvoiceInfo({ ...invoiceInfo, taxCode: e.target.value })}
-                                    className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg"
+                                    className="w-full bg-white border border-slate-200 px-3 py-2 rounded-lg font-bold"
                                   />
                                 </div>
                                 <div className="space-y-1.5 sm:col-span-2">
@@ -4797,515 +5027,11 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Framework Contract & OTP Signing Card */}
-                      <div className="card border border-slate-100 text-left">
-                        <div className="card-title">
-                          <ShieldCheck className="text-[#03377B]" size={18} />
-                          <span>Ký hợp đồng khung Bảo hiểm điện tử bằng OTP</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-4">
-                          Hợp đồng khung (Hợp đồng nguyên tắc) quy định các điều khoản chung, quyền lợi bảo lãnh, tỷ lệ bồi thường và biểu phí áp dụng cho Công ty {companyInfo.name || 'đối tác'}.
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                          {/* Contract View Simulator */}
-                          <div className="md:col-span-7 bg-slate-50 border border-slate-200 rounded-2xl p-4.5 flex flex-col justify-between">
-                            <div>
-                              <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-3">
-                                <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
-                                  <FileText size={15} className="text-[#03377B]" />
-                                  PTI_CARE_FRAMEWORK_CONTRACT.PDF
-                                </span>
-                                <span className="text-[10px] bg-slate-200 text-slate-500 font-bold px-2 py-0.5 rounded-sm">BẢN ĐỌC GHI CHỈ ĐỌC</span>
-                              </div>
-
-                              {/* Beautiful Real Document Formatted Preview */}
-                              <div className="bg-white shadow-xs rounded-xl p-5 text-xs text-slate-700 leading-relaxed font-sans space-y-4 text-left border border-slate-200/85 h-80 overflow-y-auto relative select-none">
-                                <div className="text-center space-y-1 mb-5">
-                                  <p className="font-extrabold text-slate-800 tracking-wider text-[11px]">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                                  <p className="font-bold text-slate-500 text-[9px] uppercase">Độc lập - Tự do - Hạnh phúc</p>
-                                  <div className="w-16 h-[1px] bg-slate-300 mx-auto mt-2"></div>
-                                </div>
-                                
-                                <p className="font-black text-slate-900 text-center text-xs uppercase my-3 tracking-tight leading-snug">
-                                  HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM<br />
-                                  <span className="text-[#03377B] text-[10px] font-extrabold">CHƯƠNG TRÌNH PTI CARE DOANH NGHIỆP THẾ HỆ MỚI</span>
-                                </p>
-                                
-                                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 text-[10px] text-slate-500 space-y-1">
-                                  <p><strong>Số hợp đồng:</strong> HDNT/PTI-CARE/{companyInfo.taxCode || '12345678'}</p>
-                                  <p><strong>Ngày lập dự thảo:</strong> {new Date().toLocaleDateString('vi-VN')}</p>
-                                </div>
-
-                                <p className="text-[11px] italic">Hôm nay, ngày {new Date().toLocaleDateString('vi-VN')}, chúng tôi gồm các bên dưới đây đồng ý ký kết hợp đồng này:</p>
-                                
-                                <div className="space-y-1 pt-1">
-                                  <p className="font-extrabold text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[10px]">BÊN A: TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM BƯU ĐIỆN (PTI)</p>
-                                  <div className="pl-3.5 space-y-0.5 text-slate-600 text-[11px]">
-                                    <p>• <strong>Địa chỉ:</strong> Tầng 8, Tòa nhà Harec, Số 4A Láng Hạ, Ba Đình, Hà Nội</p>
-                                    <p>• <strong>Người đại diện:</strong> Nguyễn Văn An - Chức vụ: Giám đốc Ban Bảo hiểm Con người</p>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-1 pt-1">
-                                  <p className="font-extrabold text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[10px]">BÊN B: {companyInfo.name || 'CÔNG TY ĐỐI TÁC KHÁCH HÀNG'}</p>
-                                  <div className="pl-3.5 space-y-0.5 text-slate-600 text-[11px]">
-                                    <p>• <strong>Mã số thuế:</strong> {companyInfo.taxCode || 'N/A'}</p>
-                                    <p>• <strong>Đại diện:</strong> {companyInfo.contactName || 'N/A'} - Chức vụ: {companyInfo.contactRole || 'N/A'}</p>
-                                    <p>• <strong>Số điện thoại:</strong> {companyInfo.phone || 'N/A'}</p>
-                                  </div>
-                                </div>
-
-                                <div className="pt-2 text-[11px]">
-                                  <p className="font-extrabold text-slate-900 uppercase text-[10px] border-b border-slate-100 pb-1">ĐIỀU 1: PHẠM VI BẢO HIỂM & QUYỀN LỢI</p>
-                                  <p className="text-slate-600 mt-1">Bên A đồng ý cấp bảo hiểm sức khỏe PTI Care cho toàn bộ cán bộ nhân viên của Bên B theo danh sách đính kèm tại Bước 3.</p>
-                                </div>
-
-                                <div className="pt-1 text-[11px]">
-                                  <p className="font-extrabold text-slate-900 uppercase text-[10px] border-b border-slate-100 pb-1">ĐIỀU 2: PHÍ BẢO HIỂM & THANH TOÁN</p>
-                                  <p className="text-slate-600 mt-1">Bên B có trách nhiệm thanh toán đầy đủ phí bảo hiểm cho Bên A theo thời hạn quy định để kích hoạt tài khoản bảo hiểm điện tử.</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* View & Download Buttons */}
-                            <div className="flex gap-2.5 mt-3.5">
-                              <button
-                                type="button"
-                                onClick={() => setShowFullContractModal(true)}
-                                className="flex-1 py-2 px-4 bg-white hover:bg-slate-50 text-[#03377B] border border-slate-200/80 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 hover:border-[#03377B]/50"
-                              >
-                                <Maximize2 size={13} className="text-[#03377B]" />
-                                <span>Xem toàn văn hợp đồng</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleDownloadContractPdf}
-                                disabled={isDownloadingContract}
-                                className="flex-1 py-2 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 hover:border-slate-300"
-                              >
-                                {isDownloadingContract ? (
-                                  <>
-                                    <RefreshCw className="animate-spin text-slate-500" size={13} />
-                                    <span>Đang tải...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Download size={13} className="text-slate-500" />
-                                    <span>Tải PDF bản gốc</span>
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Digital OTP Signing Controls */}
-                          <div className="md:col-span-5 flex flex-col justify-between">
-                            
-                            {isFrameworkContractSigned ? (
-                              /* Completed Green Signed State */
-                              <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-5 space-y-4 shadow-md border border-emerald-500/10 animate-fade-in text-left flex flex-col justify-between h-full">
-                                <div className="space-y-3.5">
-                                  <div className="flex items-center gap-3 border-b border-white/20 pb-3.5">
-                                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white text-base font-black shrink-0 shadow-inner">
-                                      ✓
-                                    </div>
-                                    <div>
-                                      <h4 className="font-black text-xs uppercase tracking-wider text-emerald-100">KÝ ĐIỆN TỬ HOÀN TẤT</h4>
-                                      <p className="text-[10px] text-emerald-50/90 font-medium">Đã xác thực OTP & khóa mã hóa hợp đồng</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="space-y-2 text-[11px]">
-                                    <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
-                                      <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Thời gian xác nhận ký:</span>
-                                      <span className="font-mono font-bold text-white block">06/07/2026 10:24:15 UTC+7</span>
-                                    </div>
-
-                                    <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
-                                      <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Địa chỉ IP / Thiết bị:</span>
-                                      <span className="font-bold text-white block truncate">113.161.42.xx (Chrome / macOS Sonoma)</span>
-                                    </div>
-
-                                    <div className="bg-white/10 p-2.5 rounded-xl border border-white/5 space-y-0.5">
-                                      <span className="text-emerald-200 text-[9px] uppercase font-bold tracking-wider block">Số chứng thư số điện tử:</span>
-                                      <span className="font-mono font-bold text-white block text-[10px] tracking-tight">CA-PTI-2026-992837482-SHA256</span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-3.5 pt-4 border-t border-white/15">
-                                  <div className="text-[10px] text-emerald-100 leading-normal bg-black/15 p-2.5 rounded-lg border border-emerald-500/10">
-                                    🔒 Văn bản điện tử đã được mã hóa bảo mật, chống sửa đổi. Khách hàng đã chấp thuận các điều khoản PTI Care.
-                                  </div>
-
-                                  <div className="bg-emerald-800/40 border border-emerald-500/25 rounded-xl p-2.5 text-center">
-                                    <span className="text-[9px] text-white font-extrabold block uppercase tracking-wider">✓ Sẵn sàng phát hành thẻ</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : user?.role === 'CA' ? (
-                              /* 3-Step Timeline View for Corporate Agent (CA) */
-                              <div className="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between h-full space-y-4">
-                                <div className="space-y-4">
-                                  <div className="space-y-1">
-                                    <span className="text-xs font-black text-[#03377B] uppercase tracking-wider block">TIẾN TRÌNH DUYỆT & KÝ SỐ</span>
-                                    <p className="text-[10px] text-slate-500 leading-normal">Giám sát trạng thái rà soát hợp đồng của Khách hàng theo thời gian thực.</p>
-                                  </div>
-
-                                  <div className="space-y-3.5 pt-1">
-                                    {/* Step 1: Draft Sent */}
-                                    <div className="flex gap-2.5">
-                                      <div className="flex flex-col items-center">
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
-                                          isReviewMailSent 
-                                            ? 'bg-emerald-500 text-white' 
-                                            : 'bg-amber-100 text-amber-700 ring-2 ring-amber-300'
-                                        }`}>
-                                          {isReviewMailSent ? '✓' : '1'}
-                                        </div>
-                                        <div className={`w-[1.5px] h-9 my-0.5 ${isReviewMailSent ? 'bg-emerald-500' : 'bg-slate-200'}`} />
-                                      </div>
-                                      <div className="flex-1 text-left">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[11px] font-black text-slate-700">1. Gửi bản nháp duyệt</span>
-                                          {isReviewMailSent ? (
-                                            <span className="text-[8px] bg-emerald-500/10 text-emerald-700 px-1 py-0.2 rounded font-extrabold uppercase">ĐÃ GỬI</span>
-                                          ) : (
-                                            <span className="text-[8px] bg-amber-500/15 text-amber-700 px-1 py-0.2 rounded font-extrabold uppercase animate-pulse">CẦN LÀM</span>
-                                          )}
-                                        </div>
-                                        <p className="text-[9px] text-slate-400">Gửi mail nháp kèm quyền lợi cho khách hàng kiểm tra trước.</p>
-                                        
-                                        {!isReviewMailSent && (
-                                          <button
-                                            type="button"
-                                            onClick={handleSendReviewEmail}
-                                            disabled={isReviewMailSending}
-                                            className="mt-1.5 py-1 px-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-100 text-slate-950 disabled:text-slate-400 font-extrabold text-[9px] rounded-lg transition flex items-center gap-1 shadow-xs active:scale-95"
-                                          >
-                                            {isReviewMailSending ? (
-                                              <>
-                                                <RefreshCw className="animate-spin text-slate-950" size={10} />
-                                                <span>Đang gửi...</span>
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Send size={9} className="stroke-[2.5]" />
-                                                <span>GỬI MAIL DUYỆT TRƯỚC</span>
-                                              </>
-                                            )}
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {/* Step 2: Signing Link Sent */}
-                                    <div className="flex gap-2.5">
-                                      <div className="flex flex-col items-center">
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
-                                          isOtpLinkSent 
-                                            ? 'bg-emerald-500 text-white' 
-                                            : isReviewMailSent 
-                                              ? 'bg-blue-100 text-[#03377B] ring-2 ring-blue-300' 
-                                              : 'bg-slate-100 text-slate-400'
-                                        }`}>
-                                          {isOtpLinkSent ? '✓' : '2'}
-                                        </div>
-                                        <div className={`w-[1.5px] h-9 my-0.5 ${isOtpLinkSent ? 'bg-emerald-500' : 'bg-slate-200'}`} />
-                                      </div>
-                                      <div className="flex-1 text-left">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[11px] font-black text-slate-700">2. Gửi liên kết ký số OTP</span>
-                                          {isOtpLinkSent ? (
-                                            <span className="text-[8px] bg-emerald-500/10 text-emerald-700 px-1 py-0.2 rounded font-extrabold uppercase">ĐÃ GỬI</span>
-                                          ) : isReviewMailSent ? (
-                                            <span className="text-[8px] bg-blue-100 text-blue-700 px-1 py-0.2 rounded font-extrabold uppercase">SẴN SÀNG</span>
-                                          ) : (
-                                            <span className="text-[8px] bg-slate-100 text-slate-400 px-1 py-0.2 rounded font-bold">CHỜ B1</span>
-                                          )}
-                                        </div>
-                                        <p className="text-[9px] text-slate-400">Gửi link SMS & Email bảo mật chứa mã OTP cho khách ký số.</p>
-                                        
-                                        {isReviewMailSent && !isOtpLinkSent && (
-                                          <button
-                                            type="button"
-                                            onClick={handleSendOtpLink}
-                                            disabled={isOtpLinkSending}
-                                            className="mt-1.5 py-1 px-2 bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-100 text-white disabled:text-slate-400 font-extrabold text-[9px] rounded-lg transition flex items-center gap-1 shadow-xs active:scale-95"
-                                          >
-                                            {isOtpLinkSending ? (
-                                              <>
-                                                <RefreshCw className="animate-spin text-white" size={10} />
-                                                <span>Đang gửi link...</span>
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Send size={9} />
-                                                <span>GỬI LIÊN KẾT KÝ SỐ</span>
-                                              </>
-                                            )}
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {/* Step 3: Customer Signature */}
-                                    <div className="flex gap-2.5">
-                                      <div className="flex flex-col items-center">
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
-                                          isFrameworkContractSigned 
-                                            ? 'bg-emerald-500 text-white' 
-                                            : isOtpLinkSent 
-                                              ? 'bg-orange-100 text-orange-700 ring-2 ring-orange-300' 
-                                              : 'bg-slate-100 text-slate-400'
-                                        }`}>
-                                          {isFrameworkContractSigned ? '✓' : '3'}
-                                        </div>
-                                      </div>
-                                      <div className="flex-1 text-left">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[11px] font-black text-slate-700">3. Khách hàng ký số</span>
-                                          {isOtpLinkSent ? (
-                                            <span className="text-[8px] bg-orange-100 text-orange-700 px-1 py-0.2 rounded font-extrabold uppercase animate-pulse">ĐANG KÝ</span>
-                                          ) : (
-                                            <span className="text-[8px] bg-slate-100 text-slate-400 px-1 py-0.2 rounded font-bold">CHỜ B2</span>
-                                          )}
-                                        </div>
-                                        <p className="text-[9px] text-slate-400">Khách tự nhập OTP nhận được để kích hoạt chứng thư số.</p>
-                                        
-                                        {isOtpLinkSent && (
-                                          <div className="mt-2 space-y-2">
-                                            <button
-                                              type="button"
-                                              onClick={handleRemindSign}
-                                              className="w-full py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg transition flex items-center justify-center gap-1 shadow-xs"
-                                            >
-                                              <Send size={10} className="text-slate-500" />
-                                              <span>GỬI NHẮC KÝ LẠI (REMIND)</span>
-                                            </button>
-
-                                            {/* Beautiful simulation box for testing in the workspace */}
-                                            <div className="bg-amber-50 border border-dashed border-amber-200 rounded-lg p-2 text-left">
-                                              <span className="text-[8px] text-amber-700 font-extrabold block uppercase tracking-wider mb-0.5">⚡ GIẢ LẬP KHÁCH HÀNG KÝ</span>
-                                              <p className="text-[8px] text-slate-500 mb-1 leading-relaxed">Ký thay Khách hàng để trải nghiệm tiếp quy trình hoàn tất.</p>
-                                              <button
-                                                type="button"
-                                                onClick={handleMockCustomerSign}
-                                                disabled={isSigningContract}
-                                                className="w-full py-1 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-100 text-slate-950 font-black text-[9px] rounded-md transition flex items-center justify-center gap-1"
-                                              >
-                                                {isSigningContract ? (
-                                                  <RefreshCw className="animate-spin text-slate-950" size={10} />
-                                                ) : (
-                                                  <span>Xác thực OTP (Mô phỏng Khách ký)</span>
-                                                )}
-                                              </button>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="pt-3 border-t border-slate-200 text-left">
-                                  <div className="text-[10px] text-amber-600 font-extrabold flex items-start gap-1.5 leading-normal bg-amber-50/75 p-2 rounded-xl border border-amber-100">
-                                    <span>⚠️</span>
-                                    <span>CA không thể xem hoặc nhập mã OTP thay khách hàng. Khách hàng phải tự thao tác trên thiết bị cá nhân để đảm bảo tính pháp lý.</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              /* Standard Direct OTP Signing for general users/clients */
-                              <div className="bg-blue-50/20 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between space-y-4 text-left h-full">
-                                <div className="space-y-1.5">
-                                  <span className="text-xs font-black text-[#03377B] uppercase tracking-wider block">XÁC THỰC CHỮ KÝ SỐ OTP</span>
-                                  <p className="text-[11px] text-slate-500">Mã xác thực OTP ký số hợp đồng sẽ được gửi qua SMS đến số điện thoại của người đại diện Bên B.</p>
-                                </div>
-
-                                <div className="space-y-3">
-                                  <div className="space-y-1 text-left">
-                                    <span className="text-[10px] font-bold text-slate-500 block">Số điện thoại ký kết</span>
-                                    <span className="text-xs font-bold text-slate-800 block bg-white px-3 py-2 rounded-xl border border-slate-200">{companyInfo.phone || '0988 234 567'}</span>
-                                  </div>
-
-                                  <div className="space-y-1.5">
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-[10px] font-bold text-slate-500">Nhập mã xác thực OTP (6 chữ số)</span>
-                                      {isOtpSent && (
-                                        <span className="text-[9px] text-emerald-600 font-bold">✓ Đã gửi OTP</span>
-                                      )}
-                                    </div>
-                                    
-                                    <div className="flex gap-2">
-                                      <input 
-                                        type="text" 
-                                        maxLength={6}
-                                        placeholder="VD: 123456"
-                                        value={otpInput}
-                                        onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                                        disabled={!isOtpSent || isFrameworkContractSigned}
-                                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-center tracking-widest outline-none focus:border-[#03377B] disabled:bg-slate-100 disabled:text-slate-400"
-                                      />
-                                      <button
-                                        type="button"
-                                        onClick={handleSendOtp}
-                                        disabled={isFrameworkContractSigned || otpCountdown > 0}
-                                        className="bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-200 text-white disabled:text-slate-400 px-3 py-2 text-[11px] font-bold rounded-xl transition flex-shrink-0"
-                                      >
-                                        {otpCountdown > 0 ? `Gửi lại (${otpCountdown}s)` : isOtpSent ? 'Gửi lại mã' : 'Nhận mã OTP'}
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={handleSignContract}
-                                  disabled={!isOtpSent || isSigningContract || otpInput.length !== 6}
-                                  className="w-full py-2.5 bg-gradient-to-r from-[#03377B] to-sky-600 hover:from-blue-800 hover:to-sky-700 disabled:from-slate-200 disabled:to-slate-200 text-white disabled:text-slate-400 font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-95"
-                                >
-                                  {isSigningContract ? (
-                                    <>
-                                      <RefreshCw className="animate-spin text-white" size={14} />
-                                      <span>Đang ký điện tử...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>KÝ ĐIỆN TỬ NGAY BẰNG OTP</span>
-                                    </>
-                                  )}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Complete Detailed Contract Preview Modal */}
-                      {showFullContractModal && (
-                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
-                          <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl flex flex-col h-[85vh] border border-slate-100 text-left overflow-hidden">
-                            <div className="px-6 py-4 border-b border-slate-150 flex items-center justify-between bg-slate-50">
-                              <div className="flex items-center gap-2">
-                                <FileText className="text-[#03377B]" size={20} />
-                                <div>
-                                  <h3 className="font-black text-slate-800 text-sm">HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM</h3>
-                                  <p className="text-[10px] text-slate-400">PTI_CARE_FRAMEWORK_CONTRACT.PDF (DỰ THẢO CHÍNH THỨC)</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setShowFullContractModal(false)}
-                                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-200/50 rounded-xl transition"
-                              >
-                                <X size={18} />
-                              </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-8 space-y-6 max-h-[calc(85vh-130px)] bg-slate-50/30">
-                              <div className="max-w-2xl mx-auto bg-white shadow-md border border-slate-200 rounded-2xl p-10 space-y-5 font-sans text-xs text-slate-700 leading-relaxed">
-                                <div className="text-center space-y-1 mb-8">
-                                  <p className="font-extrabold text-slate-800 tracking-wider text-xs">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                                  <p className="font-bold text-slate-500 text-[10px] uppercase">Độc lập - Tự do - Hạnh phúc</p>
-                                  <div className="w-24 h-[1.5px] bg-slate-400 mx-auto mt-2"></div>
-                                </div>
-
-                                <p className="font-black text-slate-900 text-center text-sm uppercase my-6 tracking-tight leading-snug">
-                                  HỢP ĐỒNG NGUYÊN TẮC BẢO HIỂM SỨC KHỎE NHÓM<br />
-                                  <span className="text-[#03377B] text-xs">PTI CARE DOANH NGHIỆP</span>
-                                </p>
-
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-[11px] text-slate-600 space-y-1.5">
-                                  <p><strong>Mã hợp đồng:</strong> HDNT/PTI-CARE/{companyInfo.taxCode || '12345678'}</p>
-                                  <p><strong>Ngày lập dự thảo:</strong> {new Date().toLocaleDateString('vi-VN')}</p>
-                                  <p><strong>Nơi thực hiện:</strong> Tổng Công ty Cổ phần Bảo hiểm Bưu điện (PTI) - Hà Nội</p>
-                                </div>
-
-                                <p className="indent-6"><em>Căn cứ Luật Kinh doanh bảo hiểm số 08/2022/QH15 được Quốc hội nước Cộng hòa Xã hội Chủ nghĩa Việt Nam thông qua ngày 16/06/2022; căn cứ nhu cầu thực tế và thỏa thuận giữa hai bên, hôm nay ngày {new Date().toLocaleDateString('vi-VN')}, chúng tôi gồm:</em></p>
-
-                                <div className="space-y-2 pt-2">
-                                  <p className="font-black text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[11px]">BÊN A: TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM BƯU ĐIỆN (PTI)</p>
-                                  <div className="pl-4 space-y-1 text-slate-600 text-[11px]">
-                                    <p>• <strong>Địa chỉ trụ sở:</strong> Tầng 8, Tòa nhà Harec, Số 4A Láng Hạ, Ba Đình, Hà Nội</p>
-                                    <p>• <strong>Đại diện bởi:</strong> Ông Nguyễn Văn An - Chức danh: Giám đốc Ban Bảo hiểm Con người</p>
-                                    <p>• <strong>Điện thoại:</strong> 1900 54 54 75 | Email: contact@pti.com.vn</p>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2 pt-2">
-                                  <p className="font-black text-slate-800 border-l-2 border-[#03377B] pl-2 uppercase text-[11px]">BÊN B: {companyInfo.name || 'CÔNG TY ĐỐI TÁC KHÁCH HÀNG'}</p>
-                                  <div className="pl-4 space-y-1 text-slate-600 text-[11px]">
-                                    <p>• <strong>Mã số doanh nghiệp:</strong> {companyInfo.taxCode || 'N/A'}</p>
-                                    <p>• <strong>Địa chỉ Đăng ký kinh doanh:</strong> {companyInfo.address || 'N/A'}</p>
-                                    <p>• <strong>Người đại diện:</strong> {companyInfo.contactName || 'N/A'} - Chức vụ: {companyInfo.contactRole || 'N/A'}</p>
-                                    <p>• <strong>SĐT liên hệ nhận OTP ký kết:</strong> {companyInfo.phone || 'N/A'}</p>
-                                    <p>• <strong>Email chính thức:</strong> {companyInfo.email || 'N/A'}</p>
-                                  </div>
-                                </div>
-
-                                <div className="pt-3 space-y-2">
-                                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 1: PHẠM VI BẢO HIỂM & QUYỀN LỢI</p>
-                                  <p className="text-slate-600">1.1. Bên A đồng ý cấp bảo hiểm sức khỏe PTI Care cho cán bộ nhân viên của Bên B theo danh sách và chương trình bảo hiểm chi tiết đã được hai bên đồng thuận xác nhận.</p>
-                                  <p className="text-slate-600">1.2. Quyền lợi bảo hiểm bao gồm: Điều trị nội trú do ốm đau bệnh tật, điều trị ngoại trú mở rộng, tai nạn cá nhân 24/7 và quyền lợi chăm sóc răng miệng theo đúng báo giá đã được CA phê duyệt.</p>
-                                </div>
-
-                                <div className="pt-3 space-y-2">
-                                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 2: BẢO LÃNH VIỆN PHÍ & GIẢI QUYẾT BỒI THƯỜNG</p>
-                                  <p className="text-slate-600">2.1. Người được bảo hiểm được hưởng quyền lợi bảo lãnh viện phí trực tiếp tại hơn 200 bệnh viện/phòng khám liên kết của PTI trên toàn quốc khi xuất trình giấy tờ tùy thân và e-card điện tử.</p>
-                                  <p className="text-slate-600">2.2. Đối với cơ sở y tế ngoài hệ thống bảo lãnh, người được bảo hiểm nộp hồ sơ yêu cầu bồi thường trực tuyến qua ứng dụng iPTI, thời gian giải quyết tối đa 5 ngày làm việc.</p>
-                                </div>
-
-                                <div className="pt-3 space-y-2">
-                                  <p className="font-black text-slate-900 uppercase text-[11px] border-b border-slate-100 pb-1">ĐIỀU 3: HIỆU LỰC & CHỮ KÝ SỐ PHÁP LÝ</p>
-                                  <p className="text-slate-600">3.1. Hợp đồng này chính thức có hiệu lực kể từ thời điểm Đại diện hợp pháp của hai bên ký điện tử thành công qua hệ thống chữ ký số dùng một lần OTP được cấp bởi tổ chức chứng thực CA hợp pháp.</p>
-                                  <p className="text-slate-600">3.2. Chữ ký số OTP có giá trị pháp lý đầy đủ theo quy định của Luật Giao dịch điện tử hiện hành.</p>
-                                </div>
-
-                                <div className="pt-8 border-t border-slate-200 flex justify-between text-[10px] text-slate-400">
-                                  <span>Đại diện Bên A</span>
-                                  <span>Đại diện Bên B</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="px-6 py-4 border-t border-slate-150 flex items-center justify-between bg-slate-50">
-                              <button
-                                type="button"
-                                onClick={() => setShowFullContractModal(false)}
-                                className="px-4 py-2 bg-slate-200 hover:bg-slate-250 text-slate-700 text-xs font-bold rounded-xl transition"
-                              >
-                                Đóng cửa sổ
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleDownloadContractPdf}
-                                disabled={isDownloadingContract}
-                                className="px-5 py-2.5 bg-[#03377B] hover:bg-blue-800 disabled:bg-slate-200 text-white disabled:text-slate-400 text-xs font-black rounded-xl shadow transition flex items-center gap-1.5"
-                              >
-                                {isDownloadingContract ? (
-                                  <>
-                                    <RefreshCw className="animate-spin text-white" size={14} />
-                                    <span>Đang tải xuống...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Download size={14} />
-                                    <span>TẢI FILE PDF CHÍNH THỨC</span>
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       {/* Summary Review Component Sheet */}
                       <ContractReview
                         companyInfo={companyInfo}
                         groupSizeInfo={groupSizeInfo}
-                        tiers={tiers}
+                        tiers={activeTiers}
                         employees={employees}
                         invoiceInfo={invoiceInfo}
                         programs={PROGRAMS}
@@ -5319,9 +5045,9 @@ export default function App() {
 
 
                   {/* ──────────────────────────────────────────────────
-                       STEP 8: THANH TOÁN (QR SCANNING & COMPLETED VIEW)
+                       STEP 3: THANH TOÁN (QR SCANNING & COMPLETED VIEW)
                      ────────────────────────────────────────────────── */}
-                  {currentStep === 5 && (
+                  {currentStep === 3 && corporateSubMode === 'cap_don' && (
                     <div className="space-y-6">
                       
                       {/* Payment gateway selection */}
@@ -5370,30 +5096,9 @@ export default function App() {
                             <div className="p-4 rounded-2xl bg-[#03377B]/5 border border-[#03377B]/10 space-y-2 text-xs text-[#03377B]">
                               <span className="font-bold uppercase tracking-wider block text-[10px]">Số tiền thực tế cần nộp:</span>
                               <span className="text-2xl font-black block">
-                                {formatVnd(
-                                  (tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) - Math.round((tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) * discountRate) / 100)) - 
-                                  Math.round(((tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) - Math.round((tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) * discountRate) / 100)) * commissionRate) / 100)
-                                )}
+                                {formatVnd(netRemitToPtiG2)}
                               </span>
-                              <span className="text-[10px] text-slate-400 font-medium block mt-1">(Đã trừ thù lao {commissionRate}%: {formatVnd(Math.round(((tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) - Math.round((tiers.reduce((sum, tier) => {
-                                    const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                    return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                  }, 0) * discountRate) / 100)) * commissionRate) / 100))})</span>
+                              <span className="text-[10px] text-slate-400 font-medium block mt-1">(Đã trừ thù lao {commissionRate}%: {formatVnd(commissionAmountG2)})</span>
                             </div>
                           </div>
 
@@ -5438,22 +5143,7 @@ export default function App() {
                                   <div className="flex justify-between pt-1">
                                     <span className="text-slate-400">Số tiền chuyển khoản:</span>
                                     <span className="font-bold text-emerald-600 text-sm">
-                                      {formatVnd(
-                                        (tiers.reduce((sum, tier) => {
-                                          const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                          return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                        }, 0) - Math.round((tiers.reduce((sum, tier) => {
-                                          const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                          return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                        }, 0) * discountRate) / 100)) - 
-                                        Math.round(((tiers.reduce((sum, tier) => {
-                                          const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                          return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                        }, 0) - Math.round((tiers.reduce((sum, tier) => {
-                                          const prog = PROGRAMS.find(p => p.id === tier.selectedProgramId);
-                                          return sum + (tier.headcount * (prog?.ratePerHead || 0));
-                                        }, 0) * discountRate) / 100)) * commissionRate) / 100)
-                                      )}
+                                      {formatVnd(netRemitToPtiG2)}
                                     </span>
                                   </div>
                                 </div>
@@ -5493,14 +5183,18 @@ export default function App() {
 
                   {/* Wizard Footer Controls */}
                   <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                    <button
-                      type="button"
-                      onClick={handlePrevStep}
-                      className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5"
-                    >
-                      <ArrowLeft size={14} />
-                      <span>Quay lại bước trước</span>
-                    </button>
+                    {currentStep > 1 ? (
+                      <button
+                        type="button"
+                        onClick={handlePrevStep}
+                        className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5"
+                      >
+                        <ArrowLeft size={14} />
+                        <span>Quay lại bước trước</span>
+                      </button>
+                    ) : (
+                      <div />
+                    )}
 
                     {/* Manual Save & Exit Button */}
                     <button
@@ -5512,7 +5206,7 @@ export default function App() {
                       <span>Lưu hồ sơ nháp</span>
                     </button>
 
-                    {currentStep === 1 || (currentStep >= 3 && currentStep < 5) ? (
+                    {currentStep === 1 || (corporateSubMode === 'cap_don' && currentStep === 2) ? (
                       <button
                         type="button"
                         onClick={handleNextStep}
@@ -5520,6 +5214,18 @@ export default function App() {
                       >
                         <span>Tiếp theo</span>
                         <ArrowRight size={14} />
+                      </button>
+                    ) : (corporateSubMode === 'chao_phi' && currentStep === 3) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          saveDraftState(true);
+                          setCurrentStep(0);
+                        }}
+                        className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+                      >
+                        <span>Hoàn tất &amp; Trở về</span>
+                        <CheckCircle2 size={14} />
                       </button>
                     ) : currentStep === 2 ? (
                       (() => {

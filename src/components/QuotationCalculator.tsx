@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, ShieldCheck, HelpCircle, DollarSign, Users, Sparkles, TrendingDown, ArrowRightLeft, History, ShieldAlert, Plus, RefreshCw, FileText, Check, CheckSquare } from 'lucide-react';
+import { Award, ShieldCheck, HelpCircle, DollarSign, Users, Sparkles, TrendingDown, ArrowRightLeft, History, ShieldAlert, Plus, RefreshCw, FileText, Check, CheckSquare, Trash2 } from 'lucide-react';
 import { EmployeeTier, InsuranceProgram, UserRole, QuoteVersion } from '../types';
 
 interface QuotationCalculatorProps {
@@ -144,6 +144,25 @@ export default function QuotationCalculator({
     onChangeTiers(newTiers);
   };
 
+  // Add a new tier/group
+  const handleAddTier = () => {
+    const nextNum = tiers.length + 1;
+    const newTier: EmployeeTier = {
+      id: `tier-${Date.now()}`,
+      name: `Nhóm ${nextNum}`,
+      headcount: 1,
+      selectedProgramId: 'lvl-1'
+    };
+    onChangeTiers([...tiers, newTier]);
+  };
+
+  // Remove a tier/group
+  const handleRemoveTier = (id: string) => {
+    if (tiers.length <= 1) return;
+    const newTiers = tiers.filter(t => t.id !== id);
+    onChangeTiers(newTiers);
+  };
+
   // Get total headcount entered across all tiers
   const currentTotalHeadcount = tiers.reduce((sum, t) => sum + t.headcount, 0);
 
@@ -194,65 +213,103 @@ export default function QuotationCalculator({
         </div>
       )}
 
-      {/* Tier distribution */}
-      <div className="card border border-slate-100">
-        <div className="card-title justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="text-[#03377B]" size={18} />
-            <span>Phân bổ Gói Bảo hiểm theo Cấp bậc Nhân viên</span>
-          </div>
-          <span className="text-xs font-semibold text-[#03377B] bg-blue-50 px-2.5 py-1 rounded-full">
-            Đã phân bổ: {currentTotalHeadcount} / {headcount} nhân viên
-          </span>
-        </div>
+      {/* Grid Layout: Left column for Sticky Payment Table, Right column for Inputs */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative">
+        
+        {/* LEFT COLUMN: Input Controls */}
+        <div className="lg:col-span-2 lg:order-1 order-1 space-y-6">
 
-        <div className="space-y-5">
-          {tiers.map((tier) => {
-            const selectedProg = programs.find(p => p.id === tier.selectedProgramId);
-            return (
-              <div key={tier.id} className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                  {/* Tier Info */}
-                  <div className="md:col-span-3">
-                    <span className="text-[11px] font-bold text-[#03377B] tracking-wider block mb-1">Cấp bậc</span>
-                    <span className="font-bold text-slate-800 text-sm block">{tier.name}</span>
-                  </div>
+          {/* Tier distribution */}
+          <div className="card border border-slate-100">
+            <div className="card-title justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Users className="text-[#03377B]" size={18} />
+                <span className="font-bold text-slate-800 text-sm">Phân bổ gói bảo hiểm theo nhóm</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleAddTier}
+                  className="px-3 py-1.5 bg-[#03377B] hover:bg-blue-800 text-white text-xs font-black rounded-lg transition shadow-xs flex items-center gap-1"
+                >
+                  <Plus size={13} className="text-white" />
+                  <span>Thêm nhóm mới</span>
+                </button>
+                <span className="text-xs font-semibold text-[#03377B] bg-blue-50 px-2.5 py-1 rounded-full shrink-0">
+                  Đã phân bổ: {currentTotalHeadcount} / {headcount} nhân viên
+                </span>
+              </div>
+            </div>
 
-                  {/* Headcount Input */}
-                  <div className="md:col-span-2">
-                    <label className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Số nhân viên</label>
-                    <input 
-                      type="number" 
-                      min="0"
-                      value={tier.headcount || ''}
-                      onChange={(e) => handleUpdateTier(tier.id, { headcount: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold outline-none focus:border-[#03377B]"
-                      placeholder="Số lượng"
-                    />
-                  </div>
+            <div className="space-y-5">
+              {tiers.map((tier) => {
+                const selectedProg = programs.find(p => p.id === tier.selectedProgramId);
+                return (
+                  <div key={tier.id} className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                      {/* Tier Info */}
+                      <div className="md:col-span-3">
+                        <label className="text-[11px] font-bold text-[#03377B] tracking-wider block mb-1">Tên nhóm</label>
+                        <input
+                          type="text"
+                          value={tier.name}
+                          onChange={(e) => handleUpdateTier(tier.id, { name: e.target.value })}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none focus:border-[#03377B]"
+                          placeholder="VD: Nhóm 1"
+                        />
+                      </div>
 
-                  {/* Program Selector */}
-                  <div className="md:col-span-4">
-                    <label className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Chọn gói bảo hiểm</label>
-                    <select
-                      value={tier.selectedProgramId}
-                      onChange={(e) => handleUpdateTier(tier.id, { selectedProgramId: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm outline-none focus:border-[#03377B]"
-                    >
-                      {programs.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} ({p.tierLabel}) — {formatVnd(p.ratePerHead)}/người</option>
-                      ))}
-                    </select>
-                  </div>
+                      {/* Headcount Input */}
+                      <div className="md:col-span-2">
+                        <label className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Số nhân viên</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={tier.headcount || ''}
+                          onChange={(e) => handleUpdateTier(tier.id, { headcount: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold outline-none focus:border-[#03377B]"
+                          placeholder="Số lượng"
+                        />
+                      </div>
 
-                  {/* Premium calculation display */}
-                  <div className="md:col-span-3 text-right">
-                    <span className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Thành phí ban đầu</span>
-                    <span className="font-bold text-[#03377B] text-base">
-                      {formatVnd(tier.headcount * (selectedProg?.ratePerHead || 0))}
-                    </span>
-                  </div>
-                </div>
+                      {/* Program Selector */}
+                      <div className="md:col-span-4">
+                        <label className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Chọn gói bảo hiểm</label>
+                        <select
+                          value={tier.selectedProgramId}
+                          onChange={(e) => handleUpdateTier(tier.id, { selectedProgramId: e.target.value })}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm outline-none focus:border-[#03377B]"
+                        >
+                          {programs.map(p => (
+                            <option key={p.id} value={p.id}>{p.name} ({p.tierLabel}) — {formatVnd(p.ratePerHead)}/người</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Premium calculation display */}
+                      <div className="md:col-span-2 text-right">
+                        <span className="text-[11px] font-bold text-slate-400 tracking-wider block mb-1">Thành phí</span>
+                        <span className="font-bold text-[#03377B] text-sm block">
+                          {formatVnd(tier.headcount * (selectedProg?.ratePerHead || 0))}
+                        </span>
+                      </div>
+
+                      {/* Delete Button */}
+                      <div className="md:col-span-1 text-center flex items-center justify-center pt-4 md:pt-0">
+                        {tiers.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTier(tier.id)}
+                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-100 transition shadow-xs"
+                            title="Xoá nhóm này"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        ) : (
+                          <div className="w-5" />
+                        )}
+                      </div>
+                    </div>
 
                 {/* Micro benefit summary for selected program */}
                 {selectedProg && (() => {
@@ -516,7 +573,7 @@ export default function QuotationCalculator({
               <div className="space-y-1">
                 <h4 className="text-xs font-black text-blue-800 uppercase tracking-tight">⚠️ QUYỀN LỢI ĐÃ ĐƯỢC CHỈNH SỬA (LƯU VẾT PHÁP LÝ v6.3)</h4>
                 <p className="text-blue-700 text-[11px] leading-relaxed font-medium">
-                  Bạn vừa điều chỉnh chi tiết quyền lợi chương trình so với biểu phí chuẩn của PTI. Để có bằng chứng đối soát pháp lý gửi khách hàng (tránh trường hợp khách hàng tranh chấp về mức quyền lợi sau này), <strong>hãy kéo xuống và bấm nút "TẠO VERSION MỚI" ở góc phải màn hình</strong> để lưu vết và quản lý lịch sử phiên bản báo giá của hồ sơ này.
+                  Bạn vừa điều chỉnh chi tiết quyền lợi chương trình so với biểu phí chuẩn của PTI.
                 </p>
               </div>
             </div>
@@ -524,222 +581,170 @@ export default function QuotationCalculator({
         </div>
       </div>
 
-      {/* Financial settings card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Discount slider and presets */}
-        <div className="card border border-slate-100 lg:col-span-1 shadow-sm hover:shadow-md transition">
-          <div className="card-title">
-            <TrendingDown className="text-orange-500" size={18} />
-            <span className="text-sm font-bold text-slate-800">Phí chiết khấu (Doanh nghiệp)</span>
-          </div>
-          <p className="text-xs text-slate-500 mb-4">Áp dụng ưu đãi giảm phí trực tiếp cho khách hàng dựa trên thỏa thuận quy mô nhóm.</p>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-xs font-semibold text-slate-700 mb-2">
-                <span>Tỷ lệ chiết khấu</span>
-                <span className="text-orange-600 font-black text-xs px-2 py-0.5 bg-orange-50 rounded-full">{discountRate}%</span>
+          {/* Financial settings card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Discount slider and presets */}
+            <div className="card border border-slate-100 shadow-sm hover:shadow-md transition">
+              <div className="card-title">
+                <TrendingDown className="text-orange-500" size={18} />
+                <span className="text-sm font-bold text-slate-800">Phí chiết khấu (Doanh nghiệp)</span>
               </div>
-              <div className="relative pt-1">
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="30" 
-                  step="2.5"
-                  value={discountRate} 
-                  onChange={(e) => onChangeDiscountRate(parseFloat(e.target.value))}
-                  className="ios-range-slider h-1.5 w-full rounded-full cursor-pointer appearance-none transition-all duration-200"
-                  style={{
-                    background: `linear-gradient(to right, #ff8008 0%, #ffc837 ${(discountRate / 30) * 100}%, #cbd5e1 ${(discountRate / 30) * 100}%, #cbd5e1 100%)`
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-1.5 pt-1">
-              {[0, 5, 10, 15, 20].map(val => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => onChangeDiscountRate(val)}
-                  className={`flex-1 py-1 rounded-full text-[10px] font-black border transition-all ${discountRate === val ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                  {val}%
-                </button>
-              ))}
-            </div>
-
-            <div className="bg-orange-50/60 p-3 rounded-2xl border border-orange-100 text-[11px] text-orange-800 flex items-center justify-between">
-              <span className="font-semibold text-orange-700/80">Số tiền chiết khấu thực tế:</span>
-              <strong className="text-orange-700 font-extrabold">{formatVnd(discountAmount)}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Commission settings based on user role */}
-        <div className="card border border-slate-100 lg:col-span-1 shadow-sm hover:shadow-md transition">
-          <div className="card-title">
-            <Award className="text-emerald-500" size={18} />
-            <span className="text-sm font-bold text-slate-800">Thù lao người bán ({role})</span>
-          </div>
-          <p className="text-xs text-slate-500 mb-4">
-            Đại lý được hưởng thù lao/hoa hồng tối đa là <strong className="text-emerald-600">{commLimit}%</strong> theo phân cấp đại lý hiện tại.
-          </p>
-
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-xs font-semibold text-slate-700 mb-2">
-                <span>Tỷ lệ thù lao</span>
-                <span className="text-emerald-600 font-black text-xs px-2 py-0.5 bg-emerald-50 rounded-full">{commissionRate}%</span>
-              </div>
-              <div className="relative pt-1">
-                <input 
-                  type="range" 
-                  min="0" 
-                  max={commLimit} 
-                  step="1"
-                  value={commissionRate} 
-                  onChange={(e) => onChangeCommissionRate(parseFloat(e.target.value))}
-                  className="ios-range-slider h-1.5 w-full rounded-full cursor-pointer appearance-none transition-all duration-200"
-                  style={{
-                    background: `linear-gradient(to right, #10b981 0%, #059669 ${(commissionRate / commLimit) * 100}%, #cbd5e1 ${(commissionRate / commLimit) * 100}%, #cbd5e1 100%)`
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-1.5 pt-1">
-              {[0, Math.floor(commLimit / 2), commLimit].map(val => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => onChangeCommissionRate(val)}
-                  className={`flex-1 py-1 rounded-full text-[10px] font-black border transition-all ${commissionRate === val ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                  {val}%
-                </button>
-              ))}
-            </div>
-
-            <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 flex items-center justify-between">
-              <span className="font-semibold text-emerald-700/80">Tổng thù lao nhận được:</span>
-              <strong className="text-emerald-700 font-extrabold">{formatVnd(commissionAmount)}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary total board - Redesigned to stunning Apple iOS Glassmorphic style */}
-        <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_20px_50px_rgba(3,55,123,0.06)] rounded-[2.5rem] p-6 text-slate-800 relative overflow-hidden transition-all duration-300 hover:shadow-[0_30px_60px_rgba(3,55,123,0.1)] hover:scale-[1.01] lg:col-span-1 flex flex-col justify-between">
-          {/* Subtle iOS background glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl pointer-events-none"></div>
-          
-          <div>
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 text-[#03377B] rounded-xl">
-                  <Sparkles size={16} />
-                </div>
-                <span className="text-xs font-black text-slate-800 uppercase tracking-wider">Bảng thanh toán phí</span>
-              </div>
-              <span className="text-[9px] bg-emerald-500/10 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-500/10">BÁO GIÁ ĐÚNG</span>
-            </div>
-
-            <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between items-center opacity-80 text-slate-500 font-semibold">
-                <span>Tổng phí gốc (ban đầu):</span>
-                <span className="font-bold text-slate-700">{formatVnd(basePremium)}</span>
-              </div>
-              <div className="flex justify-between items-center text-orange-600 font-semibold bg-orange-500/5 px-2.5 py-1.5 rounded-xl border border-orange-500/10">
-                <span>Chiết khấu ưu đãi ({discountRate}%):</span>
-                <span className="font-bold">- {formatVnd(discountAmount)}</span>
-              </div>
+              <p className="text-xs text-slate-500 mb-4">Áp dụng ưu đãi giảm phí trực tiếp cho khách hàng dựa trên thỏa thuận quy mô nhóm.</p>
               
-              <div className="border-t border-slate-100 py-3 my-1 flex justify-between items-center">
-                <span className="text-xs font-black text-slate-800">Tổng thanh toán KH:</span>
-                <span className="text-base text-[#03377B] font-black tracking-tight">{formatVnd(totalCustomerPay)}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-emerald-600 font-semibold bg-emerald-500/5 px-2.5 py-1.5 rounded-xl border border-emerald-500/10">
-                <span>Thù lao người bán ({commissionRate}%):</span>
-                <span className="font-bold">+ {formatVnd(commissionAmount)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 pt-4 mt-4">
-            <div className="bg-gradient-to-r from-[#03377B] to-[#0055c8] text-white p-3.5 rounded-2xl shadow-md border border-white/10 flex justify-between items-center">
-              <div>
-                <span className="block text-[9px] text-blue-200 uppercase font-bold tracking-wider">Người bán nộp PTI</span>
-                <span className="text-[9px] text-white/70 font-medium">(Đã khấu trừ thù lao)</span>
-              </div>
-              <span className="text-base font-black text-amber-300 tracking-tight">{formatVnd(netRemitToPti)}</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* NEW: STP/MCV Approval and Quotation Version History Controls */}
-      {(() => {
-        return (
-          <div className="pt-2">
-            {/* Quote Version Control History */}
-            <div className="card border border-slate-200 shadow-sm text-left w-full">
-              <div className="card-title justify-between">
-                <div className="flex items-center gap-2">
-                  <History className="text-[#03377B]" size={18} />
-                  <span className="text-sm font-bold text-slate-800">Lịch sử các phiên bản Báo giá</span>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs font-semibold text-slate-700 mb-2">
+                    <span>Tỷ lệ chiết khấu</span>
+                    <span className="text-orange-600 font-black text-xs px-2 py-0.5 bg-orange-50 rounded-full">{discountRate}%</span>
+                  </div>
+                  <div className="relative pt-1">
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="30" 
+                      step="2.5"
+                      value={discountRate} 
+                      onChange={(e) => onChangeDiscountRate(parseFloat(e.target.value))}
+                      className="ios-range-slider h-1.5 w-full rounded-full cursor-pointer appearance-none transition-all duration-200"
+                      style={{
+                        background: `linear-gradient(to right, #ff8008 0%, #ffc837 ${(discountRate / 30) * 100}%, #cbd5e1 ${(discountRate / 30) * 100}%, #cbd5e1 100%)`
+                      }}
+                    />
+                  </div>
                 </div>
-                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
-                  {quoteVersions.length} phiên bản
-                </span>
+
+                <div className="flex gap-1.5 pt-1">
+                  {[0, 5, 10, 15, 20].map(val => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => onChangeDiscountRate(val)}
+                      className={`flex-1 py-1 rounded-full text-[10px] font-black border transition-all ${discountRate === val ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {val}%
+                    </button>
+                  ))}
+                </div>
+
+                <div className="bg-orange-50/60 p-3 rounded-2xl border border-orange-100 text-[11px] text-orange-800 flex items-center justify-between">
+                  <span className="font-semibold text-orange-700/80">Số tiền chiết khấu thực tế:</span>
+                  <strong className="text-orange-700 font-extrabold">{formatVnd(discountAmount)}</strong>
+                </div>
               </div>
-              <p className="text-xs text-slate-500 mb-3">
-                Lưu vết lịch sử thay đổi để làm bằng chứng về quyền lợi và tỷ lệ chiết khấu đã đề xuất cho khách hàng tại từng thời điểm.
+            </div>
+
+            {/* Commission settings based on user role */}
+            <div className="card border border-slate-100 shadow-sm hover:shadow-md transition">
+              <div className="card-title">
+                <Award className="text-emerald-500" size={18} />
+                <span className="text-sm font-bold text-slate-800">Thù lao người bán ({role})</span>
+              </div>
+              <p className="text-xs text-slate-500 mb-4">
+                Đại lý được hưởng thù lao/hoa hồng tối đa là <strong className="text-emerald-600">{commLimit}%</strong> theo phân cấp đại lý hiện tại.
               </p>
 
-              <div className="space-y-2 max-h-[250px] overflow-y-auto mb-1 pr-1 divide-y divide-slate-100">
-                {quoteVersions.map((v) => (
-                  <div key={v.id} className="pt-2 flex items-start justify-between gap-2 text-xs">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-extrabold text-slate-800">{v.version}</span>
-                        <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase ${
-                          v.status === 'Supervisor_Approved' ? 'bg-emerald-100 text-emerald-800' :
-                          v.status === 'Pending_Approval' ? 'bg-amber-100 text-amber-800' :
-                          v.status === 'Supervisor_Rejected' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
-                        }`}>
-                          {v.status === 'Supervisor_Approved' ? 'Đã duyệt' :
-                           v.status === 'Pending_Approval' ? 'Chờ duyệt' :
-                           v.status === 'Supervisor_Rejected' ? 'Từ chối' : 'Tự duyệt'}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 block">{v.timestamp} · Người lập: {v.createdBy}</span>
-                      <span className="text-[10px] text-slate-500 block">
-                        Chiết khấu: <strong className="text-slate-700">{v.discountRate}%</strong> · Thù lao: <strong className="text-slate-700">{v.commissionRate}%</strong> · Phí sau CK: <strong className="text-slate-700">{formatVnd(v.totalPremium)}</strong>
-                      </span>
-                      {v.notes && <p className="text-[10px] text-slate-600 italic mt-0.5">"{v.notes}"</p>}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm(`Bạn có chắc muốn khôi phục thiết kế báo giá của phiên bản ${v.version}?`)) {
-                          onRestoreVersion(v);
-                        }
-                      }}
-                      className="text-[10px] text-[#03377B] hover:underline font-bold self-center shrink-0"
-                    >
-                      Khôi phục
-                    </button>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs font-semibold text-slate-700 mb-2">
+                    <span>Tỷ lệ thù lao</span>
+                    <span className="text-emerald-600 font-black text-xs px-2 py-0.5 bg-emerald-50 rounded-full">{commissionRate}%</span>
                   </div>
-                ))}
+                  <div className="relative pt-1">
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max={commLimit} 
+                      step="1"
+                      value={commissionRate} 
+                      onChange={(e) => onChangeCommissionRate(parseFloat(e.target.value))}
+                      className="ios-range-slider h-1.5 w-full rounded-full cursor-pointer appearance-none transition-all duration-200"
+                      style={{
+                        background: `linear-gradient(to right, #10b981 0%, #059669 ${(commissionRate / commLimit) * 100}%, #cbd5e1 ${(commissionRate / commLimit) * 100}%, #cbd5e1 100%)`
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-1.5 pt-1">
+                  {[0, Math.floor(commLimit / 2), commLimit].map(val => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => onChangeCommissionRate(val)}
+                      className={`flex-1 py-1 rounded-full text-[10px] font-black border transition-all ${commissionRate === val ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {val}%
+                    </button>
+                  ))}
+                </div>
+
+                <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 flex items-center justify-between">
+                  <span className="font-semibold text-emerald-700/80">Tổng thù lao nhận được:</span>
+                  <strong className="text-emerald-700 font-extrabold">{formatVnd(commissionAmount)}</strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div> {/* CLOSE LEFT COLUMN */}
+
+        {/* RIGHT COLUMN: Sticky Bảng thanh toán phí */}
+        <div className="lg:col-span-1 lg:sticky lg:top-24 lg:order-2 order-2 space-y-6">
+          
+          {/* Summary total board - Redesigned to stunning Apple iOS Glassmorphic style */}
+          <div className="bg-white/75 backdrop-blur-md border border-slate-100 shadow-[0_20px_50px_rgba(3,55,123,0.06)] rounded-[2.5rem] p-6 text-slate-800 relative overflow-hidden transition-all duration-300 hover:shadow-[0_30px_60px_rgba(3,55,123,0.1)] flex flex-col justify-between">
+            {/* Subtle background glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div>
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-50 text-[#03377B] rounded-xl animate-pulse">
+                    <Sparkles size={16} />
+                  </div>
+                  <span className="text-xs font-black text-slate-800 uppercase tracking-wider">Bảng thanh toán phí</span>
+                </div>
+                <span className="text-[9px] bg-emerald-500/10 text-emerald-700 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-500/10">BÁO GIÁ ĐÚNG</span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between items-center opacity-80 text-slate-500 font-semibold">
+                  <span>Tổng phí gốc (ban đầu):</span>
+                  <span className="font-bold text-slate-700">{formatVnd(basePremium)}</span>
+                </div>
+                <div className="flex justify-between items-center text-orange-600 font-semibold bg-orange-500/5 px-2.5 py-1.5 rounded-xl border border-orange-500/10">
+                  <span>Chiết khấu ưu đãi ({discountRate}%):</span>
+                  <span className="font-bold">- {formatVnd(discountAmount)}</span>
+                </div>
+                
+                <div className="border-t border-slate-100 py-3 my-1 flex justify-between items-center">
+                  <span className="text-xs font-black text-slate-800">Tổng thanh toán KH:</span>
+                  <span className="text-base text-[#03377B] font-black tracking-tight">{formatVnd(totalCustomerPay)}</span>
+                </div>
+
+                <div className="flex justify-between items-center text-emerald-600 font-semibold bg-emerald-500/5 px-2.5 py-1.5 rounded-xl border border-emerald-500/10">
+                  <span>Thù lao người bán ({commissionRate}%):</span>
+                  <span className="font-bold">+ {formatVnd(commissionAmount)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 mt-4">
+              <div className="bg-gradient-to-r from-[#03377B] to-[#0055c8] text-white p-3.5 rounded-2xl shadow-md border border-white/10 flex justify-between items-center">
+                <div>
+                  <span className="block text-[9px] text-blue-200 uppercase font-bold tracking-wider">Người bán nộp PTI</span>
+                  <span className="text-[9px] text-white/70 font-medium">(Đã khấu trừ thù lao)</span>
+                </div>
+                <span className="text-sm font-black text-amber-300 tracking-tight">{formatVnd(netRemitToPti)}</span>
               </div>
             </div>
           </div>
-        );
-      })()}
+
+        </div> {/* CLOSE RIGHT COLUMN */}
+
+      </div> {/* CLOSE GRID CONTAINER */}
 
     </div>
   );

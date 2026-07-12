@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { OpenIdBanner3D } from './ThreeDGraphics';
 import { 
   Users, 
   Building, 
@@ -107,13 +108,13 @@ interface Relationship {
 
 export default function OpenIdFlow() {
   // Navigation & Step states
-  // 0: Queue, 1: Start (Channel & Subject Type), 2: Input Info, 3: Loading System Check, 
+  // 1: Input Info (Channel & Subject Type), 2: Input Info / Check, 3: Loading System Check, 
   // 4: Create ID Result, 5: Assign Relationship, 6: Complete
-  const [currentSubStep, setCurrentSubStep] = useState<number>(0);
+  const [currentSubStep, setCurrentSubStep] = useState<number>(1);
   
   // Input Data States
   const [channel, setChannel] = useState<string>('app_web');
-  const [subjectType, setSubjectType] = useState<'personal' | 'corporate'>('personal');
+  const [subjectType, setSubjectType] = useState<'personal' | 'corporate'>('corporate');
   
   // Personal Form Fields
   const [pName, setPName] = useState('');
@@ -141,6 +142,11 @@ export default function OpenIdFlow() {
   const [resultId, setResultId] = useState('');
   const [resultStatus, setResultStatus] = useState<'4a' | '4b' | '4c'>('4a'); 
   const [finalSubjectData, setFinalSubjectData] = useState<Partial<MockSubject>>({});
+
+  // Appraisal Popup States
+  const [showAppraisalPopup, setShowAppraisalPopup] = useState(false);
+  const [appraisalProgress, setAppraisalProgress] = useState(0);
+  const [appraisalCompleted, setAppraisalCompleted] = useState(false);
 
   // Relationship States
   const [searchRelQuery, setSearchRelQuery] = useState('');
@@ -248,45 +254,53 @@ export default function OpenIdFlow() {
     return Object.keys(errs).length === 0;
   };
 
-  // Trigger System Check (Step 3)
-  const handleNextToSystemCheck = () => {
+  // Trigger System Appraisal (Popup)
+  const handleStartAppraisal = () => {
     if (!validateInputs()) {
       return;
     }
     
-    // Move to step 3 (Loading system check)
-    setCurrentSubStep(3);
-    setLoadingCheckMessage('Đang kết nối cổng dữ liệu Dân cư Quốc gia & Hệ thống Thuế...');
-    
+    setShowAppraisalPopup(true);
+    setAppraisalProgress(0);
+    setAppraisalCompleted(false);
+
+    // Simulated progress transitions
     setTimeout(() => {
-      setLoadingCheckMessage('Đang quét vân trùng lặp danh tính chủ thể trên hệ thống Core iPTI...');
-    }, 1500);
+      setAppraisalProgress(1);
+    }, 700);
 
     setTimeout(() => {
-      setLoadingCheckMessage('Hoàn tất đối soát, đang lưu trữ định danh...');
+      setAppraisalProgress(2);
+    }, 1400);
+
+    setTimeout(() => {
+      setAppraisalProgress(3);
+      setAppraisalCompleted(true);
       
-      // Determine duplication branch
       const idToCheck = subjectType === 'personal' ? pIdentity.trim() : cTaxCode.trim();
       const match = MOCK_EXISTING_SUBJECTS.find(s => s.identityNumber === idToCheck);
       
       if (match) {
-        setFinalSubjectData(match);
-        setResultId(match.id);
+        // Use a clean 5-digit version of the matched ID or generate one
+        const shortMatchId = match.id.includes('-') 
+          ? match.id.split('-').pop()?.slice(0, 5) || '10482'
+          : match.id.slice(0, 5);
+        
+        setFinalSubjectData({
+          ...match,
+          id: shortMatchId
+        });
+        setResultId(shortMatchId);
         if (match.status === 'active') {
-          // Rule 4b: ID exists and is active
           setResultStatus('4b');
         } else {
-          // Rule 4c: ID exists but inactive -> activate it automatically
           setResultStatus('4c');
         }
       } else {
-        // Rule 4a: Create a new ID
-        const suffix = Math.floor(10000 + Math.random() * 90000);
-        const prefix = subjectType === 'personal' ? 'PTI-IND-2026-' : 'PTI-ORG-2026-';
-        const newId = `${prefix}${suffix}`;
-        
+        // Create a 5-digit random short code
+        const shortId = `${Math.floor(10000 + Math.random() * 90000)}`;
         const newData: Partial<MockSubject> = {
-          id: newId,
+          id: shortId,
           name: subjectType === 'personal' ? pName : cName,
           type: subjectType,
           identityNumber: idToCheck,
@@ -299,13 +313,10 @@ export default function OpenIdFlow() {
         };
         
         setFinalSubjectData(newData);
-        setResultId(newId);
+        setResultId(shortId);
         setResultStatus('4a');
       }
-      
-      // Navigate to step 4
-      setCurrentSubStep(4);
-    }, 3200);
+    }, 2100);
   };
 
   // Search for relatives
@@ -414,7 +425,7 @@ export default function OpenIdFlow() {
 
   // Reset the wizard for a new request
   const handleResetFlow = () => {
-    setCurrentSubStep(0);
+    setCurrentSubStep(1);
     setChannel('app_web');
     setSubjectType('personal');
     setPName('');
@@ -484,700 +495,487 @@ export default function OpenIdFlow() {
   return (
     <div className="w-full space-y-6 text-slate-800 animate-fade-in pb-12">
       
-      {/* ── COHESIVE HEADER BANNER (Apple Glass style) ── */}
-      <div className="relative rounded-[2rem] p-6 text-white overflow-hidden shadow-2xl border border-white/20 bg-gradient-to-br from-[#03377B] via-[#022D66] to-[#011B3D] grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-        {/* Apple iOS background glow */}
-        <div className="absolute -top-12 right-0 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-12 left-1/4 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        
-        {/* Left info column */}
-        <div className="md:col-span-8 flex items-center gap-5 relative z-10 text-left">
-          <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg flex-shrink-0">
-            <UserPlus size={24} className="text-white" />
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                MỞ ID CHỦ THỂ
-              </span>
-              <span className="text-[10px] bg-white/15 border border-white/10 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                Phiên bản v6.3 - Toàn diện
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black mt-2 tracking-tight">Hệ thống Định danh Khách hàng iPTI</h2>
-            <p className="text-blue-100/80 text-xs mt-1.5 max-w-xl leading-relaxed">
-              Cấp phát ID Định danh duy nhất cho Cá nhân hoặc Tổ chức, tích hợp công nghệ OCR kiểm tra và gán mối quan hệ pháp lý đa chiều tức thì.
-            </p>
-          </div>
-        </div>
-
-        {/* Right navigation summary card */}
-        <div className="md:col-span-4 relative z-10 flex justify-center md:justify-end">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 p-4 w-full max-w-[240px] text-left space-y-2 shadow-xl">
-            <span className="text-[10px] font-bold text-blue-200 uppercase tracking-wider block">Trạng thái định danh</span>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-              <span className="text-xs font-bold text-white">Cổng dịch vụ công: SẴN SÀNG</span>
-            </div>
-            <div className="pt-1.5 border-t border-white/10 text-[10px] text-blue-100/70 flex justify-between">
-              <span>Đã cấp hôm nay:</span>
-              <span className="font-extrabold text-white">42 ID</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── MULTI-STEP PROGRESS BAR (Except for Queue Step 0) ── */}
-      {currentSubStep > 0 && (
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100/90 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3 text-left">
-            <span className="bg-[#03377B] text-white w-9 h-9 flex items-center justify-center font-black rounded-xl text-sm shadow">
-              {currentSubStep}
-            </span>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">TIẾN TRÌNH THỰC HIỆN</span>
-              <span className="text-sm font-black text-[#03377B]">
-                {currentSubStep === 1 && 'Bước 1: Khởi tạo yêu cầu & Chọn chủ thể'}
-                {currentSubStep === 2 && `Bước 2: Nhập hồ sơ ${subjectType === 'personal' ? 'Cá nhân' : 'Doanh nghiệp'}`}
-                {currentSubStep === 3 && 'Bước 3: Hệ thống đối soát dữ liệu Core'}
-                {currentSubStep === 4 && 'Bước 4: Cấp ID Định danh'}
-                {currentSubStep === 5 && 'Bước 5: Thiết lập gán mối quan hệ'}
-                {currentSubStep === 6 && 'Bước 6: Hoàn tất cấp định danh'}
-              </span>
-            </div>
-          </div>
-
-          {/* Staggered progress dots */}
-          <div className="flex items-center gap-2">
-            {[1, 2, 3, 4, 5, 6].map((num) => (
-              <div 
-                key={num} 
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  currentSubStep === num 
-                    ? 'w-8 bg-[#03377B]' 
-                    : currentSubStep > num 
-                      ? 'w-2 bg-emerald-500' 
-                      : 'w-2 bg-slate-200'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
 
-      {/* ── STEP 0: QUEUE / MÀN HÌNH CHỜ (Dành cho nhân viên xử lý) ── */}
-      {currentSubStep === 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
-          
-          {/* Main Queue Card */}
-          <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-base font-black text-slate-800 tracking-tight">Hàng đợi yêu cầu mở ID</h3>
-                <p className="text-slate-400 text-xs">Yêu cầu từ App/Web tự động hoặc trực tiếp được đồng bộ theo thời gian thực</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCurrentSubStep(1)}
-                className="px-4 py-2 bg-[#03377B] text-white rounded-2xl text-xs font-bold hover:bg-opacity-90 shadow-md flex items-center gap-1.5 transition-all"
-              >
-                <Plus size={14} className="stroke-[2.5]" />
-                Tạo ID Mới Ngay
-              </button>
-            </div>
 
-            {/* Queue Table */}
-            <div className="overflow-hidden border border-slate-100 rounded-2xl shadow-xs">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    <th className="px-4 py-3">Mã yêu cầu</th>
-                    <th className="px-4 py-3">Tên Khách hàng / Tổ chức</th>
-                    <th className="px-4 py-3">Loại</th>
-                    <th className="px-4 py-3">Kênh tiếp nhận</th>
-                    <th className="px-4 py-3">Thời gian</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3 text-right">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {queueItems.map((item) => (
-                    <tr key={item.queueId} className="hover:bg-slate-50/50 transition">
-                      <td className="px-4 py-3.5 font-mono font-bold text-slate-500">{item.queueId}</td>
-                      <td className="px-4 py-3.5 font-black text-slate-800">{item.subjectName}</td>
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                          item.type === 'personal' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-purple-50 text-purple-600 border border-purple-100'
-                        }`}>
-                          {item.type === 'personal' ? <Users size={10} /> : <Building size={10} />}
-                          {item.type === 'personal' ? 'Cá nhân' : 'Tổ chức'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-600 font-medium">{item.channel}</td>
-                      <td className="px-4 py-3.5 text-slate-400 font-mono text-[11px]">{item.requestDate}</td>
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase ${
-                          item.status === 'completed' 
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                            : item.status === 'processing'
-                              ? 'bg-amber-50 text-amber-600 border border-amber-100 animate-pulse'
-                              : 'bg-slate-100 text-slate-500 border border-slate-200'
-                        }`}>
-                          {item.status === 'completed' ? 'Đã cấp' : item.status === 'processing' ? 'Đang xử lý' : 'Đang đợi'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        {item.status === 'completed' ? (
-                          <span className="text-[10px] text-emerald-600 font-bold">Xong</span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleProcessQueueItem(item)}
-                            className="px-3 py-1 bg-sky-50 text-[#03377B] hover:bg-[#03377B] hover:text-white border border-[#03377B]/10 rounded-lg text-[10px] font-bold transition duration-200"
-                          >
-                            Xử lý ngay
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100 text-xs text-[#03377B] leading-relaxed font-medium">
-              💡 <strong>Lưu ý nghiệp vụ:</strong> Đây là phân hệ khởi tạo mã định danh duy nhất cho Khách hàng mới chưa từng có mã trên hệ thống quản lý iPTI Core. Việc chuẩn hóa thông tin đầu vào ở bước này sẽ hạn chế 99.8% tranh chấp quyền lợi bảo hiểm sau này.
-            </div>
-          </div>
-
-          {/* Quick Guide Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-gradient-to-br from-white/80 via-white/40 to-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/60 shadow-sm space-y-4">
-              <h4 className="text-sm font-black text-[#03377B] uppercase tracking-wider">HƯỚNG DẪN ĐỊNH DANH HỒ SƠ v6.3</h4>
-              <div className="space-y-4 text-xs">
-                <div className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#03377B] flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">1</span>
-                  <div>
-                    <h5 className="font-extrabold text-slate-800">Chọn Đúng Kênh & Loại Chủ thể</h5>
-                    <p className="text-slate-500 mt-0.5">Xác định hình thức tiếp cận của Khách hàng để áp dụng đúng quy chuẩn thủ tục hành chính.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#03377B] flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">2</span>
-                  <div>
-                    <h5 className="font-extrabold text-slate-800">Sử dụng Camera OCR</h5>
-                    <p className="text-slate-500 mt-0.5">Với chủ thể Cá nhân, hệ thống hỗ trợ quét thông tin từ ảnh chụp CCCD của chip điện tử, giảm thiểu sai sót gõ phím.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#03377B] flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">3</span>
-                  <div>
-                    <h5 className="font-extrabold text-slate-800">Gán mối quan hệ</h5>
-                    <p className="text-slate-500 mt-0.5">Ràng buộc pháp lý giữa cha-con, vợ-chồng hoặc công ty mẹ-con để kích hoạt ưu đãi biểu phí gia đình/doanh nghiệp liên kết.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gradient-to-br from-[#03377B]/5 via-[#03377B]/10 to-transparent rounded-3xl border border-[#03377B]/10 text-center space-y-3">
-              <span className="text-xl">📊</span>
-              <h5 className="font-black text-slate-800 text-xs">Phân tích Hệ thống Hôm nay</h5>
-              <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold text-slate-500">
-                <div className="p-2 bg-white rounded-xl border border-slate-100">
-                  <span className="text-slate-400 block mb-0.5">Trùng lặp</span>
-                  <span className="text-rose-600 font-black text-sm">3%</span>
-                </div>
-                <div className="p-2 bg-white rounded-xl border border-slate-100">
-                  <span className="text-slate-400 block mb-0.5">OCR Tốc độ</span>
-                  <span className="text-[#03377B] font-black text-sm">1.8s</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ── STEP 1: CHỌN KÊNH & CHỦ THỂ ── */}
+      {/* ── STEP 1: INFORMATION FORM & CUSTOMER ID ISSUANCE ── */}
       {currentSubStep === 1 && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm max-w-2xl mx-auto space-y-8 text-left">
-          <div className="border-b border-slate-100 pb-4">
-            <h3 className="text-lg font-black text-slate-800 tracking-tight">1. Bắt đầu yêu cầu định danh</h3>
-            <p className="text-slate-400 text-xs">Vui lòng chọn kênh nhận hồ sơ và loại chủ thể cần cấp ID định danh mới</p>
-          </div>
-
-          {/* 1.1 Chọn kênh yêu cầu */}
-          <div className="space-y-3">
-            <label className="text-xs font-black text-slate-500 block uppercase tracking-wider">1.1 Chọn kênh tiếp nhận yêu cầu</label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <button
-                type="button"
-                onClick={() => setChannel('app_web')}
-                className={`p-4 rounded-2xl border text-center transition-all ${
-                  channel === 'app_web' 
-                    ? 'border-[#03377B] bg-blue-50/30 ring-1 ring-[#03377B]' 
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <span className="text-xl block mb-1">📱</span>
-                <span className="text-xs font-black text-slate-800 block">Tự động từ App / Web</span>
-                <span className="text-[9px] text-slate-400 block mt-1 leading-normal">Khách hàng chủ động gửi thông tin trực tuyến</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setChannel('hotline')}
-                className={`p-4 rounded-2xl border text-center transition-all ${
-                  channel === 'hotline' 
-                    ? 'border-[#03377B] bg-blue-50/30 ring-1 ring-[#03377B]' 
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <span className="text-xl block mb-1">📞</span>
-                <span className="text-xs font-black text-slate-800 block">Tổng đài / Hotline</span>
-                <span className="text-[9px] text-slate-400 block mt-1 leading-normal">Nhận thông tin qua đàm thoại trực tiếp 24/7</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setChannel('counter')}
-                className={`p-4 rounded-2xl border text-center transition-all ${
-                  channel === 'counter' 
-                    ? 'border-[#03377B] bg-blue-50/30 ring-1 ring-[#03377B]' 
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <span className="text-xl block mb-1">🏛️</span>
-                <span className="text-xs font-black text-slate-800 block">Tại quầy giao dịch</span>
-                <span className="text-[9px] text-slate-400 block mt-1 leading-normal">Khách hàng đến trực tiếp văn phòng chi nhánh</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 1.2 Chọn loại chủ thể */}
-          <div className="space-y-3">
-            <label className="text-xs font-black text-slate-500 block uppercase tracking-wider">1.2 Chọn loại chủ thể định danh</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setSubjectType('personal')}
-                className={`p-5 rounded-3xl border flex items-center gap-4 transition-all ${
-                  subjectType === 'personal'
-                    ? 'border-[#03377B] bg-gradient-to-r from-blue-50/40 to-sky-50/10 ring-1 ring-[#03377B]'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <div className={`p-3 rounded-2xl ${subjectType === 'personal' ? 'bg-[#03377B] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                  <Users size={20} />
-                </div>
-                <div className="text-left">
-                  <span className="text-xs font-black text-slate-800 block">Chủ thể CÁ NHÂN</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Khách hàng mua bảo hiểm độc lập, người phụ thuộc</span>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSubjectType('corporate')}
-                className={`p-5 rounded-3xl border flex items-center gap-4 transition-all ${
-                  subjectType === 'corporate'
-                    ? 'border-[#03377B] bg-gradient-to-r from-blue-50/40 to-sky-50/10 ring-1 ring-[#03377B]'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <div className={`p-3 rounded-2xl ${subjectType === 'corporate' ? 'bg-[#03377B] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                  <Building size={20} />
-                </div>
-                <div className="text-left">
-                  <span className="text-xs font-black text-slate-800 block">Chủ thể TỔ CHỨC / DOANH NGHIỆP</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Khách hàng là Công ty, Tổ chức, cơ quan mua đoàn</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setCurrentSubStep(0)}
-              className="px-5 py-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 text-slate-600 text-xs font-bold transition"
-            >
-              Quay lại danh sách chờ
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentSubStep(2)}
-              className="px-6 py-2.5 bg-[#03377B] text-white rounded-2xl text-xs font-bold hover:bg-opacity-90 flex items-center gap-1.5 shadow-md transition-all"
-            >
-              Tiếp tục nhập hồ sơ
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-      )}
-
-
-      {/* ── STEP 2: NHẬP THÔNG TIN CHỦ THỂ (CÁ NHÂN hoặc DOANH NGHIỆP) ── */}
-      {currentSubStep === 2 && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm max-w-2xl mx-auto space-y-6 text-left">
-          <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-black text-slate-800 tracking-tight">2. Nhập thông tin chi tiết chủ thể</h3>
-              <p className="text-slate-400 text-xs">Vui lòng điền đầy đủ các thông tin bắt buộc dưới đây. Cần chính xác tuyệt đối.</p>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-              subjectType === 'personal' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-purple-50 text-purple-600 border border-purple-100'
-            }`}>
-              {subjectType === 'personal' ? 'Cá nhân' : 'Doanh nghiệp'}
-            </span>
-          </div>
-
-          {/* ── FOR 1: PERSONAL SUBJECT ── */}
-          {subjectType === 'personal' && (
-            <div className="space-y-6 animate-fade-in">
-              {/* OCR Scanning Card */}
-              <div className="p-4 bg-gradient-to-r from-blue-50/30 to-sky-50/10 rounded-2xl border border-blue-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 text-[#03377B] rounded-xl flex-shrink-0 mt-0.5">
-                    <Camera size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-tight">QUÉT CCCD QUA CAMERA OCR THẨM ĐỊNH TỰ ĐỘNG</h4>
-                    <p className="text-[11px] text-slate-500 leading-normal">Chụp ảnh mặt trước CCCD gắn chip để tự điền nhanh thông tin chính xác</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={runSimulatedOcr}
-                  disabled={ocrScanning}
-                  className="px-4 py-2 bg-white/80 hover:bg-blue-600 hover:text-white border border-blue-200 text-[#03377B] text-xs font-black rounded-xl transition duration-200 flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
-                >
-                  {ocrScanning ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin" />
-                      Đang xử lý OCR...
-                    </>
-                  ) : (
-                    <>
-                      <Camera size={13} />
-                      {ocrSuccess ? 'Quét lại ảnh khác' : 'Chụp/Quét CCCD'}
-                    </>
-                  )}
-                </button>
+        <div className="w-full space-y-6 animate-fade-in text-left">
+          {/* Main Full-Width Container */}
+          <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-slate-100 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-800 tracking-tight">Thông tin chủ thể định danh</h3>
+                <p className="text-slate-400 text-xs mt-1">
+                  Chọn loại chủ thể và cập nhật thông tin chuẩn xác để thẩm định tự động và khởi tạo mã ID duy nhất.
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPName(''); setPBirthDate(''); setPIdentity(''); setPPhone(''); setPEmail(''); setPAddress(''); setOcrSuccess(false);
+                  setCName(''); setCTaxCode(''); setCPhone(''); setCRepresentative(''); setCEmail(''); setCAddress('');
+                  setErrors({});
+                }}
+                className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-bold text-xs rounded-xl border border-slate-200/60 transition-all self-start md:self-center"
+              >
+                Xóa nhanh các trường
+              </button>
+            </div>
 
-              {ocrSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-medium leading-relaxed animate-fade-in">
-                  🎉 <strong>Quét thành công!</strong> Hệ thống đã tự động trích xuất Họ tên, Ngày sinh, CCCD và Địa chỉ từ căn cước công dân của bạn.
+            {/* Smart Dual-Column Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Left Column: Type selection and dynamic helper panels */}
+              <div className="lg:col-span-4 space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-[#03377B] uppercase tracking-widest block">Phân loại chủ thể định danh</label>
+                  <div className="p-3 bg-gradient-to-br from-white/70 via-slate-50/50 to-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white/80 shadow-xl shadow-blue-900/5 space-y-3 relative overflow-hidden">
+                    {/* Apple iOS Glass-inspired ambient glows */}
+                    <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-400/10 rounded-full blur-2xl pointer-events-none" />
+                    <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-sky-300/10 rounded-full blur-2xl pointer-events-none" />
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubjectType('corporate');
+                        setErrors({});
+                      }}
+                      className={`w-full p-4 rounded-[1.8rem] flex items-center gap-4 transition-all duration-300 relative z-10 ${
+                        subjectType === 'corporate'
+                          ? 'bg-gradient-to-r from-white to-blue-50/90 border border-blue-500/30 shadow-lg shadow-blue-900/10 -translate-y-0.5'
+                          : 'bg-white/30 hover:bg-white/60 border border-white/40 hover:shadow-xs'
+                      }`}
+                    >
+                      <div className={`p-3 rounded-2xl transition-all duration-300 ${
+                        subjectType === 'corporate' 
+                          ? 'bg-gradient-to-br from-[#03377B] to-blue-800 text-white shadow-md shadow-blue-900/20 scale-105' 
+                          : 'bg-white/80 text-slate-400 border border-slate-100'
+                      }`}>
+                        <Building size={20} className="stroke-[2.2]" />
+                      </div>
+                      <div className="text-left">
+                        <span className={`text-xs font-extrabold block transition-colors duration-300 ${subjectType === 'corporate' ? 'text-[#03377B]' : 'text-slate-700'}`}>
+                          Doanh nghiệp
+                        </span>
+                        <span className="text-[10px] text-slate-400 block font-semibold mt-0.5">Mở tài khoản định danh Tổ chức</span>
+                      </div>
+                      {subjectType === 'corporate' && (
+                        <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubjectType('personal');
+                        setErrors({});
+                      }}
+                      className={`w-full p-4 rounded-[1.8rem] flex items-center gap-4 transition-all duration-300 relative z-10 ${
+                        subjectType === 'personal'
+                          ? 'bg-gradient-to-r from-white to-blue-50/90 border border-blue-500/30 shadow-lg shadow-blue-900/10 -translate-y-0.5'
+                          : 'bg-white/30 hover:bg-white/60 border border-white/40 hover:shadow-xs'
+                      }`}
+                    >
+                      <div className={`p-3 rounded-2xl transition-all duration-300 ${
+                        subjectType === 'personal' 
+                          ? 'bg-gradient-to-br from-[#03377B] to-blue-800 text-white shadow-md shadow-blue-900/20 scale-105' 
+                          : 'bg-white/80 text-slate-400 border border-slate-100'
+                      }`}>
+                        <Users size={20} className="stroke-[2.2]" />
+                      </div>
+                      <div className="text-left">
+                        <span className={`text-xs font-extrabold block transition-colors duration-300 ${subjectType === 'personal' ? 'text-[#03377B]' : 'text-slate-700'}`}>
+                          Phi doanh nghiệp
+                        </span>
+                        <span className="text-[10px] text-slate-400 block font-semibold mt-0.5">Mở tài khoản định danh Cá nhân</span>
+                      </div>
+                      {subjectType === 'personal' && (
+                        <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              )}
 
-              {/* Form Fields: Bước A */}
-              <div className="space-y-4 border-b border-slate-100 pb-5">
-                <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                  2.1 Bước A — Nhân Thân cơ bản
-                </span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Họ và tên chủ thể <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      value={pName}
-                      onChange={(e) => { setPName(e.target.value); setErrors(prev => ({ ...prev, pName: '' })); }}
-                      placeholder="NGUYỄN VĂN A"
-                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.pName ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                    {errors.pName && <span className="text-[10px] text-rose-500 font-bold block">{errors.pName}</span>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Ngày sinh <span className="text-rose-500">*</span></label>
-                    <input
-                      type="date"
-                      value={pBirthDate}
-                      onChange={(e) => { setPBirthDate(e.target.value); setErrors(prev => ({ ...prev, pBirthDate: '' })); }}
-                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.pBirthDate ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                    {errors.pBirthDate && <span className="text-[10px] text-rose-500 font-bold block">{errors.pBirthDate}</span>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Fields: Bước B */}
-              <div className="space-y-4 border-b border-slate-100 pb-5">
-                <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                  2.2 Bước B — Giấy tờ pháp lý & Liên hệ
-                </span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Số CCCD / CMND / Hộ chiếu <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      value={pIdentity}
-                      onChange={(e) => { setPIdentity(e.target.value); setErrors(prev => ({ ...prev, pIdentity: '' })); }}
-                      placeholder="001095001234"
-                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.pIdentity ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                    <span className="text-[10px] text-slate-400 block font-medium">Nhập số CCCD thật để thử nghiệm tính năng đối soát kiểm tra trùng trùng lặp dữ liệu (Trùng: 001095001234, Dừng: 001096005678).</span>
-                    {errors.pIdentity && <span className="text-[10px] text-rose-500 font-bold block">{errors.pIdentity}</span>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Số điện thoại di động <span className="text-rose-500">*</span></label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400"><Phone size={13} /></span>
-                      <input
-                        type="tel"
-                        value={pPhone}
-                        onChange={(e) => { setPPhone(e.target.value); setErrors(prev => ({ ...prev, pPhone: '' })); }}
-                        placeholder="0912345678"
-                        className={`w-full bg-slate-50 border rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                          errors.pPhone ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                        }`}
-                      />
+                {/* Left Assistant Tools */}
+                {subjectType === 'personal' ? (
+                  <div className="p-5 bg-gradient-to-br from-blue-50/40 via-sky-50/15 to-transparent border border-blue-100/50 rounded-2xl space-y-4 text-xs animate-fade-in">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100/50 text-[#03377B] rounded-xl mt-0.5 flex-shrink-0">
+                        <Camera size={16} className="stroke-[2.5]" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-[#03377B] uppercase tracking-wider">Hỗ trợ nhận diện OCR</h4>
+                        <p className="text-[11px] text-slate-500 leading-normal mt-0.5">Tải lên hoặc chụp mặt trước căn cước công dân gắn chip để điền tự động dữ liệu.</p>
+                      </div>
                     </div>
-                    {errors.pPhone && <span className="text-[10px] text-rose-500 font-bold block">{errors.pPhone}</span>}
+                    
+                    <button
+                      type="button"
+                      onClick={runSimulatedOcr}
+                      disabled={ocrScanning}
+                      className="w-full py-2.5 bg-[#03377B] hover:bg-opacity-95 text-white text-xs font-black rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+                    >
+                      {ocrScanning ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          Đang đọc thông tin chip...
+                        </>
+                      ) : (
+                        <>
+                          <Camera size={13} />
+                          {ocrSuccess ? 'Đọc lại căn cước khác' : 'Chụp / Quét CCCD'}
+                        </>
+                      )}
+                    </button>
+
+                    {ocrSuccess && (
+                      <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-[11px] font-bold leading-normal animate-fade-in">
+                        🎉 Nhận diện hoàn tất! Các trường Họ tên, Ngày sinh, số CCCD & Địa chỉ đã được hệ thống tự động điền.
+                      </div>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="p-5 bg-gradient-to-br from-[#03377B]/5 via-sky-50/30 to-transparent border border-slate-100 rounded-2xl space-y-3.5 text-xs animate-fade-in">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-50 text-[#03377B] rounded-xl mt-0.5 flex-shrink-0">
+                        <Building size={16} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Truy vấn Mã số thuế</h4>
+                        <p className="text-[11px] text-slate-500 leading-normal mt-0.5">Dữ liệu doanh nghiệp được tự động đối soát thông qua Tổng cục Thuế và Cổng ĐKKD Quốc gia.</p>
+                      </div>
+                    </div>
+                    <div className="border-t border-slate-100 pt-3 text-[11px] text-slate-400 space-y-1">
+                      <p>● Đảm bảo mã số thuế gồm 10 chữ số.</p>
+                      <p>● Hệ thống tự kiểm tra black-list & nợ đọng thuế.</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Form Fields: Bước C (Không bắt buộc) */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                    2.3 Bước C — Thông tin tùy chọn (Có thể bỏ qua)
-                  </span>
+              {/* Right Column: Interactive Form */}
+              <div className="lg:col-span-8 bg-slate-50/40 p-6 sm:p-8 rounded-3xl border border-slate-100 space-y-6">
+                
+                {/* Personal Form fields block */}
+                {subjectType === 'personal' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="border-b border-slate-200/50 pb-3">
+                      <h4 className="text-xs font-black text-[#03377B] uppercase tracking-wider">Hồ sơ cá nhân định danh</h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Họ và tên chủ thể <span className="text-rose-500">*</span></label>
+                        <input
+                          type="text"
+                          value={pName}
+                          onChange={(e) => { setPName(e.target.value); setErrors(prev => ({ ...prev, pName: '' })); }}
+                          placeholder="NGUYỄN VĂN A"
+                          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                            errors.pName ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                          }`}
+                        />
+                        {errors.pName && <span className="text-[10px] text-rose-500 font-bold block">{errors.pName}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Ngày sinh <span className="text-rose-500">*</span></label>
+                        <input
+                          type="date"
+                          value={pBirthDate}
+                          onChange={(e) => { setPBirthDate(e.target.value); setErrors(prev => ({ ...prev, pBirthDate: '' })); }}
+                          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                            errors.pBirthDate ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                          }`}
+                        />
+                        {errors.pBirthDate && <span className="text-[10px] text-rose-500 font-bold block">{errors.pBirthDate}</span>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Số CCCD / CMND / Hộ chiếu <span className="text-rose-500">*</span></label>
+                        <input
+                          type="text"
+                          value={pIdentity}
+                          onChange={(e) => { setPIdentity(e.target.value); setErrors(prev => ({ ...prev, pIdentity: '' })); }}
+                          placeholder="001095001234"
+                          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                            errors.pIdentity ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                          }`}
+                        />
+                        <span className="text-[9px] text-slate-400 block font-medium leading-relaxed">
+                          Thử nghiệm đối soát (Trùng: 001095001234, Tạm ngưng: 001096005678).
+                        </span>
+                        {errors.pIdentity && <span className="text-[10px] text-rose-500 font-bold block">{errors.pIdentity}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Số điện thoại di động <span className="text-rose-500">*</span></label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><Phone size={13} /></span>
+                          <input
+                            type="tel"
+                            value={pPhone}
+                            onChange={(e) => { setPPhone(e.target.value); setErrors(prev => ({ ...prev, pPhone: '' })); }}
+                            placeholder="0912345678"
+                            className={`w-full bg-white border rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                              errors.pPhone ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                            }`}
+                          />
+                        </div>
+                        {errors.pPhone && <span className="text-[10px] text-rose-500 font-bold block">{errors.pPhone}</span>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ Email (Nhận mã bảo mật e-ID)</label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><Mail size={13} /></span>
+                          <input
+                            type="email"
+                            value={pEmail}
+                            onChange={(e) => { setPEmail(e.target.value); setErrors(prev => ({ ...prev, pEmail: '' })); }}
+                            placeholder="khachhang@gmail.com"
+                            className={`w-full bg-white border rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                              errors.pEmail ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                            }`}
+                          />
+                        </div>
+                        {errors.pEmail && <span className="text-[10px] text-rose-500 font-bold block">{errors.pEmail}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ thường trú</label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><MapPin size={13} /></span>
+                          <input
+                            type="text"
+                            value={pAddress}
+                            onChange={(e) => setPAddress(e.target.value)}
+                            placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B] transition"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Corporate Form fields block */}
+                {subjectType === 'corporate' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="border-b border-slate-200/50 pb-3">
+                      <h4 className="text-xs font-black text-[#03377B] uppercase tracking-wider">Hồ sơ pháp nhân Doanh nghiệp</h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Tên Tổ chức / Doanh nghiệp <span className="text-rose-500">*</span></label>
+                        <input
+                          type="text"
+                          value={cName}
+                          onChange={(e) => { setCName(e.target.value); setErrors(prev => ({ ...prev, cName: '' })); }}
+                          placeholder="CÔNG TY CỔ PHẦN CÔNG NGHỆ PTI"
+                          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                            errors.cName ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                          }`}
+                        />
+                        {errors.cName && <span className="text-[10px] text-rose-500 font-bold block">{errors.cName}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Mã số thuế / Số ĐKKD <span className="text-rose-500">*</span></label>
+                        <input
+                          type="text"
+                          value={cTaxCode}
+                          onChange={(e) => { setCTaxCode(e.target.value); setErrors(prev => ({ ...prev, cTaxCode: '' })); }}
+                          placeholder="0102030405"
+                          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                            errors.cTaxCode ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                          }`}
+                        />
+                        <span className="text-[9px] text-slate-400 block font-medium leading-relaxed">
+                          MST thật hệ thống lưu vết là "0102030405" để kiểm tra trùng lặp dữ liệu.
+                        </span>
+                        {errors.cTaxCode && <span className="text-[10px] text-rose-500 font-bold block">{errors.cTaxCode}</span>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Số điện thoại Hotline / Văn phòng <span className="text-rose-500">*</span></label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><Phone size={13} /></span>
+                          <input
+                            type="tel"
+                            value={cPhone}
+                            onChange={(e) => { setCPhone(e.target.value); setErrors(prev => ({ ...prev, cPhone: '' })); }}
+                            placeholder="0243987654"
+                            className={`w-full bg-white border rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                              errors.cPhone ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                            }`}
+                          />
+                        </div>
+                        {errors.cPhone && <span className="text-[10px] text-rose-500 font-bold block">{errors.cPhone}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Người đại diện pháp luật</label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><User size={13} /></span>
+                          <input
+                            type="text"
+                            value={cRepresentative}
+                            onChange={(e) => setCRepresentative(e.target.value)}
+                            placeholder="Họ tên Giám đốc / Đại diện pháp lý"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B] transition"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ Email Doanh nghiệp</label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><Mail size={13} /></span>
+                          <input
+                            type="email"
+                            value={cEmail}
+                            onChange={(e) => { setCEmail(e.target.value); setErrors(prev => ({ ...prev, cEmail: '' })); }}
+                            placeholder="contact@abc.com"
+                            className={`w-full bg-white border rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none transition ${
+                              errors.cEmail ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B]'
+                            }`}
+                          />
+                        </div>
+                        {errors.cEmail && <span className="text-[10px] text-rose-500 font-bold block">{errors.cEmail}</span>}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ trụ sở chính</label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-3.5 text-slate-400"><MapPin size={13} /></span>
+                          <input
+                            type="text"
+                            value={cAddress}
+                            onChange={(e) => setCAddress(e.target.value)}
+                            placeholder="Số nhà, Tên tòa nhà, Tên đường, Quận, Tỉnh/Thành phố"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:ring-1 focus:ring-[#03377B] transition"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Combined Action Buttons */}
+                <div className="flex items-center justify-end pt-5 border-t border-slate-200/50">
                   <button
                     type="button"
-                    onClick={() => { setPEmail(''); setPAddress(''); }}
-                    className="text-[10px] text-blue-600 hover:underline font-bold"
+                    onClick={handleStartAppraisal}
+                    className="px-8 py-3.5 bg-[#03377B] text-white rounded-2xl text-xs font-black hover:bg-opacity-95 flex items-center gap-2.5 shadow-md transition-all duration-200 hover:-translate-y-0.5"
                   >
-                    Xóa trống các trường này
+                    Bắt đầu thẩm định hồ sơ
+                    <ArrowRight size={15} className="stroke-[2.5]" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ Email (Nhận mã bảo mật e-ID)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400"><Mail size={13} /></span>
-                      <input
-                        type="email"
-                        value={pEmail}
-                        onChange={(e) => { setPEmail(e.target.value); setErrors(prev => ({ ...prev, pEmail: '' })); }}
-                        placeholder="khachhang@gmail.com"
-                        className={`w-full bg-slate-50 border rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                          errors.pEmail ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                    {errors.pEmail && <span className="text-[10px] text-rose-500 font-bold block">{errors.pEmail}</span>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ thường trú</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400"><MapPin size={13} /></span>
-                      <input
-                        type="text"
-                        value={pAddress}
-                        onChange={(e) => setPAddress(e.target.value)}
-                        placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
-          )}
 
-          {/* ── FOR 2: CORPORATE SUBJECT ── */}
-          {subjectType === 'corporate' && (
-            <div className="space-y-6 animate-fade-in">
+          </div>
+        </div>
+      )}
+
+      {/* ── INTERACTIVE APPRAISAL POPUP MODAL ── */}
+      {showAppraisalPopup && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl max-w-md w-full border border-slate-100 space-y-6 text-center animate-scale-up text-slate-800">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className={`w-16 h-16 border-4 rounded-full border-indigo-100 border-t-[#5d5fe1] ${!appraisalCompleted ? 'animate-spin' : ''}`}></div>
+                <span className="absolute inset-0 flex items-center justify-center text-2xl">🛡️</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-base font-black text-slate-800 tracking-tight">Hệ thống iPTI đang thẩm định thông tin</h3>
+              <p className="text-slate-400 text-xs">Chuẩn hóa dữ liệu & kiểm tra chéo thời gian thực</p>
+            </div>
+
+            {/* Checklist of appraisal tasks */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left space-y-3">
+              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Các tác vụ đang chạy nền:</span>
               
-              {/* Form Fields: Bước A' */}
-              <div className="space-y-4 border-b border-slate-100 pb-5">
-                <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                  2.1' Bước A — Đăng ký doanh nghiệp
-                </span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Tên Tổ chức / Doanh nghiệp <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      value={cName}
-                      onChange={(e) => { setCName(e.target.value); setErrors(prev => ({ ...prev, cName: '' })); }}
-                      placeholder="CÔNG TY CỔ PHẦN..."
-                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.cName ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                    {errors.cName && <span className="text-[10px] text-rose-500 font-bold block">{errors.cName}</span>}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Mã số thuế / Số ĐKKD <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      value={cTaxCode}
-                      onChange={(e) => { setCTaxCode(e.target.value); setErrors(prev => ({ ...prev, cTaxCode: '' })); }}
-                      placeholder="0102030405"
-                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.cTaxCode ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                    <span className="text-[10px] text-slate-400 block font-medium">MST thật hệ thống lưu vết là "0102030405" để kiểm tra tính năng trùng lặp dữ liệu.</span>
-                    {errors.cTaxCode && <span className="text-[10px] text-rose-500 font-bold block">{errors.cTaxCode}</span>}
-                  </div>
-                </div>
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-600">1. Đối chiếu danh tính với CSDL Quốc gia</span>
+                {appraisalProgress >= 1 ? (
+                  <span className="text-emerald-500 font-bold flex items-center gap-1">✓ Đạt</span>
+                ) : (
+                  <span className="text-blue-500 flex items-center gap-1">
+                    <RefreshCw className="animate-spin" size={11} /> Đang chạy
+                  </span>
+                )}
               </div>
 
-              {/* Form Fields: Bước B' */}
-              <div className="space-y-4 border-b border-slate-100 pb-5">
-                <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                  2.2' Bước B — Liên hệ tổ chức
-                </span>
-                
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-extrabold text-slate-500 block">Số điện thoại Hotline/Văn phòng <span className="text-rose-500">*</span></label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-slate-400"><Phone size={13} /></span>
-                    <input
-                      type="tel"
-                      value={cPhone}
-                      onChange={(e) => { setCPhone(e.target.value); setErrors(prev => ({ ...prev, cPhone: '' })); }}
-                      placeholder="0243987654"
-                      className={`w-full bg-slate-50 border rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                        errors.cPhone ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                      }`}
-                    />
-                  </div>
-                  {errors.cPhone && <span className="text-[10px] text-rose-500 font-bold block">{errors.cPhone}</span>}
-                </div>
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-600">2. Quét trùng lặp trên Cloud Core iPTI</span>
+                {appraisalProgress >= 2 ? (
+                  <span className="text-emerald-500 font-bold flex items-center gap-1">✓ Đạt</span>
+                ) : appraisalProgress === 1 ? (
+                  <span className="text-blue-500 flex items-center gap-1">
+                    <RefreshCw className="animate-spin" size={11} /> Đang chạy
+                  </span>
+                ) : (
+                  <span className="text-slate-300">Chờ duyệt</span>
+                )}
               </div>
 
-              {/* Form Fields: Bước C' (Không bắt buộc) */}
-              <div className="space-y-4">
-                <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
-                  2.3' Bước C — Người đại diện & Đại chỉ tổ chức (Có thể bỏ qua)
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Người đại diện pháp luật</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400"><User size={13} /></span>
-                      <input
-                        type="text"
-                        value={cRepresentative}
-                        onChange={(e) => setCRepresentative(e.target.value)}
-                        placeholder="Họ tên giám đốc/đại diện"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ Email Doanh nghiệp</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2.5 text-slate-400"><Mail size={13} /></span>
-                      <input
-                        type="email"
-                        value={cEmail}
-                        onChange={(e) => { setCEmail(e.target.value); setErrors(prev => ({ ...prev, cEmail: '' })); }}
-                        placeholder="contact@abc.com"
-                        className={`w-full bg-slate-50 border rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none transition ${
-                          errors.cEmail ? 'border-rose-500 bg-rose-50/20 focus:border-rose-500' : 'border-slate-200 focus:border-[#03377B] focus:bg-white'
-                        }`}
-                      />
-                    </div>
-                    {errors.cEmail && <span className="text-[10px] text-rose-500 font-bold block">{errors.cEmail}</span>}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-extrabold text-slate-500 block">Địa chỉ trụ sở chính</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-slate-400"><MapPin size={13} /></span>
-                    <input
-                      type="text"
-                      value={cAddress}
-                      onChange={(e) => setCAddress(e.target.value)}
-                      placeholder="Số nhà, Tên tòa nhà, Tỉnh/Thành phố"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-[#03377B] focus:bg-white transition"
-                    />
-                  </div>
-                </div>
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-600">3. OCR & Rà soát danh mục rủi ro black-list</span>
+                {appraisalProgress >= 3 ? (
+                  <span className="text-emerald-500 font-bold flex items-center gap-1">✓ Đạt</span>
+                ) : appraisalProgress === 2 ? (
+                  <span className="text-blue-500 flex items-center gap-1">
+                    <RefreshCw className="animate-spin" size={11} /> Đang chạy
+                  </span>
+                ) : (
+                  <span className="text-slate-300">Chờ duyệt</span>
+                )}
               </div>
-
             </div>
-          )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-5 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setCurrentSubStep(1)}
-              className="px-5 py-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 text-slate-600 text-xs font-bold transition"
-            >
-              Quay lại Bước 1
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleNextToSystemCheck}
-              className="px-6 py-2.5 bg-[#03377B] text-white rounded-2xl text-xs font-bold hover:bg-opacity-90 flex items-center gap-1.5 shadow-md transition-all"
-            >
-              Kiểm tra & Tạo ID định danh
-              <ArrowRight size={14} />
-            </button>
+            {/* Completion state button */}
+            {appraisalCompleted ? (
+              <div className="space-y-3 animate-fade-in">
+                <div className="bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-2xl p-3.5 text-xs font-bold leading-relaxed">
+                  🎉 Thẩm định hoàn tất thành công! Không phát hiện rủi ro trùng lặp hoặc pháp lý.
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAppraisalPopup(false);
+                    setCurrentSubStep(2);
+                  }}
+                  className="w-full py-3 bg-[#5d5fe1] text-white rounded-2xl text-xs font-black hover:bg-opacity-95 shadow-md flex items-center justify-center gap-1.5 transition-all"
+                >
+                  Cấp mã định danh ngay ➔
+                </button>
+              </div>
+            ) : (
+              <div className="text-[11px] text-slate-400 font-mono italic animate-pulse">
+                Đang đối soát dữ liệu, vui lòng giữ kết nối...
+              </div>
+            )}
           </div>
         </div>
       )}
 
-
-      {/* ── STEP 3: LOADING SYSTEM CHECK ── */}
-      {currentSubStep === 3 && (
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-sm max-w-lg mx-auto text-center space-y-6 animate-fade-in">
-          <div className="flex justify-center">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-100 border-t-[#03377B] rounded-full animate-spin"></div>
-              <span className="absolute inset-0 flex items-center justify-center text-xl">🛡️</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-base font-black text-slate-800 tracking-tight">Hệ thống iPTI đang thẩm định thông tin</h3>
-            <p className="text-slate-400 text-xs font-mono max-w-sm mx-auto">{loadingCheckMessage}</p>
-          </div>
-          <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] text-slate-500 leading-relaxed text-left flex gap-3">
-            <RefreshCw className="animate-spin text-blue-500 mt-0.5 flex-shrink-0" size={14} />
-            <div>
-              <span className="font-extrabold text-slate-700 block">Các tác vụ đang chạy nền:</span>
-              <ul className="list-disc pl-3 mt-1 space-y-0.5 text-slate-400 font-medium">
-                <li>Đối chiếu danh tính CCCD, MST với Cổng dịch vụ công Quốc gia</li>
-                <li>Quét tệp khách hàng trùng lặp trên CSDL iPTI Cloud Core</li>
-                <li>Bóc tách OCR, rà soát loại trừ rủi ro danh mục đen</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* ── STEP 4: CREATE ID RESULT (4a, 4b, 4c) ── */}
-      {currentSubStep === 4 && (
+      {/* ── STEP 2: CREATE ID RESULT (4a, 4b, 4c) ── */}
+      {currentSubStep === 2 && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm max-w-xl mx-auto space-y-6 text-left animate-fade-in">
           
           {/* Status 4a: Create New ID Successfully */}
@@ -1267,46 +1065,55 @@ export default function OpenIdFlow() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-5 border-t border-slate-100">
-            {resultStatus === '4b' ? (
-              // If ID already exists active, finish immediately or assign
-              <>
-                <button
-                  type="button"
-                  onClick={handleResetFlow}
-                  className="w-full sm:w-1/2 px-5 py-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 text-slate-600 text-xs font-bold text-center transition"
-                >
-                  Kết thúc, mở ID khác
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentSubStep(5)}
-                  className="w-full sm:w-1/2 px-6 py-2.5 bg-[#03377B] text-white rounded-2xl text-xs font-bold hover:bg-opacity-90 flex items-center justify-center gap-1.5 shadow-md transition-all"
-                >
-                  Gán thêm quan hệ
-                  <ArrowRight size={14} />
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleSkipRelationships}
-                  className="w-full sm:w-1/2 px-5 py-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 text-slate-600 text-xs font-bold text-center transition"
-                >
-                  Bỏ qua, gán quan hệ sau
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentSubStep(5)}
-                  className="w-full sm:w-1/2 px-6 py-2.5 bg-[#03377B] text-white rounded-2xl text-xs font-bold hover:bg-opacity-90 flex items-center justify-center gap-1.5 shadow-md transition-all"
-                >
-                  Gán quan hệ pháp lý
-                  <ArrowRight size={14} />
-                </button>
-              </>
-            )}
+          {/* Action Buttons & Utilities */}
+          <div className="space-y-4 pt-5 border-t border-slate-100">
+            <span className="text-[10px] bg-slate-100 text-slate-500 font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider block w-max">
+              Tùy chọn Hành động truyền thông & Pháp lý
+            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const alertDiv = document.createElement('div');
+                  alertDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-800/90 text-white text-xs font-bold px-4 py-3 rounded-xl z-50 border border-white/20 backdrop-blur-md shadow-lg flex items-center gap-2 animate-fade-in';
+                  alertDiv.innerHTML = '📥 <span>Đang khởi tạo tệp tin PDF và tải xuống Phiếu xác nhận Định danh...</span>';
+                  document.body.appendChild(alertDiv);
+                  setTimeout(() => alertDiv.remove(), 2500);
+                }}
+                className="p-3.5 rounded-2xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/10 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+              >
+                <Printer size={15} className="text-[#03377B]" />
+                In/Tải phiếu xác nhận PDF
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const alertDiv = document.createElement('div');
+                  alertDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-800/90 text-white text-xs font-bold px-4 py-3 rounded-xl z-50 border border-white/20 backdrop-blur-md shadow-lg flex items-center gap-2 animate-fade-in';
+                  alertDiv.innerHTML = '✉️ <span>Mã OTP & đường dẫn e-ID đã được gửi qua Email & SMS tới Khách hàng thành công!</span>';
+                  document.body.appendChild(alertDiv);
+                  setTimeout(() => alertDiv.remove(), 2500);
+                }}
+                className="p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/10 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition"
+              >
+                <Send size={15} className="text-emerald-600" />
+                Gửi SMS / Email xác nhận
+              </button>
+            </div>
+
+            {/* Reset button to start over */}
+            <div className="pt-4 border-t border-slate-100 text-center">
+              <button
+                type="button"
+                onClick={handleResetFlow}
+                className="w-full px-6 py-3 bg-[#03377B] text-white rounded-2xl text-xs font-black hover:bg-opacity-95 shadow-md flex items-center justify-center gap-2 transition duration-200"
+              >
+                <RefreshCw size={14} className="stroke-[2.5]" />
+                Tiếp tục cấp thêm ID Khách hàng khác
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1783,13 +1590,17 @@ export default function OpenIdFlow() {
                 <div>Số điện thoại liên lạc:</div>
                 <div className="font-bold text-slate-800 text-right">{finalSubjectData.phone}</div>
 
-                <div>Mối quan hệ pháp lý đã gán:</div>
-                <div className="font-bold text-slate-800 text-right">
-                  {assignedRelationships.length === 0 ? 'Không thiết lập liên kết' : `${assignedRelationships.length} liên kết`}
-                </div>
+                {subjectType === 'personal' && (
+                  <>
+                    <div>Mối quan hệ pháp lý đã gán:</div>
+                    <div className="font-bold text-slate-800 text-right">
+                      {assignedRelationships.length === 0 ? 'Không thiết lập liên kết' : `${assignedRelationships.length} liên kết`}
+                    </div>
+                  </>
+                )}
               </div>
 
-              {assignedRelationships.length > 0 && (
+              {subjectType === 'personal' && assignedRelationships.length > 0 && (
                 <div className="p-4 space-y-2 bg-white">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Chi tiết danh sách liên kết đã gán:</span>
                   <div className="space-y-1.5">

@@ -253,6 +253,136 @@ export function HealthPti3D() {
   );
 }
 
+// 4b. Corporate Health Insurance Glass 3D Graphic
+export function CorporateInsuranceGlass3D() {
+  return (
+    <div className="relative w-full h-44 flex items-center justify-center select-none overflow-hidden rounded-3xl bg-transparent">
+      {/* Decorative floating ambient glows */}
+      <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-300/30 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '6s' }}></div>
+      <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-emerald-300/20 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s' }}></div>
+
+      <svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative">
+        <style>{`
+          @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+          }
+          @keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+          }
+          @keyframes floatParticle {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+            50% { transform: translateY(-12px) translateX(4px); opacity: 0.9; }
+          }
+          .animate-float-slow {
+            animation: floatSlow 6s ease-in-out infinite;
+          }
+          .animate-pulse-glow {
+            animation: pulseGlow 4s ease-in-out infinite;
+          }
+          .animate-particle-1 {
+            animation: floatParticle 5s ease-in-out infinite;
+          }
+          .animate-particle-2 {
+            animation: floatParticle 7s ease-in-out infinite 1.5s;
+          }
+          .animate-particle-3 {
+            animation: floatParticle 6s ease-in-out infinite 3s;
+          }
+        `}</style>
+
+        {/* Dynamic Connected Network Lines in Background */}
+        <g stroke="#03377B" strokeWidth="1.5" strokeOpacity="0.2" strokeDasharray="5 5">
+          <path d="M40 75 L110 40 L180 75 L110 110 Z" />
+          <path d="M110 15 V135" />
+          <path d="M10 75 H210" />
+        </g>
+
+        {/* Central Glowing Nodes */}
+        <circle cx="110" cy="40" r="4" fill="#03377B" className="animate-pulse-glow" />
+        <circle cx="40" cy="75" r="4" fill="#10B981" />
+        <circle cx="180" cy="75" r="4" fill="#10B981" />
+        <circle cx="110" cy="110" r="4" fill="#03377B" />
+
+        {/* Floating Sparks */}
+        <circle cx="60" cy="50" r="3" fill="#60A5FA" className="animate-particle-1" />
+        <circle cx="160" cy="45" r="2.5" fill="#34D399" className="animate-particle-2" />
+        <circle cx="80" cy="115" r="3" fill="#FBBF24" className="animate-particle-3" />
+
+        {/* Floating Group Graphic */}
+        <g className="animate-float-slow">
+          {/* Main Glassmorphic Corporate Badge Plate */}
+          <rect x="35" y="25" width="150" height="96" rx="24" fill="#FFFFFF" fillOpacity="0.25" stroke="#FFFFFF" strokeWidth="2" strokeOpacity="0.6" style={{ backdropFilter: 'blur(12px)' }} />
+          <rect x="37" y="27" width="146" height="92" rx="22" fill="url(#glassGradCorp)" fillOpacity="0.1" stroke="url(#borderGradCorp)" strokeWidth="1.5" />
+
+          {/* Gradients */}
+          <defs>
+            <linearGradient id="glassGradCorp" x1="35" y1="25" x2="185" y2="121" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#E0F2FE" stopOpacity="0.2" />
+            </linearGradient>
+            <linearGradient id="borderGradCorp" x1="35" y1="25" x2="185" y2="121" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#93C5FD" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#3B82F6" strokeOpacity="0.6" />
+            </linearGradient>
+            <linearGradient id="corporateBuildingGrad" x1="55" y1="45" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#1E3A8A" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#0F172A" stopOpacity="0.95" />
+            </linearGradient>
+            <linearGradient id="shieldVibrant" x1="125" y1="45" x2="155" y2="95" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#10B981" />
+              <stop offset="100%" stopColor="#047857" />
+            </linearGradient>
+          </defs>
+
+          {/* Business/Corporate High-rise silhouettes inside the Glass panel (Left side) */}
+          <g transform="translate(10, 5)">
+            {/* Building 1 */}
+            <rect x="52" y="55" width="14" height="35" rx="2" fill="url(#corporateBuildingGrad)" stroke="#FFFFFF" strokeWidth="0.8" />
+            <line x1="56" y1="62" x2="62" y2="62" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="56" y1="68" x2="62" y2="68" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="56" y1="74" x2="62" y2="74" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="56" y1="80" x2="62" y2="80" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+
+            {/* Building 2 */}
+            <rect x="69" y="42" width="16" height="48" rx="2" fill="url(#corporateBuildingGrad)" stroke="#FFFFFF" strokeWidth="0.8" />
+            <line x1="74" y1="50" x2="80" y2="50" stroke="#FBBF24" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="74" y1="56" x2="80" y2="56" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="74" y1="62" x2="80" y2="62" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="74" y1="68" x2="80" y2="68" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="74" y1="74" x2="80" y2="74" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="74" y1="80" x2="80" y2="80" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+
+            {/* Building 3 */}
+            <rect x="88" y="60" width="12" height="30" rx="2" fill="url(#corporateBuildingGrad)" stroke="#FFFFFF" strokeWidth="0.8" />
+            <line x1="91" y1="66" x2="97" y2="66" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="91" y1="72" x2="97" y2="72" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+            <line x1="91" y1="78" x2="97" y2="78" stroke="#60A5FA" strokeWidth="1" strokeOpacity="0.8" />
+          </g>
+
+          {/* Secure Vibrant Shield with Cross representing Health Insurance (Right side) */}
+          <g transform="translate(5, 5)">
+            {/* 3D Shield */}
+            <path d="M142 42 C154 42 164 45 164 60 C164 76 146 90 142 94 C138 90 120 76 120 60 C120 45 130 42 142 42 Z" fill="url(#shieldVibrant)" stroke="#FFFFFF" strokeWidth="1.5" />
+            
+            {/* Glossy overlay reflex */}
+            <path d="M142 44 C151 44 160 47 160 59 C160 68 150 78 142 86" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.4" />
+
+            {/* White Cross inside Shield */}
+            <path d="M138 56 H146 V64 H154 V70 H146 V78 H138 V70 H130 V64 H138 V56 Z" fill="#FFFFFF" className="drop-shadow-[0_1px_4px_rgba(255,255,255,0.4)]" />
+          </g>
+
+          {/* Connection Ring (Connecting Business & Insurance) */}
+          <path d="M102 70 C102 62, 122 62, 122 70 C122 78, 102 78, 102 70 Z" stroke="#FBBF24" strokeWidth="1.5" fill="none" strokeDasharray="3 3" className="animate-pulse-glow" />
+          <circle cx="112" cy="70" r="3.5" fill="#FBBF24" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 // 5. Giant Brilliant 3D Diamond (EliteCare)
 export function EliteCare3D() {
   return (
@@ -576,6 +706,115 @@ export function CorporateBanner3D() {
         
         {/* Bright gold starburst */}
         <path d="M78,24 L79,21 L82,20 L79,19 L78,16 L77,19 L74,20 L77,21 Z" fill="#FBBF24" />
+      </svg>
+    </div>
+  );
+}
+
+// 9. OpenID Customer Identity 3D Banner Graphic (ID Badge/Globe Nodes/Scanning Beam)
+export function OpenIdBanner3D() {
+  return (
+    <div className="relative w-full h-full min-h-[140px] flex items-center justify-center select-none overflow-hidden rounded-2xl">
+      {/* Soft internal glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.15)_0%,transparent_75%)]"></div>
+      
+      <svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative drop-shadow-[0_15px_30px_rgba(3,55,123,0.25)]">
+        <defs>
+          <linearGradient id="idCardGlass" x1="20" y1="35" x2="130" y2="115" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#E0F2FE" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.3" />
+          </linearGradient>
+          <linearGradient id="cardHeader" x1="30" y1="45" x2="120" y2="45" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#03377B" />
+            <stop offset="100%" stopColor="#0ea5e9" />
+          </linearGradient>
+          <linearGradient id="avatarGrad" x1="42" y1="62" x2="62" y2="82" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#0284C7" />
+          </linearGradient>
+          <linearGradient id="scanBeam" x1="0" y1="0" x2="150" y2="0">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="0" />
+            <stop offset="50%" stopColor="#10B981" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#0EA5E9" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#0EA5E9" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Tech decorative connection orbits (Multi-dimensional legal relationships) */}
+        <circle cx="75" cy="75" r="64" stroke="#0ea5e9" strokeWidth="0.75" strokeDasharray="4 4" strokeOpacity="0.25" />
+        <ellipse cx="75" cy="75" rx="60" ry="20" stroke="#0ea5e9" strokeWidth="0.5" strokeOpacity="0.15" transform="rotate(-15 75 75)" />
+        <ellipse cx="75" cy="75" rx="60" ry="20" stroke="#10b981" strokeWidth="0.5" strokeOpacity="0.12" transform="rotate(25 75 75)" />
+
+        {/* Connection Nodes (Circles) */}
+        <g>
+          {/* Top Node */}
+          <circle cx="75" cy="11" r="4" fill="#0EA5E9" />
+          <circle cx="75" cy="11" r="8" fill="url(#nodeGlow)" />
+          {/* Left Node */}
+          <circle cx="15" cy="75" r="3.5" fill="#10B981" />
+          {/* Right Node */}
+          <circle cx="135" cy="75" r="3.5" fill="#38BDF8" />
+          {/* Bottom Node */}
+          <circle cx="75" cy="139" r="4" fill="#03377B" />
+          
+          {/* Thin lines connecting nodes */}
+          <line x1="75" y1="11" x2="30" y2="45" stroke="#0ea5e9" strokeWidth="0.75" strokeOpacity="0.3" />
+          <line x1="75" y1="11" x2="120" y2="45" stroke="#0ea5e9" strokeWidth="0.75" strokeOpacity="0.3" />
+          <line x1="15" y1="75" x2="30" y2="75" stroke="#10b981" strokeWidth="0.75" strokeOpacity="0.3" />
+          <line x1="135" y1="75" x2="120" y2="75" stroke="#0ea5e9" strokeWidth="0.75" strokeOpacity="0.3" />
+          <line x1="75" y1="139" x2="75" y2="105" stroke="#03377B" strokeWidth="0.75" strokeOpacity="0.3" />
+        </g>
+
+        {/* 3D Glassmorphic ID Card Container */}
+        <rect x="25" y="38" width="100" height="74" rx="10" fill="url(#idCardGlass)" stroke="#FFFFFF" strokeWidth="1.5" strokeOpacity="0.6" />
+        
+        {/* Card Header (Branding block) */}
+        <rect x="33" y="46" width="84" height="8" rx="2" fill="url(#cardHeader)" stroke="#FFFFFF" strokeWidth="0.5" strokeOpacity="0.5" />
+        <circle cx="40" cy="50" r="2" fill="#FFFFFF" />
+        <line x1="46" y1="50" x2="66" y2="50" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.7" />
+
+        {/* 3D Floating Profile Avatar Block inside the ID Card */}
+        <g transform="translate(0, 0)">
+          {/* Profile Frame */}
+          <rect x="35" y="60" width="22" height="22" rx="4" fill="url(#avatarGrad)" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.5" />
+          
+          {/* Profile Head/Body icon */}
+          <circle cx="46" cy="68" r="4" fill="#FFFFFF" />
+          <path d="M39 79C39 74.5 42.5 73.5 46 73.5C49.5 73.5 53 74.5 53 79" fill="#FFFFFF" />
+        </g>
+
+        {/* Personal Details Lines (Simulated text) */}
+        <g>
+          {/* Title line */}
+          <line x1="64" y1="64" x2="114" y2="64" stroke="#03377B" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Detail lines */}
+          <line x1="64" y1="72" x2="104" y2="72" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.7" />
+          <line x1="64" y1="78" x2="94" y2="78" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.7" />
+          <line x1="64" y1="84" x2="108" y2="84" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" />
+        </g>
+
+        {/* Golden Verified Shield Badge overlay */}
+        <g transform="translate(100, 85)">
+          <path d="M12 2C16 2 18 3 18 6C18 12 14 16 12 18C10 16 6 12 6 6C6 3 8 2 12 2Z" fill="#FBBF24" stroke="#FFF" strokeWidth="1" />
+          {/* Checkmark inside shield */}
+          <path d="M9 10L11 12L15 8" stroke="#FFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+
+        {/* 3D OCR Laser Scanning Beam effect */}
+        <g className="animate-pulse" style={{ animationDuration: '2s' }}>
+          {/* Beam line */}
+          <rect x="20" y="70" width="110" height="2" fill="url(#scanBeam)" />
+          {/* Scanning glow edge */}
+          <line x1="30" y1="70" x2="120" y2="70" stroke="#10B981" strokeWidth="1" strokeOpacity="0.6" />
+        </g>
+
+        {/* Magical Sparkles */}
+        <path d="M122,32 L123.5,35 L126.5,36 L123.5,37 L122,40 L120.5,37 L117.5,36 L120.5,35 Z" fill="#F59E0B" />
+        <path d="M22,95 L23,97 L25,97.5 L23,98 L22,100 L21,98 L19,97.5 L21,97 Z" fill="#10B981" />
       </svg>
     </div>
   );

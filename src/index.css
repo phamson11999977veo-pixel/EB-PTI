@@ -81,6 +81,11 @@ input[type="range"].ios-range-slider::-moz-range-thumb:hover {
   to { transform: rotate(360deg); }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
@@ -95,6 +100,10 @@ input[type="range"].ios-range-slider::-moz-range-thumb:hover {
 
 .animate-spin-slow {
   animation: spin-slow 12s infinite linear;
+}
+
+.animate-float-slow {
+  animation: float 8s ease-in-out infinite;
 }
 
 /* Custom styles for professional scrollbar */
